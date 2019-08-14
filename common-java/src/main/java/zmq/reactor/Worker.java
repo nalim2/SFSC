@@ -31,7 +31,8 @@ class Worker implements AutoCloseable {
 
   private static final Logger logger = LoggerFactory.getLogger(Worker.class);
   private static final Supplier<Integer> threadCounter = new AtomicInteger()::getAndIncrement;
-private static final int TERMINATION_TICK_MS = 50;
+  private static final int TERMINATION_TICK_MS = 50;
+
   private final ZContext zContext;
   private final CommandInjectionService commandInjector;
   private final CommandExecutionService commandExecutor;
@@ -62,8 +63,9 @@ private static final int TERMINATION_TICK_MS = 50;
       contextTermination.start();
       while (contextTermination.isAlive()) {
         logger.debug("Waiting for zContext termination");
-        commandInjector.queue(() -> {});
-        contextTermination.join(50);
+        commandInjector.queue(() -> {
+        });
+        contextTermination.join(TERMINATION_TICK_MS);
       }
     } catch (Exception e) {
       logger.error("Exception while closing", e);
