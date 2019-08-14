@@ -16,7 +16,7 @@
     <dependency>
       <groupId>de.unistuttgart.isw</groupId>
       <artifactId>core</artifactId>
-      <version>${revision}</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
