@@ -1,33 +1,28 @@
-package de.unistuttgart.isw.sfsc.benchmark;
+package de.unistuttgart.isw.sfsc.benchmark.evaluation;
 
 import static java.util.stream.Collectors.toList;
 
+import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-public class Evaluator {
+class BatchEvaluator {
 
-  void evaluate(Collection<BenchmarkMessage> benchmarkMessages) {
+  void evaluate(List<BenchmarkMessage> messages) {
     System.out.println("results");
-    Collection<BenchmarkMessage> messages = preprocess(benchmarkMessages);
+    System.out.println("received " + messages.size() + " messages");
     if (messages.isEmpty()) {
       System.out.println("no messages received");
     } else {
-      System.out.println("total messages received: " + messages.size());
       checkIdDistribution(messages);
       checkPing(messages);
     }
     System.out.println();
-  }
-
-  List<BenchmarkMessage> preprocess(Collection<BenchmarkMessage> messages) {
-    return messages.stream().filter(message -> message.getId() >= 0).collect(Collectors.toList());
   }
 
   void checkIdDistribution(Collection<BenchmarkMessage> messages) {
@@ -41,7 +36,7 @@ public class Evaluator {
         .mapToLong(BenchmarkMessage::getId)
         .max()
         .orElse(0);
-    for (long i = 0; i < maxId; i++) {
+    for (long i = 1; i < maxId; i++) {
       inventory.putIfAbsent(i, 0L);
     }
 
@@ -68,18 +63,29 @@ public class Evaluator {
     }
   }
 
-  void checkPing(Collection<BenchmarkMessage> messages) {
+  void checkPing(List<BenchmarkMessage> messages) {
 
-    List<Long> pingNsList = new ArrayList<>(messages.size());
-    messages.forEach(message -> pingNsList.add(message.getReturnTime() - message.getSendTime()));
+    double[] pings = messages.stream()
+        .map(message -> message.getReceiveTimestamp() - message.getSendTimestamp())
+        .mapToDouble(nsValue -> ((double) nsValue) / 1_000_000)
+        .toArray();
 
-    DoubleSummaryStatistics pingSummary = pingNsList.stream()
-        .map(x -> (double) x)
-        .map(nsValue -> nsValue / 1_000_000)  //ns to ms
-        .collect(Collectors.summarizingDouble(x -> x));
+    DescriptiveStatistics pingStats = new DescriptiveStatistics(pings);
 
-    System.out.println("average ping " + pingSummary.getAverage() + " ms");
-    System.out.println("max ping " + pingSummary.getMax() + " ms");
-    System.out.println("min ping " + pingSummary.getMin() + " ms");
+    System.out.println();
+    System.out.println(pingStats);
+    System.out.println("percentile   1 " + pingStats.getPercentile(1));
+    System.out.println("percentile  10 " + pingStats.getPercentile(10));
+    System.out.println("percentile  20 " + pingStats.getPercentile(20));
+    System.out.println("percentile  30 " + pingStats.getPercentile(30));
+    System.out.println("percentile  40 " + pingStats.getPercentile(40));
+    System.out.println("percentile  50 " + pingStats.getPercentile(50));
+    System.out.println("percentile  60 " + pingStats.getPercentile(60));
+    System.out.println("percentile  70 " + pingStats.getPercentile(70));
+    System.out.println("percentile  80 " + pingStats.getPercentile(80));
+    System.out.println("percentile  90 " + pingStats.getPercentile(90));
+    System.out.println("percentile  95 " + pingStats.getPercentile(95));
+    System.out.println("percentile  99 " + pingStats.getPercentile(99));
+    System.out.println("percentile 100 " + pingStats.getPercentile(100));
   }
 }

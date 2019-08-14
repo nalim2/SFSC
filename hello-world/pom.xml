@@ -12,11 +12,20 @@
 
   <artifactId>hello-world</artifactId>
 
+  <properties>
+    <apache-commons-math3.version>3.6.1</apache-commons-math3.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>de.unistuttgart.isw</groupId>
       <artifactId>adapter</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>${apache-commons-math3.version}</version>
     </dependency>
   </dependencies>
 

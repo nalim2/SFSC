@@ -7,8 +7,8 @@ option java_multiple_files = true;
 
 message BenchmarkMessage {
   fixed64 id = 1;
-  fixed64 sendTime = 2;
-  fixed64 processTime = 3;
-  fixed64 returnTime = 4;
+  fixed64 sendTimestamp = 2;
+  fixed64 serverTimestamp = 3;
+  fixed64 receiveTimestamp = 4;
   bytes weight = 5;
 }

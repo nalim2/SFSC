@@ -1,18 +1,28 @@
 package de.unistuttgart.isw.sfsc.benchmark;
 
+import de.unistuttgart.isw.sfsc.benchmark.evaluation.Evaluator;
+import de.unistuttgart.isw.sfsc.benchmark.io.SfscBenchmark;
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
 
 public class Main {
 
-  public static void main(String[] args) {
-    final BootstrapConfiguration clientConfiguration = new BootstrapConfiguration("127.0.0.1", 1251);
-    final BootstrapConfiguration serverConfiguration = new BootstrapConfiguration("127.0.0.1", 1261);
+  private static final BootstrapConfiguration clientConfiguration = new BootstrapConfiguration("127.0.0.1", 1251);
+  private static final BootstrapConfiguration serverConfiguration = new BootstrapConfiguration("127.0.0.1", 1261);
 
-    SfscBenchmark benchmark = new SfscBenchmark(clientConfiguration, serverConfiguration);
+  public static void main(String[] args) throws Exception {
+
+    executeBenchmark(10,160);
+    executeBenchmark(100,460);
+
+  }
+
+  static void executeBenchmark(int messagesPerSecond, int messageSizeBytes) throws Exception {
     Evaluator evaluator = new Evaluator();
-    for (int i = 0; i < 10; i++) {
-      evaluator.evaluate(benchmark.benchmark(5, 50, 1));
-      evaluator.evaluate(benchmark.benchmark(500, 500, 5));
-    }
+    SfscBenchmark benchmark = new SfscBenchmark(clientConfiguration, serverConfiguration);
+    benchmark.benchmark(messagesPerSecond, messageSizeBytes, 60, evaluator);
+    evaluator.evaluate();
+    evaluator.clear();
+    System.out.println("=====================================================================");
+    System.out.flush();
   }
 }

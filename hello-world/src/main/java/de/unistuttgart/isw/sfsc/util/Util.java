@@ -1,6 +1,8 @@
 package de.unistuttgart.isw.sfsc.util;
 
 import com.google.protobuf.Message;
+import de.unistuttgart.isw.sfsc.client.adapter.Adapter;
+import java.util.concurrent.ThreadLocalRandom;
 import protocol.pubsub.DataProtocol;
 import protocol.pubsub.SubProtocol;
 import protocol.pubsub.SubProtocol.SubscriptionType;
@@ -29,5 +31,13 @@ public class Util {
     byte[][] subscriptionMessage = SubProtocol.newEmptyMessage();
     SubProtocol.TYPE_AND_TOPIC_FRAME.put(subscriptionMessage, SubProtocol.buildTypeAndTopicFrame(SubscriptionType.SUBSCRIPTION, topic));
     return subscriptionMessage;
+  }
+
+  public static byte[] pair(Adapter sender, Adapter receiver, int topicSizeBytes) throws InterruptedException {
+    byte[] topic = new byte[topicSizeBytes];
+    ThreadLocalRandom.current().nextBytes(topic);
+    receiver.getDataClient().getSubEventOutbox().add(subscriptionMessage(topic));
+    sender.getDataClient().getSubEventInbox().take();
+    return topic;
   }
 }
