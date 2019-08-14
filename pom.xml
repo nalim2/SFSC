@@ -32,14 +32,13 @@
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <dockerfile-maven-version>1.4.10</dockerfile-maven-version>
     <maven-shade-plugin-version>3.2.1</maven-shade-plugin-version>
-    <java.version>1.12</java.version>
+    <maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
+    <java.version>12</java.version>
     <encoding>UTF-8</encoding>
 
     <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
     <maven.compiler.release>${java.version}</maven.compiler.release>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
   </properties>
 
   <dependencyManagement>
@@ -132,6 +131,11 @@
             <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml
             </dependencyReducedPomLocation>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin-version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
