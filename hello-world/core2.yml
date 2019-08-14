@@ -1,0 +1,26 @@
+version: "3"
+services:
+  core2:
+    image: 'docker-core:0.1.0-SNAPSHOT'
+    ports:
+      - "1260:1260"
+      - "1261:1261"
+      - "1262:1262"
+      - "1263:1263"
+      - "1264:1264"
+      - "7951:7951/udp"
+      - "7951:7951/tcp"
+    environment:
+      - NODE_ID=core2
+
+      - HOST=127.0.0.1
+      - CONTROL_PUB_PORT=1261
+      - CONTROL_SUB_PORT=1262
+      - DATA_PUB_PORT=1263
+      - DATA_SUB_PORT=1264
+
+      - BACKEND_HOST=core2
+      - CLUSTER_NAME=cluster
+#      - SERF_JOIN_ADDRESS=core1:7950
+      - SERF_PORT=7951
+      - BACKEND_PORT=1260

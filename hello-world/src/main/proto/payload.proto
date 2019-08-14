@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package sfsc;
+
+option java_package = "de.unistuttgart.isw.sfsc.benchmark";
+option java_multiple_files = true;
+
+message BenchmarkMessage {
+  fixed64 id = 1;
+  fixed64 sendTime = 2;
+  fixed64 processTime = 3;
+  fixed64 returnTime = 4;
+  bytes weight = 5;
+}

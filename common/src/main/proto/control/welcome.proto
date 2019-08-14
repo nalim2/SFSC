@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.protocol.control;
+
+option java_multiple_files = true;
+
+message WelcomeMessage {
+  string host = 1;
+  int32 controlPubPort = 2;
+  int32 controlSubPort = 3;
+  int32 dataPubPort = 4;
+  int32 dataSubPort = 5;
+  int32 registryPubPort = 6;
+  int32 registrySubPort = 7;
+}

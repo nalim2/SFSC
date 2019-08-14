@@ -1,0 +1,25 @@
+version: "3"
+services:
+  core1:
+    image: 'docker-core:0.1.0-SNAPSHOT'
+    ports:
+      - "1250:1250"
+      - "1251:1251"
+      - "1252:1252"
+      - "1253:1253"
+      - "1254:1254"
+      - "7950:7950/udp"
+      - "7950:7950/tcp"
+    environment:
+      - NODE_ID=core1
+
+      - HOST=127.0.0.1
+      - CONTROL_PUB_PORT=1251
+      - CONTROL_SUB_PORT=1252
+      - DATA_PUB_PORT=1253
+      - DATA_SUB_PORT=1254
+
+      - BACKEND_HOST=core1
+      - CLUSTER_NAME=cluster
+      - SERF_PORT=7950
+      - BACKEND_PORT=1250

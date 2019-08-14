@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.unistuttgart.isw</groupId>
+    <artifactId>smart-service-framework</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+  <artifactId>core</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>no.tv2.serf</groupId>
+      <artifactId>serf-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.unistuttgart.isw</groupId>
+      <artifactId>common</artifactId>
+      <version>${revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.unistuttgart.isw</groupId>
+      <artifactId>common-java</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
