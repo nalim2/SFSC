@@ -69,13 +69,13 @@
         <version>${jeromq.version}</version>
       </dependency>
       <dependency>
-        <artifactId>jmh-core</artifactId>
         <groupId>org.openjdk.jmh</groupId>
+        <artifactId>jmh-core</artifactId>
         <version>${jmh.version}</version>
       </dependency>
       <dependency>
-        <artifactId>jmh-generator-annprocess</artifactId>
         <groupId>org.openjdk.jmh</groupId>
+        <artifactId>jmh-generator-annprocess</artifactId>
         <version>${jmh.version}</version>
       </dependency>
     </dependencies>

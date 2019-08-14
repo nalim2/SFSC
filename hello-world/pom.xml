@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>smart-service-framework</artifactId>
     <groupId>de.unistuttgart.isw</groupId>
+    <artifactId>smart-service-framework</artifactId>
     <version>${revision}</version>
   </parent>
 
@@ -16,15 +16,15 @@
     <dependency>
       <groupId>de.unistuttgart.isw</groupId>
       <artifactId>adapter</artifactId>
-      <version>${revision}</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <artifactId>protobuf-maven-plugin</artifactId>
         <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
