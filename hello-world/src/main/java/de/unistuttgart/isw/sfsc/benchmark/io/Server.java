@@ -29,6 +29,7 @@ class Server implements AutoCloseable {
 
   void start() {
     executorService.execute(() -> {
+      Thread.currentThread().setName("Benchmark Server Thread");
       final Inbox inbox = adapter.getDataClient().getDataInbox();
       final Outbox outbox = adapter.getDataClient().getDataOutbox();
       while (!Thread.interrupted()) {
