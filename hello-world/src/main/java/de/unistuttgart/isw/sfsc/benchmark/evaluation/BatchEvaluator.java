@@ -67,7 +67,7 @@ class BatchEvaluator {
 
     double[] pings = messages.stream()
         .map(message -> message.getReceiveTimestamp() - message.getSendTimestamp())
-        .mapToDouble(nsValue -> ((double) nsValue) / 1_000_000)
+        .mapToDouble(nsValue -> ((double) nsValue) / 1_000_000) //to ms
         .toArray();
 
     DescriptiveStatistics pingStats = new DescriptiveStatistics(pings);
