@@ -27,6 +27,7 @@ class Receiver implements AutoCloseable {
 
   void start() {
     executorService.execute(() -> {
+      Thread.currentThread().setName("Benchmark Receiver Thread");
       while (!Thread.interrupted()) {
         try {
           final byte[][] message = inbox.take();
