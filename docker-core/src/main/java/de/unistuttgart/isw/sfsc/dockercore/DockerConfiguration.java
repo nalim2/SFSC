@@ -7,11 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class DockerConfiguration {
+class DockerConfiguration {
 
-  private static final String DEFAULT_SERF_PORT = "7946";
-  private static final String DEFAULT_SERF_RPC_HOST = "127.0.0.1";
-  private static final String DEFAULT_SERF_RPC_PORT = "7373";
+  private static final String DEFAULT_HAZELCAST_PORT = "5701";
   private static final String DEFAULT_BACKEND_PORT = "1251";
   private static final String DEFAULT_CONTROL_PUB_PORT = "1252";
   private static final String DEFAULT_CONTROL_SUB_PORT = "1253";
@@ -20,12 +18,9 @@ public class DockerConfiguration {
   private static final String DEFAULT_REGISTRY_PUB_PORT = "1256";
   private static final String DEFAULT_REGISTRY_SUB_PORT = "1257";
 
-  private final String nodeId;
-  private final String clusterName;
   private final String host;
-  private final String serfJoinAddress;
   private final String backendHost;
-  private final String serfPort;
+  private final String hazelcastPort;
   private final String backendPort;
   private final String controlPubPort;
   private final String controlSubPort;
@@ -34,14 +29,11 @@ public class DockerConfiguration {
   private final String registryPubPort;
   private final String registrySubPort;
 
-  DockerConfiguration(String nodeId, String clusterName, String host, String serfJoinAddress, String backendHost, String serfPort, String backendPort,
-      String controlPubPort, String controlSubPort, String dataPubPort, String dataSubPort, String registryPubPort, String registrySubPort) {
+  DockerConfiguration(String host, String backendHost, String hazelcastPort, String backendPort, String controlPubPort, String controlSubPort,
+      String dataPubPort, String dataSubPort, String registryPubPort, String registrySubPort) {
     this.host = Objects.requireNonNull(host);
-    this.clusterName = clusterName;
-    this.nodeId = nodeId;
-    this.serfJoinAddress = serfJoinAddress;
     this.backendHost = backendHost;
-    this.serfPort = serfPort;
+    this.hazelcastPort = hazelcastPort;
     this.backendPort = backendPort;
     this.controlPubPort = controlPubPort;
     this.controlSubPort = controlSubPort;
@@ -53,12 +45,9 @@ public class DockerConfiguration {
 
   static DockerConfiguration fromEnvironment() {
     Map<String, String> environment = System.getenv();
-    String nodeId = environment.get("NODE_ID");
-    String clusterName = environment.get("CLUSTER_NAME");
     String host = environment.get("HOST");
-    String serfJoinAddress = environment.get("SERF_JOIN_ADDRESS");
     String backendHost = environment.get("BACKEND_HOST");
-    String serfPort = environment.get("SERF_PORT");
+    String hazelcastPort = environment.get("HAZELCAST_PORT");
     String backendPort = environment.get("BACKEND_PORT");
     String controlPubPort = environment.get("CONTROL_PUB_PORT");
     String controlSubPort = environment.get("CONTROL_SUB_PORT");
@@ -66,15 +55,15 @@ public class DockerConfiguration {
     String dataSubPort = environment.get("DATA_SUB_PORT");
     String registryPubPort = environment.get("REGISTRY_PUB_PORT");
     String registrySubPort = environment.get("REGISTRY_SUB_PORT");
-    return new DockerConfiguration(nodeId, clusterName, host, serfJoinAddress, backendHost, serfPort, backendPort, controlPubPort, controlSubPort,
-        dataPubPort, dataSubPort, registryPubPort, registrySubPort);
+    return new DockerConfiguration(host, backendHost, hazelcastPort, backendPort, controlPubPort, controlSubPort, dataPubPort, dataSubPort,
+        registryPubPort, registrySubPort);
   }
 
   Configuration<CoreOption> toCoreConfiguration() {
     EnumMap<CoreOption, String> enumMap = new EnumMap<>(CoreOption.class);
     enumMap.put(CoreOption.HOST, getHost());
-    enumMap.put(CoreOption.SERF_RPC_HOST, DEFAULT_SERF_RPC_HOST);
-    enumMap.put(CoreOption.SERF_RPC_PORT, DEFAULT_SERF_RPC_PORT);
+    enumMap.put(CoreOption.BACKEND_HOST, getBackendHost());
+    enumMap.put(CoreOption.HAZELCAST_PORT, getHazelcastPort());
     enumMap.put(CoreOption.BACKEND_PORT, getBackendPort());
     enumMap.put(CoreOption.CONTROL_PUB_PORT, getControlPubPort());
     enumMap.put(CoreOption.CONTROL_SUB_PORT, getControlSubPort());
@@ -89,24 +78,12 @@ public class DockerConfiguration {
     return host;
   }
 
+  public String getHazelcastPort() {
+    return Optional.ofNullable(hazelcastPort).orElse(DEFAULT_HAZELCAST_PORT);
+  }
+
   public String getBackendHost() {
     return Optional.ofNullable(backendHost).orElseGet(this::getHost);
-  }
-
-  public String getSerfPort() {
-    return Optional.ofNullable(serfPort).orElse(DEFAULT_SERF_PORT);
-  }
-
-  public Optional<String> getNodeId() {
-    return Optional.ofNullable(nodeId);
-  }
-
-  public Optional<String> getClusterName() {
-    return Optional.ofNullable(clusterName);
-  }
-
-  public Optional<String> getSerfJoinAddress() {
-    return Optional.ofNullable(serfJoinAddress);
   }
 
   public String getBackendPort() {

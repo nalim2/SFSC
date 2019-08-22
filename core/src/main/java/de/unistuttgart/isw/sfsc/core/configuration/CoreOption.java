@@ -6,8 +6,8 @@ import java.util.function.Predicate;
 public enum CoreOption implements Predicate<String> {
 
   HOST(any -> true),
-  SERF_RPC_HOST(any -> true),
-  SERF_RPC_PORT(any -> true),
+  BACKEND_HOST(any -> true),
+  HAZELCAST_PORT(any -> true),
   BACKEND_PORT(any -> true),
   CONTROL_PUB_PORT(any -> true),
   CONTROL_SUB_PORT(any -> true),

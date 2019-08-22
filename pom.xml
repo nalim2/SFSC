@@ -26,9 +26,8 @@
     <revision>0.1.0-SNAPSHOT</revision>
     <slf4j.version>1.7.26</slf4j.version>
     <protobuf.version>3.8.0</protobuf.version>
-    <serf-client.version>1.0.1</serf-client.version>
     <jeromq.version>0.5.1</jeromq.version>
-    <jmh.version>1.21</jmh.version>
+    <hazelcast.version>3.12.2</hazelcast.version>
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <dockerfile-maven-version>1.4.10</dockerfile-maven-version>
     <maven-shade-plugin-version>3.2.1</maven-shade-plugin-version>
@@ -59,24 +58,14 @@
         <version>${protobuf.version}</version>
       </dependency>
       <dependency>
-        <groupId>no.tv2.serf</groupId>
-        <artifactId>serf-client</artifactId>
-        <version>${serf-client.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.zeromq</groupId>
         <artifactId>jeromq</artifactId>
         <version>${jeromq.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.openjdk.jmh</groupId>
-        <artifactId>jmh-core</artifactId>
-        <version>${jmh.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openjdk.jmh</groupId>
-        <artifactId>jmh-generator-annprocess</artifactId>
-        <version>${jmh.version}</version>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast</artifactId>
+        <version>${hazelcast.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

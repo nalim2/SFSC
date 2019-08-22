@@ -3,44 +3,39 @@ package de.unistuttgart.isw.sfsc.core;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.core.control.Control;
-import de.unistuttgart.isw.sfsc.core.pubsub.PubSub;
-import de.unistuttgart.isw.sfsc.core.serf.SerfEndpoint;
-import java.io.IOException;
+import de.unistuttgart.isw.sfsc.core.data.Data;
+import de.unistuttgart.isw.sfsc.core.hazelcast.HazelcastNode;
 import java.util.concurrent.ExecutionException;
 import zmq.reactor.ContextConfiguration;
-import zmq.reactor.Reactor;
 
 public class Core implements AutoCloseable {
 
-  private final Reactor reactor;
   private final Control control;
-  private final PubSub pubSub;
-  private final SerfEndpoint serfEndpoint;
+  private final Data data;
+  private final HazelcastNode hazelcastNode;
 
-  Core(Reactor reactor, Configuration<CoreOption> configuration) throws IOException, ExecutionException, InterruptedException {
-    this.reactor = reactor;
-    this.control = Control.create(reactor, configuration);
-    this.pubSub = PubSub.create(reactor, configuration);
-    this.serfEndpoint = SerfEndpoint.getInstance(configuration);
+  Core(Control control, Data data, HazelcastNode hazelcastNode) {
+    this.control = control;
+    this.data = data;
+    this.hazelcastNode = hazelcastNode;
   }
 
-  public static Core start(Configuration<CoreOption> configuration) throws IOException, ExecutionException, InterruptedException {
+  public static Core start(Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     ContextConfiguration contextConfiguration = context -> {
-      context.setLinger(0);
       context.setRcvHWM(0);
       context.setSndHWM(0);
     };
-    Reactor reactor = Reactor.create(contextConfiguration);
-    Core core = new Core(reactor, configuration);
-    core.serfEndpoint.handleMembershipEventStream(core.serfEndpoint.memberJoinStream(), core.pubSub::connectBackend);
-    return core;
+    Data data = Data.create(contextConfiguration, configuration);
+    HazelcastNode hazelcastNode = HazelcastNode.create(data::connectBackend, data::disconnectBackend, configuration);
+    Control control = Control.create(contextConfiguration, configuration);
+
+    return new Core(control, data, hazelcastNode);
   }
 
   @Override
   public void close() throws Exception {
-    reactor.close();
-    serfEndpoint.close();
+    hazelcastNode.close();
     control.close();
-    pubSub.close();
+    data.close();
   }
 }
