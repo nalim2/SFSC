@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.core.pubsub;
+package de.unistuttgart.isw.sfsc.core.data;
 
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
@@ -7,9 +7,10 @@ import java.util.concurrent.ExecutionException;
 import protocol.pubsub.DataProtocol;
 import zmq.forwarder.Forwarder;
 import zmq.pubsubsocketpair.PubSubSocketPair;
+import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
-public class PubSub implements AutoCloseable {
+public class Data implements AutoCloseable {
 
   private final PubSubSocketPair frontend;
   private final PubSubSocketPair backend;
@@ -18,9 +19,11 @@ public class PubSub implements AutoCloseable {
   private final Forwarder backendSubEventInboxForwarder;
   private final Forwarder frontendDataInboxForwarder;
   private final Forwarder frontendSubEventInboxForwarder;
+  private final Reactor reactor;
 
-  PubSub(Reactor reactor, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+  Data(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     this.configuration = configuration;
+    reactor = Reactor.create(contextConfiguration);
     frontend = PubSubSocketPair.create(reactor, DataProtocol.class);
     backend = PubSubSocketPair.create(reactor, DataProtocol.class);
     backendDataInboxForwarder = Forwarder.create(backend.getDataInbox(), frontend.getDataOutbox());
@@ -29,11 +32,11 @@ public class PubSub implements AutoCloseable {
     frontendSubEventInboxForwarder = Forwarder.create(frontend.getSubEventInbox(), List.of(frontend.getSubEventOutbox(), backend.getSubEventOutbox()));
   }
 
-  public static PubSub create(Reactor reactor, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
-    PubSub pubSub = new PubSub(reactor, configuration);
-    pubSub.bindFrontend(configuration);
-    pubSub.bindBackend(configuration);
-    return pubSub;
+  public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+    Data data = new Data(contextConfiguration, configuration);
+    data.bindFrontend(configuration);
+    data.bindBackend(configuration);
+    return data;
   }
 
   void bindFrontend(Configuration<CoreOption> configuration) {
@@ -59,6 +62,7 @@ public class PubSub implements AutoCloseable {
 
   @Override
   public void close() throws Exception {
+    reactor.close();
     backendDataInboxForwarder.close();
     backendSubEventInboxForwarder.close();
     frontendDataInboxForwarder.close();

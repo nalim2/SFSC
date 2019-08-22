@@ -8,19 +8,14 @@ services:
       - "1262:1262"
       - "1263:1263"
       - "1264:1264"
-      - "7951:7951/udp"
-      - "7951:7951/tcp"
+      - "5702:5702"
     environment:
-      - NODE_ID=core2
-
       - HOST=127.0.0.1
+      - BACKEND_PORT=1260
       - CONTROL_PUB_PORT=1261
       - CONTROL_SUB_PORT=1262
       - DATA_PUB_PORT=1263
       - DATA_SUB_PORT=1264
 
       - BACKEND_HOST=core2
-      - CLUSTER_NAME=cluster
-#      - SERF_JOIN_ADDRESS=core1:7950
-      - SERF_PORT=7951
-      - BACKEND_PORT=1260
+      - HAZELCAST_PORT=5702

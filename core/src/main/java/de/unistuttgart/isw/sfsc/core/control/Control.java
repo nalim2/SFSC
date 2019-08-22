@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import protocol.control.ControlProtocol;
 import zmq.pubsubsocketpair.PubSubSocketPair;
+import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
 public class Control implements AutoCloseable {
@@ -15,15 +16,18 @@ public class Control implements AutoCloseable {
   private final PubSubSocketPair pubSubSocketPair;
   private final ControlInboxHandler controlMessageHandler;
   private final SubscriptionEventInboxHandler subscriptionEventInboxHandler;
+  private final Reactor reactor;
 
-  Control(Reactor reactor, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+    reactor = Reactor.create(contextConfiguration);
     pubSubSocketPair = PubSubSocketPair.create(reactor, ControlProtocol.class);
     controlMessageHandler = ControlInboxHandler.create(pubSubSocketPair, executorService, configuration);
     subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, configuration);
   }
 
-  public static Control create(Reactor reactor, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
-    Control control = new Control(reactor, configuration);
+  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration)
+      throws ExecutionException, InterruptedException {
+    Control control = new Control(contextConfiguration, configuration);
     bind(control.pubSubSocketPair, configuration);
     return control;
   }
@@ -35,6 +39,7 @@ public class Control implements AutoCloseable {
 
   @Override
   public void close() throws Exception {
+    reactor.close();
     pubSubSocketPair.close();
     subscriptionEventInboxHandler.close();
     controlMessageHandler.close();
