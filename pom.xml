@@ -36,8 +36,6 @@
     <java.version>12</java.version>
     <encoding>UTF-8</encoding>
 
-    <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
     <maven.compiler.release>${java.version}</maven.compiler.release>
   </properties>
 
