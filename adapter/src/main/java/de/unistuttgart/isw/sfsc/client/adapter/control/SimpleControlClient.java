@@ -1,11 +1,9 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control;
 
-import static de.unistuttgart.isw.sfsc.client.adapter.control.SessionManager.SESSION_TOPIC;
-import static de.unistuttgart.isw.sfsc.client.adapter.registry.RegistryClient.REGISTRY_TOPIC;
-
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.client.adapter.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.registry.SimpleRegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.session.SessionManager;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -41,7 +39,7 @@ public class SimpleControlClient implements ControlClient, AutoCloseable {
     SimplePubSubSocketPair pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
 
     WelcomeMessageTransmitter welcomeMessageTransmitter = new WelcomeMessageTransmitter();
-    SessionManager sessionManager = new SessionManager(welcomeMessageTransmitter, uuid);
+    SessionManager sessionManager = SessionManager.create(welcomeMessageTransmitter, uuid);
     SimpleRegistryClient registryClient = SimpleRegistryClient.create(pubSubSocketPair.publisher(), uuid);
     MessageDistributor messageDistributor = new MessageDistributor();
     messageDistributor.add(sessionManager);
@@ -49,8 +47,8 @@ public class SimpleControlClient implements ControlClient, AutoCloseable {
 
     ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubSocketPair.dataInbox(), messageDistributor);
     pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
-    pubSubSocketPair.subscriptionManager().subscribe((SESSION_TOPIC + "///" + uuid).getBytes()); //todo ///
-    pubSubSocketPair.subscriptionManager().subscribe((REGISTRY_TOPIC + "///" + uuid).getBytes()); //todo ///
+    pubSubSocketPair.subscriptionManager().subscribe(sessionManager.getTopic().getBytes());
+    pubSubSocketPair.subscriptionManager().subscribe(registryClient.getTopic().getBytes());
 
     WelcomeMessage welcomeMessage = welcomeMessageTransmitter.welcomeMessageFuture().get();//todo log state
 

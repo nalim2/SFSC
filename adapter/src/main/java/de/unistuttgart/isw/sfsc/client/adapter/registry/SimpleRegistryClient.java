@@ -4,19 +4,16 @@ import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import consumerfuture.ConsumerFuture;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
-import de.unistuttgart.isw.sfsc.protocol.registry.CreateResponse;
 import de.unistuttgart.isw.sfsc.protocol.registry.DeleteRequest;
-import de.unistuttgart.isw.sfsc.protocol.registry.DeleteResponse;
 import de.unistuttgart.isw.sfsc.protocol.registry.ReadRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.ReadResponse;
 import de.unistuttgart.isw.sfsc.protocol.registry.RegistryMessage;
 import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -30,20 +27,21 @@ import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
 public class SimpleRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
-  private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
+  private static final String REGISTRY_TOPIC = "registry";
+  private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleRegistryClient.class);
 
-  private final Pattern pattern;
-  private final Publisher publisher;
-  private final TimeoutRegistry<Integer, Consumer<Message>> timeoutRegistry = new TimeoutRegistry<>();
+  private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
   private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("registry created exception", exception);
-  private final int timeoutMs = 500;
-  private final String fullTopic;
+  private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
+  private final Publisher publisher;
+  private final Pattern pattern;
+  private final String topic;
 
   SimpleRegistryClient(Publisher publisher, UUID uuid) {
-    fullTopic = REGISTRY_TOPIC + "///" + uuid;
-    this.pattern = Pattern.compile("\\A" + fullTopic + "\\z");
+    topic = REGISTRY_TOPIC + "///" + uuid; //todo ///
+    pattern = Pattern.compile("\\A" + topic + "\\z");
     this.publisher = publisher;
   }
 
@@ -52,41 +50,44 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
   }
 
   @Override
-  public ServiceHandle addService(ServiceDeclaration serviceDeclaration) throws ExecutionException, InterruptedException {
-    UUID topic = UUID.randomUUID();
-    ServiceHandle serviceHandle = new ServiceHandle(topic.toString(), serviceDeclaration.getName());
-    MessageConsumer<CreateResponse> responseConsumer = new MessageConsumer<>(CreateResponse.class);
+  public Future<ServiceHandle> addService(ServiceDeclaration serviceDeclaration) {
+    UUID serviceTopic = UUID.randomUUID();
+    ServiceHandle serviceHandle = new ServiceHandle(serviceTopic.toString(), serviceDeclaration.getName());
+    ConsumerFuture<Message, ServiceHandle> consumerFuture = new ConsumerFuture<>(message -> serviceHandle);
     int id = idSupplier.get();
     byte[] message = RegistryMessage.newBuilder().setMessageId(id).setCreateRequest(CreateRequest.newBuilder()
-        .setService(ServiceDescriptor.newBuilder().setName(serviceDeclaration.getName()).setTopic(topic.toString()).build()).build()).build().toByteArray();
-    timeoutRegistry.put(id, responseConsumer, timeoutMs, exceptionConsumer);
-    publisher.publish(fullTopic.getBytes(), message);
-    responseConsumer.future.get();
-    return serviceHandle;
+        .setService(ServiceDescriptor.newBuilder().setName(serviceDeclaration.getName()).setTopic(serviceTopic.toString()).build()).build()).build()
+        .toByteArray();
+    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
+    publisher.publish(topic.getBytes(), message);
+    return consumerFuture;
   }
 
   @Override
-  public Set<ServiceHandle> getServices() throws ExecutionException, InterruptedException {
-    MessageConsumer<ReadResponse> responseConsumer = new MessageConsumer<>(ReadResponse.class);
+  public Future<Set<ServiceHandle>> getServices() {
+    ConsumerFuture<Message, Set<ServiceHandle>> consumerFuture = new ConsumerFuture<>(message ->
+        ((ReadResponse) message)
+            .getServicesList()
+            .stream()
+            .map(serviceDescriptor -> new ServiceHandle(serviceDescriptor.getTopic(), serviceDescriptor.getName()))
+            .collect(Collectors.toSet()));
     int id = idSupplier.get();
     byte[] message = RegistryMessage.newBuilder().setMessageId(id).setReadRequest(ReadRequest.newBuilder().build()).build().toByteArray();
-    timeoutRegistry.put(id, responseConsumer, timeoutMs, exceptionConsumer);
-    publisher.publish(fullTopic.getBytes(), message);
-    return responseConsumer.future.get().getServicesList()
-        .stream()
-        .map(serviceDescriptor -> new ServiceHandle(serviceDescriptor.getTopic(), serviceDescriptor.getName()))
-        .collect(Collectors.toSet());
+    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
+    publisher.publish(topic.getBytes(), message);
+    return consumerFuture;
   }
 
   @Override
-  public void removeService(ServiceHandle serviceHandle) throws ExecutionException, InterruptedException {
-    MessageConsumer<DeleteResponse> responseConsumer = new MessageConsumer<>(DeleteResponse.class);
+  public Future<Void> removeService(ServiceHandle serviceHandle) {
+    ConsumerFuture<Message, Void> consumerFuture = new ConsumerFuture<>(ignored -> null);
     int id = idSupplier.get();
     byte[] message = RegistryMessage.newBuilder().setMessageId(id).setDeleteRequest(DeleteRequest.newBuilder()
-        .setService(ServiceDescriptor.newBuilder().setName(serviceHandle.getName()).setTopic(serviceHandle.getTopic()).build()).build()).build().toByteArray();
-    timeoutRegistry.put(id, responseConsumer, timeoutMs, exceptionConsumer);
-    publisher.publish(fullTopic.getBytes(), message);
-    responseConsumer.future.get();
+        .setService(ServiceDescriptor.newBuilder().setName(serviceHandle.getName()).setTopic(serviceHandle.getTopic()).build()).build()).build()
+        .toByteArray();
+    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
+    publisher.publish(topic.getBytes(), message);
+    return consumerFuture;
   }
 
   @Override
@@ -125,30 +126,13 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
     }
   }
 
+  public String getTopic() {
+    return topic;
+  }
+
   @Override
   public void close() {
     timeoutRegistry.close();
-  }
-
-  static class MessageConsumer<T> implements Consumer<Message> {
-
-    private volatile T message;
-    private final FutureTask<T> future = new FutureTask<>(() -> message);
-    private final Class<T> clazz;
-
-    MessageConsumer(Class<T> clazz) {
-      this.clazz = clazz;
-    }
-
-    @Override
-    public void accept(Message message) {
-      this.message = clazz.cast(message);
-      future.run();
-    }
-
-    Future<T> future() {
-      return future;
-    }
   }
 
 }
