@@ -6,7 +6,6 @@ import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import java.util.concurrent.ExecutionException;
 import zmq.processors.Forwarder;
 import zmq.processors.MessageDistributor;
-import zmq.pubsubsocketpair.PubSubSocketPair;
 import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactiveinbox.ReactiveInbox;
 import zmq.reactor.ContextConfiguration;
@@ -14,22 +13,21 @@ import zmq.reactor.Reactor;
 
 public class Control implements AutoCloseable {
 
+  private static final String REGISTRY_BASE_TOPIC = "registry";
+  private static final String SESSION_BASE_TOPIC = "session";
+
   private final SimplePubSubSocketPair pubSubSocketPair;
   private final Reactor reactor;
   private final ReactiveInbox reactiveDataInbox;
   private final ReactiveInbox reactiveSubscriptionInbox;
 
-  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry) throws ExecutionException, InterruptedException {
+  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)
+      throws ExecutionException, InterruptedException {
     reactor = Reactor.create(contextConfiguration);
     pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
     MessageDistributor messageDistributor = new MessageDistributor();
     messageDistributor.add(new RegistryEventProcessor(pubSubSocketPair.publisher(), registry));
     reactiveDataInbox = ReactiveInbox.create(pubSubSocketPair.dataInbox(), messageDistributor);
-
-    pubSubSocketPair.subscriptionManager().subscribe("registry".getBytes()); //todo extract var
-    pubSubSocketPair.subscriptionManager().subscribe("session".getBytes()); //todo extract var
-
-
     reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(),
         new Forwarder(pubSubSocketPair.subscriptionManager().outbox())
             .andThen(new SubscriptionEventProcessor(pubSubSocketPair.publisher(), new SessionManager(configuration))));

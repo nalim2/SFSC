@@ -27,7 +27,7 @@ import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
 public class SimpleRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
-  private static final String REGISTRY_TOPIC = "registry";
+  private static final String REGISTRY_BASE_TOPIC = "registry";
   private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleRegistryClient.class);
@@ -40,7 +40,7 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
   private final String topic;
 
   SimpleRegistryClient(Publisher publisher, UUID uuid) {
-    topic = REGISTRY_TOPIC + "///" + uuid; //todo ///
+    topic = REGISTRY_BASE_TOPIC + "///" + uuid; //todo ///
     pattern = Pattern.compile("\\A" + topic + "\\z");
     this.publisher = publisher;
   }

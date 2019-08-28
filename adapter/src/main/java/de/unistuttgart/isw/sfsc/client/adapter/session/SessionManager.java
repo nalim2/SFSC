@@ -14,8 +14,7 @@ import zmq.processors.MessageDistributor.TopicListener;
 
 public class SessionManager implements TopicListener, AutoCloseable {
 
-  private static final String SESSION_TOPIC = "session";
-
+  private static final String SESSION_BASE_TOPIC = "session";
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
   private final Pattern pattern;
@@ -24,11 +23,11 @@ public class SessionManager implements TopicListener, AutoCloseable {
 
   SessionManager(Consumer<WelcomeMessage> welcomeResponseConsumer, UUID uuid) {
     this.welcomeResponseConsumer = welcomeResponseConsumer;
-    topic = SESSION_TOPIC + "///" + uuid; //todo ///
+    topic = SESSION_BASE_TOPIC + "///" + uuid; //todo ///
     pattern = Pattern.compile("\\A" + topic + "\\z");
   }
 
-  public static SessionManager create(Consumer<WelcomeMessage> welcomeResponseConsumer, UUID uuid){
+  public static SessionManager create(Consumer<WelcomeMessage> welcomeResponseConsumer, UUID uuid) {
     return new SessionManager(welcomeResponseConsumer, uuid);
   }
 
