@@ -90,8 +90,8 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
   }
 
   @Override
-  public Pattern getTopicPattern() {
-    return pattern;
+  public boolean test(byte[] bytes) {
+    return pattern.matcher(new String(bytes)).matches();
   }
 
   @Override

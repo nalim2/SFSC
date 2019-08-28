@@ -27,6 +27,11 @@ class SessionManager implements TopicListener, AutoCloseable {
   }
 
   @Override
+  public boolean test(byte[] bytes) {
+    return pattern.matcher(new String(bytes)).matches();
+  }
+
+  @Override
   public void accept(byte[][] controlMessage) {
     try {
       SessionMessage request = PAYLOAD_FRAME.get(controlMessage, SessionMessage.parser());
@@ -47,12 +52,6 @@ class SessionManager implements TopicListener, AutoCloseable {
   }
 
   @Override
-  public Pattern getTopicPattern() {
-    return pattern;
-  }
-
-  @Override
-  public void close()  {
-    //todo
+  public void close() {
   }
 }

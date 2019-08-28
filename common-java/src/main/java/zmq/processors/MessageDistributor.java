@@ -5,32 +5,32 @@ import static protocol.pubsub.DataProtocol.TOPIC_FRAME;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
+import java.util.function.Predicate;
 
 public class MessageDistributor implements Consumer<byte[][]> {
 
   private final Set<TopicListener> topicListeners = ConcurrentHashMap.newKeySet();
 
-  public void add(TopicListener topicListener){
+  public void add(TopicListener topicListener) {
     topicListeners.add(topicListener);
   }
 
-  public void remove(TopicListener topicListener){
+  public void remove(TopicListener topicListener) {
     topicListeners.remove(topicListener);
   }
 
   @Override
   public void accept(byte[][] message) {
-    String topic = new String(TOPIC_FRAME.get(message));
+    byte[] topic = TOPIC_FRAME.get(message);
     topicListeners.forEach(topicListener -> {
-      if (topicListener.getTopicPattern().matcher(topic).matches()) {
-        topicListener.accept(message);
+      if (topicListener.test(topic)) {
+        topicListener.accept(message); //for performance reasons, all consumers share the original array
       }
     });
   }
 
-  public interface TopicListener extends Consumer<byte[][]> {
+  public interface TopicListener extends Predicate<byte[]>, Consumer<byte[][]> {
 
-    Pattern getTopicPattern();
   }
+
 }
