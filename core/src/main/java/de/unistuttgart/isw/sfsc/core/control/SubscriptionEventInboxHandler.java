@@ -41,8 +41,8 @@ public class SubscriptionEventInboxHandler implements AutoCloseable {
 
   public static SubscriptionEventInboxHandler create(PubSubSocketPair pubSubSocketPair, Configuration<CoreOption> configuration) {
     WelcomeMessage welcomeMessage = createWelcomeMessage(configuration);
-    SubscriptionEventInboxHandler subscriptionEventInboxHandler = new SubscriptionEventInboxHandler(pubSubSocketPair.getSubEventInbox(),
-        pubSubSocketPair.getSubEventOutbox(), pubSubSocketPair.getDataOutbox(), welcomeMessage);
+    SubscriptionEventInboxHandler subscriptionEventInboxHandler = new SubscriptionEventInboxHandler(pubSubSocketPair.subEventInbox(),
+        pubSubSocketPair.subscriptionManager().outbox(), pubSubSocketPair.publisher().outbox(), welcomeMessage);
     subscriptionEventInboxHandler.startDaemon();
     return subscriptionEventInboxHandler;
   }

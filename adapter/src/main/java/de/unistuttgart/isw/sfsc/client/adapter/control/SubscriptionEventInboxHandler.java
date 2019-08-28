@@ -33,7 +33,7 @@ public class SubscriptionEventInboxHandler implements AutoCloseable {
   }
 
   public static SubscriptionEventInboxHandler create(PubSubSocketPair pubSubSocketPair, UUID uuid, CountDownLatch ready) {
-    SubscriptionEventInboxHandler subscriptionEventInboxHandler = new SubscriptionEventInboxHandler(pubSubSocketPair.getSubEventInbox(), uuid, ready);
+    SubscriptionEventInboxHandler subscriptionEventInboxHandler = new SubscriptionEventInboxHandler(pubSubSocketPair.subEventInbox(), uuid, ready);
     subscriptionEventInboxHandler.startDaemon();
     return subscriptionEventInboxHandler;
   }

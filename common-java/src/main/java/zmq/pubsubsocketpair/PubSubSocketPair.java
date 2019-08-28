@@ -1,58 +1,37 @@
 package zmq.pubsubsocketpair;
 
-import java.util.concurrent.ExecutionException;
-import org.zeromq.SocketType;
-import protocol.pubsub.SubProtocol;
-import zmq.reactor.ReactiveSocket;
 import zmq.reactor.ReactiveSocket.Connector;
 import zmq.reactor.ReactiveSocket.Inbox;
 import zmq.reactor.ReactiveSocket.Outbox;
-import zmq.reactor.Reactor;
 
-public class PubSubSocketPair implements AutoCloseable {
+public interface PubSubSocketPair {
 
-  private final ReactiveSocket publisher;
-  private final ReactiveSocket subscriber;
+  Publisher publisher();
 
-  PubSubSocketPair(ReactiveSocket  publisher, ReactiveSocket subscriber) {
-    this.publisher = publisher;
-    this.subscriber = subscriber;
+  Inbox dataInbox();
+
+  SubscriptionManager subscriptionManager();
+
+  Inbox subEventInbox();
+
+  Connector publisherSocketConnector();
+
+  Connector subscriberSocketConnector();
+
+  interface SubscriptionManager {
+
+    void subscribe(byte[] topic);
+
+    void unsubscribe(byte[] topic);
+
+    Outbox outbox();
   }
 
-  public static <DataProtocolT extends Enum<DataProtocolT>> PubSubSocketPair create(Reactor reactor, Class<DataProtocolT> clazz)
-      throws ExecutionException, InterruptedException {
-    ReactiveSocket publisher = reactor.createReactiveSocket(SocketType.XPUB, SubProtocol.class);
-    ReactiveSocket subscriber = reactor.createReactiveSocket(SocketType.XSUB, clazz);
-    return new PubSubSocketPair(publisher, subscriber);
-  }
+  interface Publisher {
 
-  public Outbox getDataOutbox() {
-    return publisher.getOutbox();
-  }
+    void publish(byte[] topic, byte[] data);
 
-  public Inbox getDataInbox() {
-    return subscriber.getInbox();
-  }
+    Outbox outbox();
 
-  public Outbox getSubEventOutbox() {
-    return subscriber.getOutbox();
-  }
-
-  public Inbox getSubEventInbox() {
-    return publisher.getInbox();
-  }
-
-  public Connector getPublisherSocketConnector() {
-    return publisher.getConnector();
-  }
-
-  public Connector getSubscriberSocketConnector() {
-    return subscriber.getConnector();
-  }
-
-  @Override
-  public void close() throws Exception {
-    subscriber.close();
-    publisher.close();
   }
 }

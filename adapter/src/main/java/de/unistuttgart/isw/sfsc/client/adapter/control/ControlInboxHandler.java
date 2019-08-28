@@ -32,7 +32,7 @@ public class ControlInboxHandler implements AutoCloseable {
   }
 
   public static ControlInboxHandler create(PubSubSocketPair pubSubSocketPair) {
-    ControlInboxHandler controlInboxHandler = new ControlInboxHandler(pubSubSocketPair.getDataInbox());
+    ControlInboxHandler controlInboxHandler = new ControlInboxHandler(pubSubSocketPair.dataInbox());
     controlInboxHandler.startDaemon();
     return controlInboxHandler;
   }

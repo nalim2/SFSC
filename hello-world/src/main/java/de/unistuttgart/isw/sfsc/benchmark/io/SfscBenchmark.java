@@ -35,8 +35,8 @@ public class SfscBenchmark {
       final byte[] responseTopic = pair(serverAdapter, clientAdapter, TOPIC_SIZE_BYTES);
 
       try (final Server server = Server.start(serverAdapter, responseTopic);
-          final Receiver receiver = Receiver.start(clientAdapter.getDataClient().getDataInbox(), consumer)) {
-        try (final Transmitter transmitter = new Transmitter(clientAdapter.getDataClient().getDataOutbox(), requestTopic, messageSizeBytes)) {
+          final Receiver receiver = Receiver.start(clientAdapter.getDataClient().dataInbox(), consumer)) {
+        try (final Transmitter transmitter = new Transmitter(clientAdapter.getDataClient().publisher().outbox(), requestTopic, messageSizeBytes)) {
           System.out.println("executing benchmark");
           Thread.sleep(lingerDurationMs); //some time to warm up
           transmitter.send(periodNs);

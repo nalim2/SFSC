@@ -4,16 +4,15 @@ import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import protocol.pubsub.DataProtocol;
 import zmq.forwarder.Forwarder;
-import zmq.pubsubsocketpair.PubSubSocketPair;
+import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
 public class Data implements AutoCloseable {
 
-  private final PubSubSocketPair frontend;
-  private final PubSubSocketPair backend;
+  private final SimplePubSubSocketPair frontend;
+  private final SimplePubSubSocketPair backend;
   private final Configuration<CoreOption> configuration;
   private final Forwarder backendDataInboxForwarder;
   private final Forwarder backendSubEventInboxForwarder;
@@ -24,12 +23,12 @@ public class Data implements AutoCloseable {
   Data(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     this.configuration = configuration;
     reactor = Reactor.create(contextConfiguration);
-    frontend = PubSubSocketPair.create(reactor, DataProtocol.class);
-    backend = PubSubSocketPair.create(reactor, DataProtocol.class);
-    backendDataInboxForwarder = Forwarder.create(backend.getDataInbox(), frontend.getDataOutbox());
-    backendSubEventInboxForwarder = Forwarder.create(backend.getSubEventInbox(), frontend.getSubEventOutbox());
-    frontendDataInboxForwarder = Forwarder.create(frontend.getDataInbox(), List.of(frontend.getDataOutbox(), backend.getDataOutbox()));
-    frontendSubEventInboxForwarder = Forwarder.create(frontend.getSubEventInbox(), List.of(frontend.getSubEventOutbox(), backend.getSubEventOutbox()));
+    frontend = SimplePubSubSocketPair.create(reactor);
+    backend = SimplePubSubSocketPair.create(reactor);
+    backendDataInboxForwarder = Forwarder.create(backend.dataInbox(), frontend.publisher().outbox());
+    backendSubEventInboxForwarder = Forwarder.create(backend.subEventInbox(), frontend.subscriptionManager().outbox());
+    frontendDataInboxForwarder = Forwarder.create(frontend.dataInbox(), List.of(frontend.publisher().outbox(), backend.publisher().outbox()));
+    frontendSubEventInboxForwarder = Forwarder.create(frontend.subEventInbox(), List.of(frontend.subscriptionManager().outbox(), backend.subscriptionManager().outbox()));
   }
 
   public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
@@ -40,28 +39,28 @@ public class Data implements AutoCloseable {
   }
 
   void bindFrontend(Configuration<CoreOption> configuration) {
-    frontend.getPublisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)));
-    frontend.getSubscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)));
+    frontend.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)));
+    frontend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)));
   }
 
   void bindBackend(Configuration<CoreOption> configuration) {
-    backend.getSubscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.BACKEND_PORT)));
+    backend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.BACKEND_PORT)));
   }
 
   public void connectBackend(String host, int port) {
     if (!configuration.get(CoreOption.HOST).equals(host) && !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
-      backend.getPublisherSocketConnector().connect(host, port);
+      backend.publisherSocketConnector().connect(host, port);
     }
   }
 
   public void disconnectBackend(String host, int port) {
     if (!configuration.get(CoreOption.HOST).equals(host) && !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
-      backend.getPublisherSocketConnector().disconnect(host, port);
+      backend.publisherSocketConnector().disconnect(host, port);
     }
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     reactor.close();
     backendDataInboxForwarder.close();
     backendSubEventInboxForwarder.close();

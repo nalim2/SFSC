@@ -20,16 +20,16 @@ public class HelloWorld {
     new Thread(() -> {
       try (Adapter adapter1 = Adapter.create(bootstrapConfiguration1)) {
 
-        adapter1.getDataClient().getSubEventOutbox().add(subscriptionMessage("topic1"));
+        adapter1.getDataClient().subscriptionManager().outbox().add(subscriptionMessage("topic1"));
         System.out.println("adapter1 sent subscription");
 
-        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.getDataClient().getSubEventInbox().take()))));
-        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.getDataClient().getSubEventInbox().take()))));
+        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.getDataClient().subEventInbox().take()))));
+        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.getDataClient().subEventInbox().take()))));
 
-        adapter1.getDataClient().getDataOutbox().add(dataMessage("topic1", "messageFromAdapter1"));
+        adapter1.getDataClient().publisher().outbox().add(dataMessage("topic1", "messageFromAdapter1"));
         System.out.println("adapter1 sent message");
 
-        System.out.println("adapter1 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter1.getDataClient().getDataInbox().take())));
+        System.out.println("adapter1 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter1.getDataClient().dataInbox().take())));
 
         Thread.sleep(2000);
       } catch (Exception e) {
@@ -40,16 +40,16 @@ public class HelloWorld {
     new Thread(() -> {
       try (Adapter adapter2 = Adapter.create(bootstrapConfiguration2)) {
 
-        adapter2.getDataClient().getSubEventOutbox().add(subscriptionMessage("topic2"));
+        adapter2.getDataClient().subscriptionManager().outbox().add(subscriptionMessage("topic2"));
         System.out.println("adapter2 sent subscription");
 
-        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.getDataClient().getSubEventInbox().take()))));
-        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.getDataClient().getSubEventInbox().take()))));
+        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.getDataClient().subEventInbox().take()))));
+        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.getDataClient().subEventInbox().take()))));
 
-        adapter2.getDataClient().getDataOutbox().add(dataMessage("topic2", "messageFromAdapter2"));
+        adapter2.getDataClient().publisher().outbox().add(dataMessage("topic2", "messageFromAdapter2"));
         System.out.println("adapter2 sent message");
 
-        System.out.println("adapter2 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter2.getDataClient().getDataInbox().take())));
+        System.out.println("adapter2 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter2.getDataClient().dataInbox().take())));
 
         Thread.sleep(2000);
       } catch (Exception e) {

@@ -29,4 +29,6 @@ public interface ReactiveSocket extends AutoCloseable {
     void add(byte[][] output);
   }
 
+  @Override
+  void close();
 }

@@ -5,22 +5,22 @@ import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import protocol.pubsub.DataProtocol;
 import zmq.pubsubsocketpair.PubSubSocketPair;
+import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
 public class Control implements AutoCloseable {
 
   private final ExecutorService executorService = Executors.newCachedThreadPool();
-  private final PubSubSocketPair pubSubSocketPair;
+  private final SimplePubSubSocketPair pubSubSocketPair;
   private final ControlInboxHandler controlMessageHandler;
   private final SubscriptionEventInboxHandler subscriptionEventInboxHandler;
   private final Reactor reactor;
 
   Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     reactor = Reactor.create(contextConfiguration);
-    pubSubSocketPair = PubSubSocketPair.create(reactor, DataProtocol.class);
+    pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
     controlMessageHandler = ControlInboxHandler.create(pubSubSocketPair, executorService, configuration);
     subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, configuration);
   }
@@ -33,12 +33,12 @@ public class Control implements AutoCloseable {
   }
 
   static void bind(PubSubSocketPair pubSubSocketPair, Configuration<CoreOption> configuration) {
-    pubSubSocketPair.getPublisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT)));
-    pubSubSocketPair.getSubscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)));
+    pubSubSocketPair.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT)));
+    pubSubSocketPair.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)));
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     reactor.close();
     pubSubSocketPair.close();
     subscriptionEventInboxHandler.close();

@@ -36,8 +36,8 @@ public class Util {
   public static byte[] pair(Adapter sender, Adapter receiver, int topicSizeBytes) throws InterruptedException {
     byte[] topic = new byte[topicSizeBytes];
     ThreadLocalRandom.current().nextBytes(topic);
-    receiver.getDataClient().getSubEventOutbox().add(subscriptionMessage(topic));
-    sender.getDataClient().getSubEventInbox().take();
+    receiver.getDataClient().subscriptionManager().outbox().add(subscriptionMessage(topic));
+    sender.getDataClient().subEventInbox().take();
     return topic;
   }
 }

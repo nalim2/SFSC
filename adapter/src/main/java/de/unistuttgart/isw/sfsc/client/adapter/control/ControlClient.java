@@ -10,18 +10,18 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import protocol.pubsub.DataProtocol;
 import protocol.pubsub.SubProtocol;
 import zmq.pubsubsocketpair.PubSubSocketPair;
+import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactor.Reactor;
 
 public class ControlClient implements AutoCloseable {
 
-  private final PubSubSocketPair pubSubSocketPair;
+  private final SimplePubSubSocketPair pubSubSocketPair;
   private final ControlInboxHandler controlInboxHandler;
   private final SubscriptionEventInboxHandler subscriptionEventInboxHandler;
 
-  ControlClient(PubSubSocketPair pubSubSocketPair, ControlInboxHandler controlInboxHandler,
+  ControlClient(SimplePubSubSocketPair pubSubSocketPair, ControlInboxHandler controlInboxHandler,
       SubscriptionEventInboxHandler subscriptionEventInboxHandler) {
     this.pubSubSocketPair = pubSubSocketPair;
     this.controlInboxHandler = controlInboxHandler;
@@ -30,7 +30,7 @@ public class ControlClient implements AutoCloseable {
 
   public static ControlClient create(Reactor reactor, BootstrapConfiguration configuration, UUID uuid, CountDownLatch ready)
       throws ExecutionException, InterruptedException {
-    PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor, DataProtocol.class);
+    SimplePubSubSocketPair pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
     ControlInboxHandler controlInboxHandler = ControlInboxHandler.create(pubSubSocketPair);
     SubscriptionEventInboxHandler subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, uuid, ready);
     ControlClient controlClient = new ControlClient(pubSubSocketPair, controlInboxHandler, subscriptionEventInboxHandler);
@@ -40,14 +40,14 @@ public class ControlClient implements AutoCloseable {
   }
 
   static void connect(PubSubSocketPair pubSubSocketPair, BootstrapConfiguration configuration) {
-    pubSubSocketPair.getSubscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
+    pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
   }
 
   void subscribe(UUID uuid) {
     byte[] subscription = SubProtocol.buildTypeAndTopicFrame(SUBSCRIPTION, serializeUuid(uuid));
     byte[][] message = SubProtocol.newEmptyMessage();
     TYPE_AND_TOPIC_FRAME.put(message, subscription);
-    pubSubSocketPair.getSubEventOutbox().add(message);
+    pubSubSocketPair.subscriptionManager().outbox().add(message);
   }
 
   static byte[] serializeUuid(UUID uuid) {
@@ -58,7 +58,7 @@ public class ControlClient implements AutoCloseable {
   }
 
   public void connectPubSocket(WelcomeMessage welcomeMessage) {
-    pubSubSocketPair.getPublisherSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getControlSubPort());
+    pubSubSocketPair.publisherSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getControlSubPort());
   }
 
   public Future<WelcomeMessage> getWelcomeMessage() {
@@ -66,7 +66,7 @@ public class ControlClient implements AutoCloseable {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     pubSubSocketPair.close();
     controlInboxHandler.close();
     subscriptionEventInboxHandler.close();
