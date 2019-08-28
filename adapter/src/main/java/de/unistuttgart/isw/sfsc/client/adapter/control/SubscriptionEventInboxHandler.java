@@ -2,76 +2,43 @@ package de.unistuttgart.isw.sfsc.client.adapter.control;
 
 import static protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
-import java.nio.ByteBuffer;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protocol.pubsub.SubProtocol;
 import protocol.pubsub.SubProtocol.SubscriptionType;
-import zmq.pubsubsocketpair.PubSubSocketPair;
-import zmq.reactor.ReactiveSocket.Inbox;
 
-public class SubscriptionEventInboxHandler implements AutoCloseable {
+class SubscriptionEventInboxHandler implements Consumer<byte[][]> {
 
-  private static final Supplier<Integer> threadCounter = new AtomicInteger()::getAndIncrement;
+  private static final Set<String> TOPICS = Set.of("registry", "session");
   private static final Logger logger = LoggerFactory.getLogger(SubscriptionEventInboxHandler.class);
 
-  private final ExecutorService daemonExecutor = Executors.newSingleThreadExecutor();
-  private final Inbox subInbox;
-  private final CountDownLatch ready;
-  private final UUID uuid;
+  private final Set<String> missing = new HashSet<>(TOPICS);
+  private final Runnable ready;
 
-  SubscriptionEventInboxHandler(Inbox subInbox, UUID uuid, CountDownLatch ready) {
-    this.subInbox = subInbox;
+  SubscriptionEventInboxHandler(Runnable ready) {
     this.ready = ready;
-    this.uuid = uuid;
   }
-
-  public static SubscriptionEventInboxHandler create(PubSubSocketPair pubSubSocketPair, UUID uuid, CountDownLatch ready) {
-    SubscriptionEventInboxHandler subscriptionEventInboxHandler = new SubscriptionEventInboxHandler(pubSubSocketPair.subEventInbox(), uuid, ready);
-    subscriptionEventInboxHandler.startDaemon();
-    return subscriptionEventInboxHandler;
-  }
-
-  void startDaemon() {
-    daemonExecutor.submit(this::handleDataInboxLoop);
-  }
-
-  void handleDataInboxLoop() {
-    Thread.currentThread().setName("Control Subscription Event Handling Thread " + threadCounter.get());
-    while (!Thread.interrupted()) {
-      try {
-        byte[][] message = subInbox.take();
-        handleSubscriptionMessage(message);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      } catch (Exception e) {
-        logger.warn("Unexpected Exception", e);
-      }
-    }
-    logger.debug("{} finished!", Thread.currentThread().getName());
-  }
-
-  void handleSubscriptionMessage(byte[][] subscriptionMessage) {
-    byte[] typeAndTopicFrame = TYPE_AND_TOPIC_FRAME.get(subscriptionMessage);
-    SubscriptionType subscriptionType = SubProtocol.getSubscriptionType(typeAndTopicFrame);
-    if (subscriptionType == SubscriptionType.SUBSCRIPTION) {
-      ByteBuffer rawTopic = ByteBuffer.wrap(SubProtocol.getTopic(typeAndTopicFrame));
-      UUID uuid = new UUID(rawTopic.getLong(), rawTopic.getLong());
-      if (uuid.equals(this.uuid)) {
-        ready.countDown();
-      }
-    }
-  }
-
 
   @Override
-  public void close() {
-    daemonExecutor.shutdownNow();
+  public void accept(byte[][] subscriptionMessage) {
+    byte[] typeAndTopicFrame = TYPE_AND_TOPIC_FRAME.get(subscriptionMessage);
+    SubscriptionType subscriptionType = SubProtocol.getSubscriptionType(typeAndTopicFrame);
+    switch (subscriptionType) {
+      case SUBSCRIPTION: {
+        missing.remove(new String(SubProtocol.getTopic(typeAndTopicFrame)));
+        if (missing.isEmpty()) {
+          ready.run();
+        }
+        break;
+      }
+      default: {
+        logger.warn("Received unsupported subscription event with type {}", subscriptionType);
+        break;
+      }
+    }
   }
+
 }

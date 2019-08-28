@@ -1,11 +1,9 @@
 package de.unistuttgart.isw.sfsc.example;
 
-import static de.unistuttgart.isw.sfsc.util.Util.dataMessage;
-import static de.unistuttgart.isw.sfsc.util.Util.subscriptionMessage;
 import static protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
-import de.unistuttgart.isw.sfsc.client.adapter.Adapter;
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
 import protocol.pubsub.DataProtocol;
 import protocol.pubsub.SubProtocol;
 
@@ -18,18 +16,18 @@ public class HelloWorld {
     BootstrapConfiguration bootstrapConfiguration2 = new BootstrapConfiguration("127.0.0.1", 1261);
 
     new Thread(() -> {
-      try (Adapter adapter1 = Adapter.create(bootstrapConfiguration1)) {
+      try (RawAdapter adapter1 = RawAdapter.create(bootstrapConfiguration1)) {
 
-        adapter1.getDataClient().subscriptionManager().outbox().add(subscriptionMessage("topic1"));
+        adapter1.dataClient().subscriptionManager().subscribe("topic1".getBytes());
         System.out.println("adapter1 sent subscription");
 
-        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.getDataClient().subEventInbox().take()))));
-        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.getDataClient().subEventInbox().take()))));
+        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataClient().subEventInbox().take()))));
+        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataClient().subEventInbox().take()))));
 
-        adapter1.getDataClient().publisher().outbox().add(dataMessage("topic1", "messageFromAdapter1"));
+        adapter1.dataClient().publisher().publish("topic1".getBytes(), "messageFromAdapter1".getBytes());
         System.out.println("adapter1 sent message");
 
-        System.out.println("adapter1 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter1.getDataClient().dataInbox().take())));
+        System.out.println("adapter1 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter1.dataClient().dataInbox().take())));
 
         Thread.sleep(2000);
       } catch (Exception e) {
@@ -38,18 +36,18 @@ public class HelloWorld {
     }).start();
 
     new Thread(() -> {
-      try (Adapter adapter2 = Adapter.create(bootstrapConfiguration2)) {
+      try (RawAdapter adapter2 = RawAdapter.create(bootstrapConfiguration2)) {
 
-        adapter2.getDataClient().subscriptionManager().outbox().add(subscriptionMessage("topic2"));
+        adapter2.dataClient().subscriptionManager().subscribe("topic2".getBytes());
         System.out.println("adapter2 sent subscription");
 
-        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.getDataClient().subEventInbox().take()))));
-        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.getDataClient().subEventInbox().take()))));
+        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataClient().subEventInbox().take()))));
+        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataClient().subEventInbox().take()))));
 
-        adapter2.getDataClient().publisher().outbox().add(dataMessage("topic2", "messageFromAdapter2"));
+        adapter2.dataClient().publisher().publish("topic2".getBytes(), "messageFromAdapter2".getBytes());
         System.out.println("adapter2 sent message");
 
-        System.out.println("adapter2 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter2.getDataClient().dataInbox().take())));
+        System.out.println("adapter2 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter2.dataClient().dataInbox().take())));
 
         Thread.sleep(2000);
       } catch (Exception e) {

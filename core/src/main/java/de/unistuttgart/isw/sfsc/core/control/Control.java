@@ -2,32 +2,42 @@ package de.unistuttgart.isw.sfsc.core.control;
 
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
+import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import zmq.processors.Forwarder;
+import zmq.processors.MessageDistributor;
 import zmq.pubsubsocketpair.PubSubSocketPair;
 import zmq.pubsubsocketpair.SimplePubSubSocketPair;
+import zmq.reactiveinbox.ReactiveInbox;
 import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
 public class Control implements AutoCloseable {
 
-  private final ExecutorService executorService = Executors.newCachedThreadPool();
   private final SimplePubSubSocketPair pubSubSocketPair;
-  private final ControlInboxHandler controlMessageHandler;
-  private final SubscriptionEventInboxHandler subscriptionEventInboxHandler;
   private final Reactor reactor;
+  private final ReactiveInbox reactiveDataInbox;
+  private final ReactiveInbox reactiveSubscriptionInbox;
 
-  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry) throws ExecutionException, InterruptedException {
     reactor = Reactor.create(contextConfiguration);
     pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
-    controlMessageHandler = ControlInboxHandler.create(pubSubSocketPair, executorService, configuration);
-    subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, configuration);
+    MessageDistributor messageDistributor = new MessageDistributor();
+    messageDistributor.add(new RegistryEventProcessor(pubSubSocketPair.publisher(), registry));
+    reactiveDataInbox = ReactiveInbox.create(pubSubSocketPair.dataInbox(), messageDistributor);
+
+    pubSubSocketPair.subscriptionManager().subscribe("registry".getBytes()); //todo extract var
+    pubSubSocketPair.subscriptionManager().subscribe("session".getBytes()); //todo extract var
+
+
+    reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(),
+        new Forwarder(pubSubSocketPair.subscriptionManager().outbox())
+            .andThen(new SubscriptionEventProcessor(pubSubSocketPair.publisher(), new SessionManager(configuration))));
   }
 
-  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration)
+  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)
       throws ExecutionException, InterruptedException {
-    Control control = new Control(contextConfiguration, configuration);
+    Control control = new Control(contextConfiguration, configuration, registry);
     bind(control.pubSubSocketPair, configuration);
     return control;
   }
@@ -41,8 +51,7 @@ public class Control implements AutoCloseable {
   public void close() {
     reactor.close();
     pubSubSocketPair.close();
-    subscriptionEventInboxHandler.close();
-    controlMessageHandler.close();
-    executorService.shutdownNow();
+    reactiveSubscriptionInbox.close();
+    reactiveDataInbox.close();
   }
 }

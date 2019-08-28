@@ -27,13 +27,13 @@ public class Core implements AutoCloseable {
     };
     Data data = Data.create(contextConfiguration, configuration);
     HazelcastNode hazelcastNode = HazelcastNode.create(data::connectBackend, data::disconnectBackend, configuration);
-    Control control = Control.create(contextConfiguration, configuration);
+    Control control = Control.create(contextConfiguration, configuration, hazelcastNode.getRegistry());
 
     return new Core(control, data, hazelcastNode);
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     hazelcastNode.close();
     control.close();
     data.close();

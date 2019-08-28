@@ -1,34 +1,33 @@
 package de.unistuttgart.isw.sfsc.benchmark.io;
 
-import de.unistuttgart.isw.sfsc.util.Util;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import zmq.reactor.ReactiveSocket.Outbox;
+import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
 class Transmitter implements AutoCloseable {
 
-  private final Outbox outbox;
+  private final Publisher publisher;
   private final byte[] topic;
   private final MessageSupplier messageSupplier;
   private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(0);
 
-  Transmitter(Outbox outbox, byte[] topic, int messageSizeBytes) {
-    this.outbox = outbox;
+  Transmitter(Publisher publisher, byte[] topic, int messageSizeBytes) {
+    this.publisher = publisher;
     this.topic = topic;
     this.messageSupplier = new MessageSupplier(messageSizeBytes);
   }
 
-  static void send(Outbox outbox, byte[] topic, byte[] data) {
+  static void send(Publisher publisher, byte[] topic, byte[] data) {
     try {
-      outbox.add(Util.dataMessage(topic, data));
+      publisher.publish(topic, data);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   void send(long periodNs) {
-    scheduledExecutorService.scheduleAtFixedRate(() -> Transmitter.send(outbox, topic, messageSupplier.get()), 0, periodNs, TimeUnit.NANOSECONDS);
+    scheduledExecutorService.scheduleAtFixedRate(() -> Transmitter.send(publisher, topic, messageSupplier.get()), 0, periodNs, TimeUnit.NANOSECONDS);
   }
 
   @Override

@@ -1,27 +1,26 @@
 package de.unistuttgart.isw.sfsc.benchmark.io;
 
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
-import de.unistuttgart.isw.sfsc.client.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.util.Util;
+import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import protocol.pubsub.DataProtocol;
+import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 import zmq.reactor.ReactiveSocket.Inbox;
-import zmq.reactor.ReactiveSocket.Outbox;
 
 class Server implements AutoCloseable {
 
   private final ExecutorService executorService = Executors.newCachedThreadPool();
-  private final Adapter adapter;
+  private final RawAdapter adapter;
   private final byte[] responseTopic;
 
-  Server(Adapter adapter, byte[] responseTopic) {
+  Server(RawAdapter adapter, byte[] responseTopic) {
     this.adapter = adapter;
     this.responseTopic = responseTopic;
   }
 
-  static Server start(Adapter adapter, byte[] responseTopic) {
+  static Server start(RawAdapter adapter, byte[] responseTopic) {
     Server server = new Server(adapter, responseTopic);
     server.start();
     return server;
@@ -30,8 +29,8 @@ class Server implements AutoCloseable {
   void start() {
     executorService.execute(() -> {
       Thread.currentThread().setName("Benchmark Server Thread");
-      final Inbox inbox = adapter.getDataClient().dataInbox();
-      final Outbox outbox = adapter.getDataClient().publisher().outbox();
+      final Inbox inbox = adapter.dataClient().dataInbox();
+      final Publisher publisher = adapter.dataClient().publisher();
       while (!Thread.interrupted()) {
         try {
           final byte[][] message = inbox.take();
@@ -39,7 +38,7 @@ class Server implements AutoCloseable {
             try {
               final BenchmarkMessage request = DataProtocol.PAYLOAD_FRAME.get(message, BenchmarkMessage.parser());
               final BenchmarkMessage response = BenchmarkMessage.newBuilder(request).setServerTimestamp(System.nanoTime()).build();
-              outbox.add(Util.dataMessage(responseTopic, response));
+              publisher.publish(responseTopic, response.toByteArray());
             } catch (Exception e) {
               e.printStackTrace();
             }
