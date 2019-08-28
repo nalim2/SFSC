@@ -29,14 +29,13 @@
     <jeromq.version>0.5.1</jeromq.version>
     <hazelcast.version>3.12.2</hazelcast.version>
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
-    <dockerfile-maven-version>1.4.10</dockerfile-maven-version>
-    <maven-shade-plugin-version>3.2.1</maven-shade-plugin-version>
-    <maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
+    <dockerfile-maven.version>1.4.10</dockerfile-maven.version>
+    <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+
     <java.version>12</java.version>
     <encoding>UTF-8</encoding>
 
-    <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
     <maven.compiler.release>${java.version}</maven.compiler.release>
   </properties>
 
@@ -77,6 +76,9 @@
           <groupId>org.xolstice.maven.plugins</groupId>
           <artifactId>protobuf-maven-plugin</artifactId>
           <version>${protobuf-maven-plugin.version}</version>
+          <configuration>
+            <protocExecutable>protoc</protocExecutable>
+          </configuration>
           <executions>
             <execution>
               <goals>
@@ -89,7 +91,7 @@
         <plugin>
           <groupId>com.spotify</groupId>
           <artifactId>dockerfile-maven-plugin</artifactId>
-          <version>${dockerfile-maven-version}</version>
+          <version>${dockerfile-maven.version}</version>
           <executions>
             <execution>
               <goals>
@@ -100,14 +102,13 @@
           <configuration>
             <skipDockerInfo>true</skipDockerInfo>
             <repository>${project.artifactId}</repository>
-            <tag>${project.version}</tag>
             <contextDirectory>${project.basedir}</contextDirectory>
           </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>${maven-shade-plugin-version}</version>
+          <version>${maven-shade-plugin.version}</version>
           <executions>
             <execution>
               <phase>package</phase>
@@ -124,7 +125,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin-version}</version>
+          <version>${maven-compiler-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
