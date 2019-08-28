@@ -34,18 +34,10 @@ public class Data implements AutoCloseable {
 
   public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     Data data = new Data(contextConfiguration, configuration);
-    data.bindFrontend(configuration);
-    data.bindBackend(configuration);
+    data.frontend.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)));
+    data.frontend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)));
+    data.backend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.BACKEND_PORT)));
     return data;
-  }
-
-  void bindFrontend(Configuration<CoreOption> configuration) {
-    frontend.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)));
-    frontend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)));
-  }
-
-  void bindBackend(Configuration<CoreOption> configuration) {
-    backend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.BACKEND_PORT)));
   }
 
   public void connectBackend(String host, int port) {
