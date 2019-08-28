@@ -102,7 +102,6 @@
           <configuration>
             <skipDockerInfo>true</skipDockerInfo>
             <repository>${project.artifactId}</repository>
-            <tag>${project.version}</tag>
             <contextDirectory>${project.basedir}</contextDirectory>
           </configuration>
         </plugin>
