@@ -10,6 +10,4 @@ message WelcomeMessage {
   int32 controlSubPort = 3;
   int32 dataPubPort = 4;
   int32 dataSubPort = 5;
-  int32 registryPubPort = 6;
-  int32 registrySubPort = 7;
 }

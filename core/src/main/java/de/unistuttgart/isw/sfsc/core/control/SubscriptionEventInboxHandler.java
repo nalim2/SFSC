@@ -98,8 +98,6 @@ public class SubscriptionEventInboxHandler implements AutoCloseable {
         .setControlSubPort(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)))
         .setDataPubPort(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)))
         .setDataSubPort(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)))
-        .setRegistryPubPort(Integer.parseInt(configuration.get(CoreOption.REGISTRY_PUB_PORT)))
-        .setRegistrySubPort(Integer.parseInt(configuration.get(CoreOption.REGISTRY_SUB_PORT)))
         .build();
   }
 
