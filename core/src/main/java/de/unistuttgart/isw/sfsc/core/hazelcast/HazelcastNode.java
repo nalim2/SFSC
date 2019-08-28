@@ -16,7 +16,7 @@ public class HazelcastNode implements AutoCloseable {
   private static final String REGISTRY_MAP_NAME = "ServiceRegistry";
 
   private final HazelcastInstance hazelcastInstance;
-  private final Registry registry;
+  private final Registry registry; //todo remove All service from member on memberquit
 
   static final Function<MembershipEvent, String> GET_HOST = event -> event.getMember().getAddress().getHost();
   static final Function<MembershipEvent, Integer> GET_PORT = event -> event.getMember().getIntAttribute(BACKEND_PORT_ATTRIBUTE_KEY);
