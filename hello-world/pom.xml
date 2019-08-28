@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.unistuttgart.isw</groupId>
-    <artifactId>smart-service-framework</artifactId>
+    <groupId>de.unistuttgart.isw.sfsc</groupId>
+    <artifactId>sfsc</artifactId>
     <version>${revision}</version>
   </parent>
 
@@ -18,7 +18,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>de.unistuttgart.isw</groupId>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
       <artifactId>adapter</artifactId>
       <version>${project.version}</version>
     </dependency>

@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.unistuttgart.isw</groupId>
-    <artifactId>smart-service-framework</artifactId>
+    <groupId>de.unistuttgart.isw.sfsc</groupId>
+    <artifactId>sfsc</artifactId>
     <version>${revision}</version>
   </parent>
 
@@ -14,16 +14,17 @@
 
   <dependencies>
     <dependency>
-      <groupId>de.unistuttgart.isw</groupId>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
       <artifactId>core</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
   <build>
     <finalName>${project.artifactId}</finalName>
+
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <configuration>
           <transformers>
@@ -33,6 +34,7 @@
           </transformers>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>

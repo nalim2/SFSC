@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.unistuttgart.isw</groupId>
-    <artifactId>smart-service-framework</artifactId>
+    <groupId>de.unistuttgart.isw.sfsc</groupId>
+    <artifactId>sfsc</artifactId>
     <version>${revision}</version>
   </parent>
 
@@ -30,14 +30,12 @@
       <artifactId>hazelcast</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.unistuttgart.isw</groupId>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
       <artifactId>common</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.unistuttgart.isw</groupId>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
       <artifactId>common-java</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
