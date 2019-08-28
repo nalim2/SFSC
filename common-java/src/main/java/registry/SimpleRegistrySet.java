@@ -1,5 +1,6 @@
 package registry;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +26,7 @@ public class SimpleRegistrySet<T> implements RegistrySet<T> {
   }
 
   @Override
-  public Set<T> getMatching(Predicate<T> predicate) {
+  public Set<T> getMatching(Predicate<? super T> predicate) {
     return set.stream().filter(predicate).collect(Collectors.toSet());
   }
 
@@ -35,12 +36,17 @@ public class SimpleRegistrySet<T> implements RegistrySet<T> {
   }
 
   @Override
+  public void addAll(Collection<? extends T> entry) {
+    set.addAll(entry);
+  }
+
+  @Override
   public void remove(T entry) {
     set.remove(entry);
   }
 
   @Override
-  public void removeMatching(Predicate<T> predicate) {
+  public void removeMatching(Predicate<? super T> predicate) {
     set.removeIf(predicate);
   }
 
