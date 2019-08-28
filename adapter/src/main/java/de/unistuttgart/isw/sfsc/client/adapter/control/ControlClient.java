@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import protocol.control.ControlProtocol;
+import protocol.pubsub.DataProtocol;
 import protocol.pubsub.SubProtocol;
 import zmq.pubsubsocketpair.PubSubSocketPair;
 import zmq.reactor.Reactor;
@@ -30,7 +30,7 @@ public class ControlClient implements AutoCloseable {
 
   public static ControlClient create(Reactor reactor, BootstrapConfiguration configuration, UUID uuid, CountDownLatch ready)
       throws ExecutionException, InterruptedException {
-    PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor, ControlProtocol.class);
+    PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor, DataProtocol.class);
     ControlInboxHandler controlInboxHandler = ControlInboxHandler.create(pubSubSocketPair);
     SubscriptionEventInboxHandler subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, uuid, ready);
     ControlClient controlClient = new ControlClient(pubSubSocketPair, controlInboxHandler, subscriptionEventInboxHandler);

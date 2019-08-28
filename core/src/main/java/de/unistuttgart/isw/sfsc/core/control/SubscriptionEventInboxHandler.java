@@ -1,14 +1,12 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
-import static protocol.control.ControlProtocol.HEADER_FRAME;
-import static protocol.control.ControlProtocol.PAYLOAD_FRAME;
-import static protocol.control.ControlProtocol.TOPIC_FRAME;
+import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
+import static protocol.pubsub.DataProtocol.TOPIC_FRAME;
 import static protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
-import de.unistuttgart.isw.sfsc.protocol.control.ControlHeader;
-import de.unistuttgart.isw.sfsc.protocol.control.ControlMessageType;
+import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import protocol.control.ControlProtocol;
+import protocol.pubsub.DataProtocol;
 import protocol.pubsub.SubProtocol;
 import protocol.pubsub.SubProtocol.SubscriptionType;
 import zmq.pubsubsocketpair.PubSubSocketPair;
@@ -33,7 +31,6 @@ public class SubscriptionEventInboxHandler implements AutoCloseable {
   private final Outbox subOutbox;
   private final Outbox controlOutbox;
   private final WelcomeMessage welcomeMessage;
-  private final ControlHeader welcomeMessageHeader = ControlHeader.newBuilder().setType(ControlMessageType.WELCOME).build();
 
   SubscriptionEventInboxHandler(Inbox subInbox, Outbox subOutbox, Outbox controlOutbox, WelcomeMessage welcomeMessage) {
     this.subInbox = subInbox;
@@ -77,10 +74,9 @@ public class SubscriptionEventInboxHandler implements AutoCloseable {
     switch (subscriptionType) {
       case SUBSCRIPTION:
         logger.info("Subscription to topic {}", new String(topicBytes));
-        byte[][] pubMessage = ControlProtocol.newEmptyMessage();
+        byte[][] pubMessage = DataProtocol.newEmptyMessage();
         TOPIC_FRAME.put(pubMessage, SubProtocol.getTopic(typeAndTopicFrame));
-        HEADER_FRAME.put(pubMessage, welcomeMessageHeader);
-        PAYLOAD_FRAME.put(pubMessage, welcomeMessage);
+        PAYLOAD_FRAME.put(pubMessage, SessionMessage.newBuilder().setWelcomeMessage(welcomeMessage).build().toByteArray());
         controlOutbox.add(pubMessage);
         break;
       case UNSUBSCRIPTION:

@@ -1,13 +1,11 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
-import static protocol.control.ControlProtocol.HEADER_FRAME;
-import static protocol.control.ControlProtocol.TOPIC_FRAME;
+import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
-import de.unistuttgart.isw.sfsc.protocol.control.ControlHeader;
-import de.unistuttgart.isw.sfsc.protocol.control.ControlMessageType;
+import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,12 +65,10 @@ public class ControlInboxHandler implements AutoCloseable {
 
   void handleControlMessage(byte[][] controlMessage) {
     try {
-      byte[] topic = TOPIC_FRAME.get(controlMessage);
-      ControlHeader requestHeader = HEADER_FRAME.get(controlMessage, ControlHeader.parser());
-      ControlMessageType type = requestHeader.getType();
-      switch (type) {
+      SessionMessage request = PAYLOAD_FRAME.get(controlMessage, SessionMessage.parser());
+      switch (request.getPayloadCase()) {
         default:
-          logger.warn("received control message with currently unsupported type {}", type);
+          logger.warn("received control message with unsupported type {}", request.getPayloadCase());
       }
     } catch (InvalidProtocolBufferException e) {
       logger.warn("Received malformed Control Message", e);

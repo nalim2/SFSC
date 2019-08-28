@@ -2,12 +2,12 @@ syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.protocol.registry;
 
-//import "nodes/service.proto";
+import "registry/service.proto";
 
 option java_multiple_files = true;
 
 message DeleteRequest {
-//  ServiceDescriptor service = 1;
+  ServiceDescriptor service = 1;
 }
 
 message DeleteResponse {

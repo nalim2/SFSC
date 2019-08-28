@@ -6,8 +6,8 @@ option java_multiple_files = true;
 
 message WelcomeMessage {
   string host = 1;
-  int32 controlPubPort = 2;
-  int32 controlSubPort = 3;
-  int32 dataPubPort = 4;
-  int32 dataSubPort = 5;
+  int32 control_pub_port = 2;
+  int32 control_sub_port = 3;
+  int32 data_pub_port = 4;
+  int32 data_sub_port = 5;
 }

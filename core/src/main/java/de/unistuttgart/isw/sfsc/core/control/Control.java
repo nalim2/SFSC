@@ -5,7 +5,7 @@ import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import protocol.control.ControlProtocol;
+import protocol.pubsub.DataProtocol;
 import zmq.pubsubsocketpair.PubSubSocketPair;
 import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
@@ -20,7 +20,7 @@ public class Control implements AutoCloseable {
 
   Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     reactor = Reactor.create(contextConfiguration);
-    pubSubSocketPair = PubSubSocketPair.create(reactor, ControlProtocol.class);
+    pubSubSocketPair = PubSubSocketPair.create(reactor, DataProtocol.class);
     controlMessageHandler = ControlInboxHandler.create(pubSubSocketPair, executorService, configuration);
     subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, configuration);
   }
