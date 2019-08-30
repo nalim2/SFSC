@@ -30,4 +30,5 @@
       <artifactId>protobuf-java</artifactId>
     </dependency>
   </dependencies>
+
 </project>
