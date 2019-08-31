@@ -1,6 +1,6 @@
 package de.unistuttgart.isw.sfsc.client.adapter;
 
-import de.unistuttgart.isw.sfsc.client.adapter.control.SimpleControlClient;
+import de.unistuttgart.isw.sfsc.client.adapter.control.ControlClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.concurrent.ExecutionException;
@@ -12,10 +12,10 @@ import zmq.reactor.Reactor;
 public class RawAdapter implements AutoCloseable {
 
   private final Reactor reactor;
-  private final SimpleControlClient controlClient;
+  private final ControlClient controlClient;
   private final SimplePubSubSocketPair dataPubSubSocketPair;
 
-  RawAdapter(Reactor reactor, SimpleControlClient controlClient, SimplePubSubSocketPair dataPubSubSocketPair) {
+  RawAdapter(Reactor reactor, ControlClient controlClient, SimplePubSubSocketPair dataPubSubSocketPair) {
     this.reactor = reactor;
     this.controlClient = controlClient;
     this.dataPubSubSocketPair = dataPubSubSocketPair;
@@ -28,7 +28,7 @@ public class RawAdapter implements AutoCloseable {
       context.setSndHWM(0);
     };
     Reactor reactor = Reactor.create(contextConfiguration);
-    SimpleControlClient controlClient = SimpleControlClient.create(reactor, configuration);
+    ControlClient controlClient = ControlClient.create(reactor, configuration);
     WelcomeMessage welcomeMessage = controlClient.welcomeMessage();
 
     SimplePubSubSocketPair dataPubSubSocketPair = SimplePubSubSocketPair.create(reactor);
