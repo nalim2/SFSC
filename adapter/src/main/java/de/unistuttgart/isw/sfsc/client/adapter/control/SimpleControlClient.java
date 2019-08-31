@@ -3,7 +3,7 @@ package de.unistuttgart.isw.sfsc.client.adapter.control;
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.SimpleRegistryClient;
-import de.unistuttgart.isw.sfsc.client.adapter.session.SessionManager;
+import de.unistuttgart.isw.sfsc.client.adapter.control.session.SessionManager;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -37,10 +37,12 @@ public class SimpleControlClient implements ControlClient, AutoCloseable {
 
   public static SimpleControlClient create(Reactor reactor, BootstrapConfiguration configuration) throws ExecutionException, InterruptedException {
     UUID uuid = UUID.randomUUID();
+    FutureTask<Void> ready = new FutureTask<>(() -> null);
+
     SimplePubSubSocketPair pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
 
     WelcomeMessageTransmitter welcomeMessageTransmitter = new WelcomeMessageTransmitter();
-    SessionManager sessionManager = SessionManager.create(welcomeMessageTransmitter, uuid);
+    SessionManager sessionManager = SessionManager.create(welcomeMessageTransmitter, uuid, ready);
     SimpleRegistryClient registryClient = SimpleRegistryClient.create(pubSubSocketPair.publisher(), uuid);
     MessageDistributor messageDistributor = new MessageDistributor();
     messageDistributor.add(sessionManager);
@@ -53,8 +55,7 @@ public class SimpleControlClient implements ControlClient, AutoCloseable {
 
     WelcomeMessage welcomeMessage = welcomeMessageTransmitter.welcomeMessageFuture().get();//todo log state
 
-    FutureTask<Void> ready = new FutureTask<>(() -> null);
-    ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(), new SubscriptionEventProcessor(new SubscriptionEventInboxHandler(ready)));
+    ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(), new SubscriptionEventProcessor(sessionManager));
     pubSubSocketPair.publisherSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getControlSubPort());
     ready.get();//todo log state
     return new SimpleControlClient(pubSubSocketPair, reactiveDataInbox, reactiveSubscriptionInbox, sessionManager, registryClient, welcomeMessage);
