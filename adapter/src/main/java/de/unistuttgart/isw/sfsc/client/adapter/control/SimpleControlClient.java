@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
 import zmq.processors.MessageDistributor;
+import zmq.processors.SubscriptionEventProcessor;
 import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactiveinbox.ReactiveInbox;
 import zmq.reactor.Reactor;
@@ -53,7 +54,7 @@ public class SimpleControlClient implements ControlClient, AutoCloseable {
     WelcomeMessage welcomeMessage = welcomeMessageTransmitter.welcomeMessageFuture().get();//todo log state
 
     FutureTask<Void> ready = new FutureTask<>(() -> null);
-    ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(), new SubscriptionEventInboxHandler(ready));
+    ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(), new SubscriptionEventProcessor(new SubscriptionEventInboxHandler(ready)));
     pubSubSocketPair.publisherSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getControlSubPort());
     ready.get();//todo log state
     return new SimpleControlClient(pubSubSocketPair, reactiveDataInbox, reactiveSubscriptionInbox, sessionManager, registryClient, welcomeMessage);

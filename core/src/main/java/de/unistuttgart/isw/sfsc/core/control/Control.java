@@ -6,6 +6,7 @@ import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import java.util.concurrent.ExecutionException;
 import zmq.processors.Forwarder;
 import zmq.processors.MessageDistributor;
+import zmq.processors.SubscriptionEventProcessor;
 import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactiveinbox.ReactiveInbox;
 import zmq.reactor.ContextConfiguration;
@@ -30,7 +31,7 @@ public class Control implements AutoCloseable {
     reactiveDataInbox = ReactiveInbox.create(pubSubSocketPair.dataInbox(), messageDistributor);
     reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(),
         new Forwarder(pubSubSocketPair.subscriptionManager().outbox())
-            .andThen(new SubscriptionEventProcessor(pubSubSocketPair.publisher(), new SessionManager(configuration))));
+            .andThen(new SubscriptionEventProcessor(new SessionManager(configuration, pubSubSocketPair.publisher()))));
   }
 
   public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)

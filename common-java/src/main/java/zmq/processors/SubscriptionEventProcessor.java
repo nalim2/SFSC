@@ -1,27 +1,22 @@
-package de.unistuttgart.isw.sfsc.core.control;
+package zmq.processors;
 
 import static protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
-import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protocol.pubsub.SubProtocol;
 import protocol.pubsub.SubProtocol.SubscriptionType;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
-class SubscriptionEventProcessor implements Consumer<byte[][]> {
+public class SubscriptionEventProcessor implements Consumer<byte[][]> {
 
   private static final Logger logger = LoggerFactory.getLogger(SubscriptionEventProcessor.class);
 
-  private final Publisher publisher;
-  private final SessionManager sessionManager;
+  private final SubscriptionListener subscriptionListener;
 
-  SubscriptionEventProcessor(Publisher publisher, SessionManager sessionManager) {
-    this.publisher = publisher;
-    this.sessionManager = sessionManager;
+  public SubscriptionEventProcessor(SubscriptionListener subscriptionListener) {
+    this.subscriptionListener = subscriptionListener;
   }
 
   @Override
@@ -32,23 +27,28 @@ class SubscriptionEventProcessor implements Consumer<byte[][]> {
       switch (subscriptionType) {
         case SUBSCRIPTION: {
           String topic = SubProtocol.getTopic(typeAndTopicFrame);
-          WelcomeMessage welcome = sessionManager.onSubscription(topic);
-          byte[] payload = SessionMessage.newBuilder().setWelcomeMessage(welcome).build().toByteArray();
-          publisher.publish(topic, payload);
+          subscriptionListener.onSubscription(topic);
           break;
         }
         case UNSUBSCRIPTION: {
           String topic = SubProtocol.getTopic(typeAndTopicFrame);
-          sessionManager.onUnsubscription(topic);
+          subscriptionListener.onUnsubscription(topic);
           break;
         }
         default: {
           logger.warn("Received unsupported subscription type {}", subscriptionType);
+          break;
         }
       }
-    } catch (
-        InvalidProtocolBufferException e) {
+    } catch (InvalidProtocolBufferException e) {
       logger.warn("Received malformed topic", e);
     }
+  }
+
+  public interface SubscriptionListener {
+
+    void onSubscription(String topic);
+
+    void onUnsubscription(String topic);
   }
 }
