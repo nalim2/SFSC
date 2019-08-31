@@ -2,10 +2,10 @@ package de.unistuttgart.isw.sfsc.client.adapter;
 
 import de.unistuttgart.isw.sfsc.client.adapter.control.SimpleControlClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.client.adapter.data.DataClient;
-import de.unistuttgart.isw.sfsc.client.adapter.data.SimpleDataClient;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.concurrent.ExecutionException;
+import zmq.pubsubsocketpair.PubSubSocketPair;
+import zmq.pubsubsocketpair.SimplePubSubSocketPair;
 import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
@@ -13,12 +13,12 @@ public class RawAdapter implements AutoCloseable {
 
   private final Reactor reactor;
   private final SimpleControlClient controlClient;
-  private final SimpleDataClient dataClient;
+  private final SimplePubSubSocketPair dataPubSubSocketPair;
 
-  RawAdapter(Reactor reactor, SimpleControlClient controlClient, SimpleDataClient dataClient) {
+  RawAdapter(Reactor reactor, SimpleControlClient controlClient, SimplePubSubSocketPair dataPubSubSocketPair) {
     this.reactor = reactor;
     this.controlClient = controlClient;
-    this.dataClient = dataClient;
+    this.dataPubSubSocketPair = dataPubSubSocketPair;
   }
 
   public static RawAdapter create(BootstrapConfiguration configuration) throws InterruptedException, ExecutionException {
@@ -30,22 +30,26 @@ public class RawAdapter implements AutoCloseable {
     Reactor reactor = Reactor.create(contextConfiguration);
     SimpleControlClient controlClient = SimpleControlClient.create(reactor, configuration);
     WelcomeMessage welcomeMessage = controlClient.welcomeMessage();
-    SimpleDataClient dataClient = SimpleDataClient.create(reactor, welcomeMessage);
-    return new RawAdapter(reactor, controlClient, dataClient);
+
+    SimplePubSubSocketPair dataPubSubSocketPair = SimplePubSubSocketPair.create(reactor);
+    dataPubSubSocketPair.publisherSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getDataSubPort());
+    dataPubSubSocketPair.subscriberSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getDataPubPort());
+
+    return new RawAdapter(reactor, controlClient, dataPubSubSocketPair);
   }
 
   public RegistryClient registryClient() {
     return controlClient.registryClient();
   }
 
-  public DataClient dataClient() {
-    return dataClient;
+  public PubSubSocketPair dataClient() {
+    return dataPubSubSocketPair;
   }
 
   @Override
   public void close() {
     reactor.close();
-    dataClient.close();
+    dataPubSubSocketPair.close();
     controlClient.close();
   }
 }
