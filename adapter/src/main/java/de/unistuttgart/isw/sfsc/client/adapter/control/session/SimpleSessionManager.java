@@ -1,15 +1,14 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.session;
 
-import static de.unistuttgart.isw.sfsc.client.adapter.control.registry.SimpleRegistryClient.REGISTRY_BASE_TOPIC;
 import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import consumerfuture.ConsumerFuture;
+import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryClient;
 import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -21,7 +20,7 @@ public class SimpleSessionManager implements SessionManager {
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleSessionManager.class);
 
-  private static final Set<String> TOPICS = Set.of(TOPIC, REGISTRY_BASE_TOPIC);
+  private static final Set<String> TOPICS = Set.of(SessionManager.TOPIC, AdapterRegistryClient.TOPIC);
 
   private final Set<String> missing = new HashSet<>(TOPICS);
   private final ConsumerFuture<WelcomeMessage, WelcomeMessage> welcomeMessageConsumer = new ConsumerFuture<>(x -> x);
@@ -29,14 +28,13 @@ public class SimpleSessionManager implements SessionManager {
   private final Pattern pattern;
   private final String topic;
 
-
-  SimpleSessionManager(UUID uuid) {
-    topic = TOPIC + "///" + uuid; //todo ///
+  SimpleSessionManager(String name) {
+    topic = TOPIC + "///" + name; //todo ///
     pattern = Pattern.compile("\\A" + topic + "\\z");
   }
 
-  public static SimpleSessionManager create(UUID uuid) {
-    return new SimpleSessionManager(uuid);
+  public static SimpleSessionManager create(String name) {
+    return new SimpleSessionManager(name);
   }
 
   @Override
@@ -62,10 +60,6 @@ public class SimpleSessionManager implements SessionManager {
     } catch (InvalidProtocolBufferException e) {
       logger.warn("received malformed Control Message", e);
     }
-  }
-
-  public String getTopic() {
-    return topic;
   }
 
   @Override

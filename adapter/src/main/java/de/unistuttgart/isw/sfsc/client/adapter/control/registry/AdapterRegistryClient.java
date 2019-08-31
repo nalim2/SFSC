@@ -25,12 +25,12 @@ import registry.TimeoutRegistry;
 import zmq.processors.MessageDistributor.TopicListener;
 import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
-public class SimpleRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
+public class AdapterRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
-  public static final String REGISTRY_BASE_TOPIC = "registry";
+  public static final String TOPIC = "registry";
   private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
-  private static final Logger logger = LoggerFactory.getLogger(SimpleRegistryClient.class);
+  private static final Logger logger = LoggerFactory.getLogger(AdapterRegistryClient.class);
 
   private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
   private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("registry created exception", exception);
@@ -39,14 +39,14 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
   private final Pattern pattern;
   private final String topic;
 
-  SimpleRegistryClient(Publisher publisher, UUID uuid) {
-    topic = REGISTRY_BASE_TOPIC + "///" + uuid; //todo ///
+  AdapterRegistryClient(Publisher publisher, String name) {
+    topic = TOPIC + "///" + name; //todo ///
     pattern = Pattern.compile("\\A" + topic + "\\z");
     this.publisher = publisher;
   }
 
-  public static SimpleRegistryClient create(Publisher publisher, UUID uuid) {
-    return new SimpleRegistryClient(publisher, uuid);
+  public static AdapterRegistryClient create(Publisher publisher, String name) {
+    return new AdapterRegistryClient(publisher, name);
   }
 
   @Override
@@ -122,10 +122,6 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
     } catch (InvalidProtocolBufferException e) {
       logger.warn("received malformed message", e);
     }
-  }
-
-  public String getTopic() {
-    return topic;
   }
 
   @Override

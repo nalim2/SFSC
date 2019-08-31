@@ -1,8 +1,8 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control;
 
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.client.adapter.control.registry.SimpleRegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.session.SessionManager;
 import de.unistuttgart.isw.sfsc.client.adapter.control.session.SimpleSessionManager;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
@@ -20,11 +20,11 @@ public class ControlClient implements AutoCloseable {
   private final SessionManager sessionManager;
   private final ReactiveInbox reactiveDataInbox;
   private final ReactiveInbox reactiveSubscriptionInbox;
-  private final SimpleRegistryClient registryClient;
+  private final AdapterRegistryClient registryClient;
   private final WelcomeMessage welcomeMessage;
 
   ControlClient(SimplePubSubSocketPair pubSubSocketPair, ReactiveInbox reactiveDataInbox, ReactiveInbox reactiveSubscriptionInbox,
-      SessionManager sessionManager, SimpleRegistryClient registryClient, WelcomeMessage welcomeMessage) {
+      SessionManager sessionManager, AdapterRegistryClient registryClient, WelcomeMessage welcomeMessage) {
     this.pubSubSocketPair = pubSubSocketPair;
     this.reactiveDataInbox = reactiveDataInbox;
     this.reactiveSubscriptionInbox = reactiveSubscriptionInbox;
@@ -34,12 +34,12 @@ public class ControlClient implements AutoCloseable {
   }
 
   public static ControlClient create(Reactor reactor, BootstrapConfiguration configuration) throws ExecutionException, InterruptedException {
-    UUID uuid = UUID.randomUUID();
+    String name = "adapter-" + UUID.randomUUID();
 
     SimplePubSubSocketPair pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
 
-    SessionManager sessionManager = SimpleSessionManager.create(uuid);
-    SimpleRegistryClient registryClient = SimpleRegistryClient.create(pubSubSocketPair.publisher(), uuid);
+    SessionManager sessionManager = SimpleSessionManager.create(name);
+    AdapterRegistryClient registryClient = AdapterRegistryClient.create(pubSubSocketPair.publisher(), name);
     MessageDistributor messageDistributor = new MessageDistributor();
     messageDistributor.add(sessionManager);
     messageDistributor.add(registryClient);
@@ -47,7 +47,7 @@ public class ControlClient implements AutoCloseable {
     ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubSocketPair.dataInbox(), messageDistributor);
     pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
     pubSubSocketPair.subscriptionManager().subscribe(SessionManager.TOPIC);
-    pubSubSocketPair.subscriptionManager().subscribe(registryClient.getTopic());
+    pubSubSocketPair.subscriptionManager().subscribe(AdapterRegistryClient.TOPIC);
 
     WelcomeMessage welcomeMessage = sessionManager.getWelcomeMessage().get();//todo log state
 
