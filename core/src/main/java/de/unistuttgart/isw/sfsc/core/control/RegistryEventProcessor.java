@@ -33,8 +33,8 @@ class RegistryEventProcessor implements TopicListener {
   }
 
   @Override
-  public boolean test(byte[] bytes) {
-    return pattern.matcher(new String(bytes)).matches();
+  public boolean test(String topic) {
+    return pattern.matcher(topic).matches();
   }
 
   @Override

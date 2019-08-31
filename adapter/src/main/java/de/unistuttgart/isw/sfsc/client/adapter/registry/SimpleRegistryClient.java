@@ -27,7 +27,7 @@ import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
 public class SimpleRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
-  private static final String REGISTRY_BASE_TOPIC = "registry";
+  public static final String REGISTRY_BASE_TOPIC = "registry";
   private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleRegistryClient.class);
@@ -89,8 +89,8 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
   }
 
   @Override
-  public boolean test(byte[] bytes) {
-    return pattern.matcher(new String(bytes)).matches();
+  public boolean test(String topic) {
+    return pattern.matcher(topic).matches();
   }
 
   @Override
