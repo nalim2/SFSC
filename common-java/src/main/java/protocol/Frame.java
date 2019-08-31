@@ -13,7 +13,7 @@ public interface Frame {
   }
 
   default <T> T get(byte[][] multiPart, Parser<T> parser) throws InvalidProtocolBufferException {
-    return FrameParser.getFrameAs(multiPart, parser, getFramePosition());
+    return FrameParser.getFrame(multiPart, parser, getFramePosition());
   }
 
   default void put(byte[][] message, byte[] frameData) {

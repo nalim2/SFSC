@@ -38,8 +38,8 @@ public class Control implements AutoCloseable {
     Control control = new Control(contextConfiguration, configuration, registry);
     control.pubSubSocketPair.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT)));
     control.pubSubSocketPair.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)));
-    control.pubSubSocketPair.subscriptionManager().subscribe(REGISTRY_BASE_TOPIC.getBytes());
-    control.pubSubSocketPair.subscriptionManager().subscribe(SESSION_BASE_TOPIC.getBytes());
+    control.pubSubSocketPair.subscriptionManager().subscribe(REGISTRY_BASE_TOPIC);
+    control.pubSubSocketPair.subscriptionManager().subscribe(SESSION_BASE_TOPIC);
     return control;
   }
 

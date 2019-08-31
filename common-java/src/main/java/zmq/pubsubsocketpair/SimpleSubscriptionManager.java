@@ -2,6 +2,7 @@ package zmq.pubsubsocketpair;
 
 import static protocol.pubsub.SubProtocol.buildTypeAndTopicFrame;
 
+import com.google.protobuf.StringValue;
 import protocol.pubsub.SubProtocol;
 import protocol.pubsub.SubProtocol.SubscriptionType;
 import zmq.pubsubsocketpair.PubSubSocketPair.SubscriptionManager;
@@ -21,8 +22,28 @@ class SimpleSubscriptionManager implements SubscriptionManager {
   }
 
   @Override
+  public void subscribe(StringValue topic) {
+    subscribe(topic.toByteArray());
+  }
+
+  @Override
+  public void subscribe(String topic) {
+    subscribe(StringValue.newBuilder().setValue(topic).build());
+  }
+
+  @Override
   public void unsubscribe(byte[] topic) {
     sendSubscriptionMessage(SubscriptionType.UNSUBSCRIPTION, topic);
+  }
+
+  @Override
+  public void unsubscribe(StringValue topic) {
+    unsubscribe(topic.toByteArray());
+  }
+
+  @Override
+  public void unsubscribe(String topic) {
+    unsubscribe(StringValue.newBuilder().setValue(topic).build());
   }
 
   @Override

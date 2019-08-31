@@ -55,11 +55,10 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
     ServiceHandle serviceHandle = new ServiceHandle(serviceTopic.toString(), serviceDeclaration.getName());
     ConsumerFuture<Message, ServiceHandle> consumerFuture = new ConsumerFuture<>(message -> serviceHandle);
     int id = idSupplier.get();
-    byte[] message = RegistryMessage.newBuilder().setMessageId(id).setCreateRequest(CreateRequest.newBuilder()
-        .setService(ServiceDescriptor.newBuilder().setName(serviceDeclaration.getName()).setTopic(serviceTopic.toString()).build()).build()).build()
-        .toByteArray();
+    RegistryMessage message = RegistryMessage.newBuilder().setMessageId(id).setCreateRequest(CreateRequest.newBuilder()
+        .setService(ServiceDescriptor.newBuilder().setName(serviceDeclaration.getName()).setTopic(serviceTopic.toString()).build()).build()).build();
     timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
-    publisher.publish(topic.getBytes(), message);
+    publisher.publish(topic, message);
     return consumerFuture;
   }
 
@@ -72,9 +71,9 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
             .map(serviceDescriptor -> new ServiceHandle(serviceDescriptor.getTopic(), serviceDescriptor.getName()))
             .collect(Collectors.toSet()));
     int id = idSupplier.get();
-    byte[] message = RegistryMessage.newBuilder().setMessageId(id).setReadRequest(ReadRequest.newBuilder().build()).build().toByteArray();
+    RegistryMessage message = RegistryMessage.newBuilder().setMessageId(id).setReadRequest(ReadRequest.newBuilder().build()).build();
     timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
-    publisher.publish(topic.getBytes(), message);
+    publisher.publish(topic, message);
     return consumerFuture;
   }
 
@@ -82,11 +81,10 @@ public class SimpleRegistryClient implements RegistryClient, TopicListener, Auto
   public Future<Void> removeService(ServiceHandle serviceHandle) {
     ConsumerFuture<Message, Void> consumerFuture = new ConsumerFuture<>(ignored -> null);
     int id = idSupplier.get();
-    byte[] message = RegistryMessage.newBuilder().setMessageId(id).setDeleteRequest(DeleteRequest.newBuilder()
-        .setService(ServiceDescriptor.newBuilder().setName(serviceHandle.getName()).setTopic(serviceHandle.getTopic()).build()).build()).build()
-        .toByteArray();
+    RegistryMessage message = RegistryMessage.newBuilder().setMessageId(id).setDeleteRequest(DeleteRequest.newBuilder()
+        .setService(ServiceDescriptor.newBuilder().setName(serviceHandle.getName()).setTopic(serviceHandle.getTopic()).build()).build()).build();
     timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
-    publisher.publish(topic.getBytes(), message);
+    publisher.publish(topic, message);
     return consumerFuture;
   }
 

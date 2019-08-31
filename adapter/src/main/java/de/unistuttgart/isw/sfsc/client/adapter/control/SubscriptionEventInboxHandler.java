@@ -2,6 +2,7 @@ package de.unistuttgart.isw.sfsc.client.adapter.control;
 
 import static protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -26,18 +27,23 @@ class SubscriptionEventInboxHandler implements Consumer<byte[][]> {
   public void accept(byte[][] subscriptionMessage) {
     byte[] typeAndTopicFrame = TYPE_AND_TOPIC_FRAME.get(subscriptionMessage);
     SubscriptionType subscriptionType = SubProtocol.getSubscriptionType(typeAndTopicFrame);
-    switch (subscriptionType) {
-      case SUBSCRIPTION: {
-        missing.remove(new String(SubProtocol.getTopic(typeAndTopicFrame)));
-        if (missing.isEmpty()) {
-          ready.run();
+    try {
+      switch (subscriptionType) {
+        case SUBSCRIPTION: {
+          missing.remove(SubProtocol.getTopic(typeAndTopicFrame));
+          if (missing.isEmpty()) {
+            ready.run();
+          }
+          break;
         }
-        break;
+        default: {
+          logger.warn("Received unsupported subscription event with type {}", subscriptionType);
+          break;
+        }
       }
-      default: {
-        logger.warn("Received unsupported subscription event with type {}", subscriptionType);
-        break;
-      }
+    } catch (
+        InvalidProtocolBufferException e) {
+      logger.warn("Received malformed topic", e);
     }
   }
 

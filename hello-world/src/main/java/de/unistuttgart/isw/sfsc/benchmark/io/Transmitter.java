@@ -1,5 +1,6 @@
 package de.unistuttgart.isw.sfsc.benchmark.io;
 
+import com.google.protobuf.Message;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ class Transmitter implements AutoCloseable {
     scheduledExecutorService.scheduleAtFixedRate(() -> Transmitter.send(publisher, topic, messageSupplier.get()), 0, periodNs, TimeUnit.NANOSECONDS);
   }
 
-  static void send(Publisher publisher, byte[] topic, byte[] data) {
+  static void send(Publisher publisher, byte[] topic, Message data) {
     publisher.publish(topic, data);
   }
 

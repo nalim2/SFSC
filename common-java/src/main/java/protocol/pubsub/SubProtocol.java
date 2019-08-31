@@ -1,5 +1,7 @@
 package protocol.pubsub;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.StringValue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -10,12 +12,9 @@ public enum SubProtocol implements Frame {
   TYPE_AND_TOPIC_FRAME(0);
 
   public static final int TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION = 0; //first byte
+
   private static final int LENGTH = values().length; //cache
   private final int position;
-
-  public static int getLength() {
-    return LENGTH;
-  }
 
   public static byte[][] newEmptyMessage() {
     return new byte[LENGTH][];
@@ -34,8 +33,16 @@ public enum SubProtocol implements Frame {
     return SubscriptionType.ofValue(typeAndTopicFrame[TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION]);
   }
 
-  public static byte[] getTopic(byte[] typeAndTopicFrame) {
+  public static byte[] getRawTopic(byte[] typeAndTopicFrame) {
     return Arrays.copyOfRange(typeAndTopicFrame, TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION + 1, typeAndTopicFrame.length);
+  }
+
+  public static StringValue getTopicMessage(byte[] typeAndTopicFrame) throws InvalidProtocolBufferException {
+    return StringValue.parseFrom(getRawTopic(typeAndTopicFrame));
+  }
+
+  public static String getTopic(byte[] typeAndTopicFrame) throws InvalidProtocolBufferException {
+    return getTopicMessage(typeAndTopicFrame).getValue();
   }
 
   public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, byte[] topic) {
@@ -43,6 +50,14 @@ public enum SubProtocol implements Frame {
     data[0] = subscriptionType.getValue();
     System.arraycopy(topic, 0, data, 1, topic.length);
     return data;
+  }
+
+  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, StringValue topic) {
+    return buildTypeAndTopicFrame(subscriptionType, topic.toByteArray());
+  }
+
+  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, String topic) {
+    return buildTypeAndTopicFrame(subscriptionType, StringValue.newBuilder().setValue(topic).build());
   }
 
   public enum SubscriptionType {

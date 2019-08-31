@@ -9,10 +9,6 @@ public enum DataProtocol implements Frame {
   private static final int LENGTH = values().length; //cache
   private final int position;
 
-  public static int getLength() {
-    return LENGTH;
-  }
-
   public static byte[][] newEmptyMessage() {
     return new byte[LENGTH][];
   }

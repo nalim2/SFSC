@@ -20,8 +20,8 @@ class SessionManager {
     return welcome;
   }
 
-  void onUnsubscription(byte[] topicBytes){
-    logger.info("Unsubscription from topic {}", new String(topicBytes));
+  void onUnsubscription(String topic){
+    logger.info("Unsubscription from topic {}", topic);
   }
 
   static WelcomeMessage createWelcomeMessage(Configuration<CoreOption> configuration) {

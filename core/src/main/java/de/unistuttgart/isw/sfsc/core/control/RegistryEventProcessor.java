@@ -45,24 +45,24 @@ class RegistryEventProcessor implements TopicListener {
         case CREATE_REQUEST: {
           CreateRequest createRequest = PAYLOAD_FRAME.get(message, CreateRequest.parser());
           registry.create(createRequest.getService());
-          byte[] topic = TOPIC_FRAME.get(message);
-          byte[] payload = RegistryMessage.newBuilder(registryMessage).setCreateResponse(CreateResponse.newBuilder().build()).build().toByteArray();
+          String topic = new String(TOPIC_FRAME.get(message));
+          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage).setCreateResponse(CreateResponse.newBuilder().build()).build();
           publisher.publish(topic, payload);
           break;
         }
         case READ_REQUEST: {
           Set<ServiceDescriptor> services = registry.read();
-          byte[] topic = TOPIC_FRAME.get(message);
-          byte[] payload = RegistryMessage.newBuilder(registryMessage).setReadResponse(ReadResponse.newBuilder().addAllServices(services).build())
-              .build().toByteArray();
+          String topic = new String(TOPIC_FRAME.get(message)); //todo charset
+          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage)
+              .setReadResponse(ReadResponse.newBuilder().addAllServices(services).build()).build();
           publisher.publish(topic, payload);
           break;
         }
         case DELETE_REQUEST: {
           DeleteRequest deleteRequest = PAYLOAD_FRAME.get(message, DeleteRequest.parser());
           registry.delete(deleteRequest.getService());
-          byte[] topic = TOPIC_FRAME.get(message);
-          byte[] payload = RegistryMessage.newBuilder(registryMessage).setDeleteResponse(DeleteResponse.newBuilder().build()).build().toByteArray();
+          String topic = new String(TOPIC_FRAME.get(message));
+          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage).setDeleteResponse(DeleteResponse.newBuilder().build()).build();
           publisher.publish(topic, payload);
           break;
         }

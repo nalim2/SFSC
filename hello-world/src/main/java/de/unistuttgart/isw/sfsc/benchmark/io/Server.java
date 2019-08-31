@@ -42,7 +42,7 @@ class Server implements AutoCloseable {
             try {
               final BenchmarkMessage request = DataProtocol.PAYLOAD_FRAME.get(message, BenchmarkMessage.parser());
               final BenchmarkMessage response = BenchmarkMessage.newBuilder(request).setServerTimestamp(System.nanoTime()).build();
-              publisher.publish(responseTopic, response.toByteArray());
+              publisher.publish(responseTopic, response);
             } catch (InvalidProtocolBufferException e) {
               e.printStackTrace();
             }
