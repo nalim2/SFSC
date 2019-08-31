@@ -1,8 +1,6 @@
 package zmq.reactor;
 
-import static zmq.ZError.ETERM;
-import static zmq.ZMQ.ZMQ_POLLIN;
-
+import java.lang.invoke.MethodHandles;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -25,31 +23,34 @@ import org.zeromq.ZLoop.IZLoopHandler;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQException;
+import util.ExceptionLoggingThreadFactory;
+import zmq.ZError;
+import zmq.ZMQ;
 import zmq.reactor.ReactiveSocket.Inbox;
 
-class Worker implements AutoCloseable {
+class ZMQWorker implements AutoCloseable {
 
-  private static final Logger logger = LoggerFactory.getLogger(Worker.class);
-  private static final Supplier<Integer> threadCounter = new AtomicInteger()::getAndIncrement;
+  private static final Logger logger = LoggerFactory.getLogger(ZMQWorker.class);
+  private static final Supplier<Integer> workerCounter = new AtomicInteger()::getAndIncrement;
   private static final int TERMINATION_TICK_MS = 50;
 
   private final ZContext zContext;
   private final CommandInjectionService commandInjector;
   private final CommandExecutionService commandExecutor;
 
-  Worker(ZContext zContext, CommandInjectionService commandInjector, CommandExecutionService commandExecutor) {
+  ZMQWorker(ZContext zContext, CommandInjectionService commandInjector, CommandExecutionService commandExecutor) {
     this.zContext = zContext;
     this.commandInjector = commandInjector;
     this.commandExecutor = commandExecutor;
   }
 
-  static Worker create(ZContext zContext) throws InterruptedException {
-    int threadCount = threadCounter.get();
-    CommandExecutionService commandExecutor = CommandExecutionService.create(ZContext.shadow(zContext), "ZMQ Execution Thread " + threadCount);
+  static ZMQWorker create(ZContext zContext) throws InterruptedException {
+    String workerName = MethodHandles.lookup().lookupClass().getName() + "-" + workerCounter.get();
+    CommandExecutionService commandExecutor = CommandExecutionService.create(ZContext.shadow(zContext), workerName);
     commandExecutor.awaitBinding();
     CommandInjectionService commandInjector = CommandInjectionService
-        .create(ZContext.shadow(zContext), commandExecutor.getQueue(), commandExecutor.getAddress(), "ZMQ Injection Thread " + threadCount);
-    return new Worker(zContext, commandInjector, commandExecutor);
+        .create(ZContext.shadow(zContext), commandExecutor.getQueue(), commandExecutor.getAddress(), workerName);
+    return new ZMQWorker(zContext, commandInjector, commandExecutor);
   }
 
   Future<ReactiveSocket> createSocket(SocketType type, IZLoopHandler handler, Inbox inbox) {
@@ -89,48 +90,44 @@ class Worker implements AutoCloseable {
       this.commandExecutorZContext = commandExecutorZContext;
     }
 
-    static CommandExecutionService create(ZContext zContext, String threadName) {
+    static CommandExecutionService create(ZContext zContext, String workerName) {
       CommandExecutionService commandExecutionService = new CommandExecutionService(zContext);
-      commandExecutionService.start(threadName);
+      commandExecutionService.start(workerName);
       return commandExecutionService;
     }
 
-    void start(String threadName) {
-      ExecutorService serviceExecutor = Executors.newSingleThreadExecutor();
+    void start(String workerName) {
+      String threadGroupName = workerName + "." + getClass().getName();
+      ExecutorService serviceExecutor = Executors.newSingleThreadExecutor(new ExceptionLoggingThreadFactory(threadGroupName, logger));
       serviceExecutor.execute(() -> {
-            try {
-              Thread.currentThread().setName(threadName);
-              final Socket receiver = commandExecutorZContext.createSocket(SocketType.PAIR);
-              receiver.bind(address);
-              bound.countDown();
-              final PollItem pollItem = new PollItem(receiver, ZMQ_POLLIN);
-              final IZLoopHandler handlerManager = (unused1, unused2, unused3) -> {
-                try {
-                  Runnable runnable = commandQueue.poll();
-                  if (runnable != null) {
-                    receiver.recv();
-                    try {
-                      runnable.run();
-                    } catch (Exception e) {
-                      logger.warn("Execution of Runnable failed with Exception", e);
-                    }
+            final Socket receiver = commandExecutorZContext.createSocket(SocketType.PAIR);
+            receiver.bind(address);
+            bound.countDown();
+            final PollItem pollItem = new PollItem(receiver, ZMQ.ZMQ_POLLIN);
+            final IZLoopHandler handlerManager = (unused1, unused2, unused3) -> {
+              try {
+                Runnable runnable = commandQueue.poll();
+                if (runnable != null) {
+                  receiver.recv();
+                  try {
+                    runnable.run();
+                  } catch (Exception e) {
+                    logger.warn("Execution of Runnable failed with Exception", e);
                   }
-                } catch (Exception e) {
-                  logger.warn("Unexpected Exception", e);
                 }
-                return 0;
-              };
-              zLoop.addPoller(pollItem, handlerManager, null);
-              int result = zLoop.start();
-              commandExecutorZContext.destroySocket(receiver);
-              commandExecutorZContext.close();
-              if (result != 0) {
-                logger.error("Unexpected reactor shutdown with error code {}", result);
+              } catch (Exception e) {
+                logger.warn("Unexpected Exception in thread " + Thread.currentThread().getName(), e);
               }
-              logger.debug("{} finished!", Thread.currentThread().getName());
-            } catch (Exception e) {
-              logger.error("Unexpected Exception", e);
+              return 0;
+            };
+            zLoop.addPoller(pollItem, handlerManager, null);
+            int result = zLoop.start();
+            commandExecutorZContext.destroySocket(receiver);
+            commandExecutorZContext.close();
+            if (result != 0) {
+              logger.error("{} shutdown unexpectedly with error code {}", Thread.currentThread().getName(), result);
             }
+            logger.debug("{} finished!", Thread.currentThread().getName());
           }
       );
       serviceExecutor.shutdown();
@@ -139,7 +136,7 @@ class Worker implements AutoCloseable {
     Future<ReactiveSocket> createReactiveSocket(SocketType type, IZLoopHandler handler, Inbox inbox, Executor injectingExecutor) {
       FutureTask<ReactiveSocket> futureTask = new FutureTask<>(() -> {
         Socket socket = commandExecutorZContext.createSocket(type);
-        PollItem pollItem = new PollItem(socket, ZMQ_POLLIN);
+        PollItem pollItem = new PollItem(socket, ZMQ.ZMQ_POLLIN);
         zLoop.addPoller(pollItem, handler, null);
         return new ReactiveSocketImpl(injectingExecutor, socket, inbox, () -> closeSocket(pollItem));
       });
@@ -178,39 +175,37 @@ class Worker implements AutoCloseable {
       this.commandInjectorZContext = commandInjectorZContext;
     }
 
-    static CommandInjectionService create(ZContext commandInjectorZContext, Queue<Runnable> commandExecutorQueue, String address, String threadName) {
+    static CommandInjectionService create(ZContext commandInjectorZContext, Queue<Runnable> commandExecutorQueue, String address, String workerName) {
       CommandInjectionService commandInjector = new CommandInjectionService(commandInjectorZContext);
-      commandInjector.start(commandExecutorQueue, address, threadName);
+      commandInjector.start(commandExecutorQueue, address, workerName);
       return commandInjector;
     }
 
-    void start(Queue<Runnable> commandExecutorQueue, String address, String threadName) {
-      ExecutorService serviceExecutor = Executors.newSingleThreadExecutor();
+    void start(Queue<Runnable> commandExecutorQueue, String address, String workerName) {
+      String threadGroupName = workerName + "." + getClass().getName();
+      ExecutorService serviceExecutor = Executors.newSingleThreadExecutor(new ExceptionLoggingThreadFactory(threadGroupName, logger));
       serviceExecutor.execute(() -> {
-            try {
-              Thread.currentThread().setName(threadName);
-              final byte[] notification = {};
-              final Socket notificationSender = commandInjectorZContext.createSocket(SocketType.PAIR);
-              notificationSender.connect(address);
-              while (!Thread.interrupted()) {
-                try {
-                  Runnable runnable = receivingQueue.take();
-                  commandExecutorQueue.add(runnable);
-                  notificationSender.send(notification);
-                } catch (ZMQException e) {
-                  int errorCode = e.getErrorCode();
-                  if (errorCode == ETERM) {
-                    Thread.currentThread().interrupt();
-                  }
+            final byte[] notification = {};
+            final Socket notificationSender = commandInjectorZContext.createSocket(SocketType.PAIR);
+            notificationSender.connect(address);
+            while (!Thread.interrupted()) {
+              try {
+                Runnable runnable = receivingQueue.take();
+                commandExecutorQueue.add(runnable);
+                notificationSender.send(notification);
+              } catch (ZMQException e) {
+                int errorCode = e.getErrorCode();
+                if (errorCode == ZError.ETERM) {
+                  Thread.currentThread().interrupt();
                 }
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
               }
-              commandInjectorZContext.destroySocket(notificationSender);
-              commandInjectorZContext.close();
-              receivingQueue.clear();
-              logger.debug("{} finished!", Thread.currentThread().getName());
-            } catch (Exception e) {
-              logger.error("Unexpected Exception", e);
             }
+            commandInjectorZContext.destroySocket(notificationSender);
+            commandInjectorZContext.close();
+            receivingQueue.clear();
+            logger.debug("{} finished!", Thread.currentThread().getName());
           }
       );
       serviceExecutor.shutdown();

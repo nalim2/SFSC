@@ -6,10 +6,10 @@ import org.zeromq.ZContext;
 
 public class Reactor implements AutoCloseable {
 
-  private final Worker worker;
+  private final ZMQWorker worker;
 
   Reactor(ZContext zContext) throws InterruptedException {
-    this.worker = Worker.create(zContext);
+    worker = ZMQWorker.create(zContext);
   }
 
   public static Reactor create(ContextConfiguration contextConfiguration) throws InterruptedException {

@@ -3,14 +3,19 @@ package de.unistuttgart.isw.sfsc.benchmark.io;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.ExceptionLoggingThreadFactory;
 import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
 
 class Transmitter implements AutoCloseable {
 
+  private static final Logger logger = LoggerFactory.getLogger(Transmitter.class);
+  private final ScheduledExecutorService scheduledExecutorService = Executors
+      .newScheduledThreadPool(0, new ExceptionLoggingThreadFactory("BenchmarkTransmitter", logger));
   private final Publisher publisher;
   private final byte[] topic;
   private final MessageSupplier messageSupplier;
-  private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(0);
 
   Transmitter(Publisher publisher, byte[] topic, int messageSizeBytes) {
     this.publisher = publisher;
@@ -18,16 +23,12 @@ class Transmitter implements AutoCloseable {
     this.messageSupplier = new MessageSupplier(messageSizeBytes);
   }
 
-  static void send(Publisher publisher, byte[] topic, byte[] data) {
-    try {
-      publisher.publish(topic, data);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
   void send(long periodNs) {
     scheduledExecutorService.scheduleAtFixedRate(() -> Transmitter.send(publisher, topic, messageSupplier.get()), 0, periodNs, TimeUnit.NANOSECONDS);
+  }
+
+  static void send(Publisher publisher, byte[] topic, byte[] data) {
+    publisher.publish(topic, data);
   }
 
   @Override

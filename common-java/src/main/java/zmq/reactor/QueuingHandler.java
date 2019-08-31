@@ -26,12 +26,8 @@ class QueuingHandler implements IZLoopHandler {
 
   @Override
   public int handle(ZLoop unused1, PollItem item, Object unused2) {
-    try {
-      byte[][] data = read(item.getSocket());
-      queue.offer(data);
-    } catch (Exception e) {
-      logger.warn("Unexpected Exception", e);
-    }
+    byte[][] data = read(item.getSocket());
+    queue.offer(data);
     return 0;
   }
 
@@ -55,7 +51,7 @@ class QueuingHandler implements IZLoopHandler {
     return bytes;
   }
 
-  Inbox getInbox(){
+  Inbox getInbox() {
     return queue::take;
   }
 }

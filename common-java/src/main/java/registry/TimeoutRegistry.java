@@ -7,13 +7,19 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.ExceptionLoggingThreadFactory;
 
 public class TimeoutRegistry<K, V> implements AutoCloseable {
 
-  private final ConcurrentHashMap<K, TimeoutContainer<V>> map = new ConcurrentHashMap<>();
-  private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(0);
+  private static final Logger logger = LoggerFactory.getLogger(TimeoutRegistry.class);
 
- public void put(K key, V value, int timeoutMs, Consumer<Exception> exceptionConsumer) {
+  private final ConcurrentHashMap<K, TimeoutContainer<V>> map = new ConcurrentHashMap<>();
+  private final ScheduledExecutorService scheduledExecutorService = Executors
+      .newScheduledThreadPool(0, new ExceptionLoggingThreadFactory(getClass().getName(), logger));
+
+  public void put(K key, V value, int timeoutMs, Consumer<Exception> exceptionConsumer) {
     ScheduledFuture<?> scheduledFuture = scheduledExecutorService.schedule(() -> {
           if (map.remove(key) != null) {
             exceptionConsumer.accept(new TimeoutException());
