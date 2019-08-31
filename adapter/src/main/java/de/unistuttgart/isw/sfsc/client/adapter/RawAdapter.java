@@ -1,9 +1,9 @@
 package de.unistuttgart.isw.sfsc.client.adapter;
 
 import de.unistuttgart.isw.sfsc.client.adapter.control.SimpleControlClient;
+import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.data.DataClient;
 import de.unistuttgart.isw.sfsc.client.adapter.data.SimpleDataClient;
-import de.unistuttgart.isw.sfsc.client.adapter.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.concurrent.ExecutionException;
 import zmq.reactor.ContextConfiguration;

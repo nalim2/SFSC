@@ -1,6 +1,7 @@
-package de.unistuttgart.isw.sfsc.client.adapter.registry;
+package de.unistuttgart.isw.sfsc.client.adapter.control.registry;
 
 public class ServiceDeclaration {
+
   private final String name;
 
   public ServiceDeclaration(String name) {

@@ -1,8 +1,8 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control;
 
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.client.adapter.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.client.adapter.registry.SimpleRegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.control.registry.SimpleRegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.session.SessionManager;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import java.util.UUID;

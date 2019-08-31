@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.client.adapter.registry;
+package de.unistuttgart.isw.sfsc.client.adapter.control.registry;
 
 import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
