@@ -13,11 +13,9 @@
 *.tar.gz
 *.rar
 
-# Gradle and Maven with auto-import
+# IntelliJ
 *.iml
 *.ipr
-
-# IntelliJ
 out/
 .idea/
 
