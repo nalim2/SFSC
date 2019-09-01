@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 
 public class AdapterRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
-  public static final String TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
+  public static final String TOPIC = "registry";
   private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
   private static final Logger logger = LoggerFactory.getLogger(AdapterRegistryClient.class);
 
   private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
-  private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("de.unistuttgart.isw.sfsc.commonjava.registry created exception", exception);
+  private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("registry created exception", exception);
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
   private final Publisher publisher;
   private final String topic;
@@ -115,7 +115,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
             break;
           }
           default: {
-            logger.warn("received de.unistuttgart.isw.sfsc.commonjava.registry message with currently unsupported type {}", reply.getPayloadCase());
+            logger.warn("received registry message with currently unsupported type {}", reply.getPayloadCase());
             break;
           }
 

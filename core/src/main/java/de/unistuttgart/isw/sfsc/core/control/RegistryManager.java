@@ -72,7 +72,7 @@ class RegistryManager implements TopicListener {
           break;
         }
         default: {
-          logger.warn("received de.unistuttgart.isw.sfsc.commonjava.registry message with currently unsupported type {}", registryMessage.getPayloadCase());
+          logger.warn("received registry message with currently unsupported type {}", registryMessage.getPayloadCase());
           break;
         }
       }
