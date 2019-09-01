@@ -1,7 +1,7 @@
 version: "3"
 services:
   core2:
-    image: "docker-core:latest"
+    image: "docker-core:local"
     ports:
       - "1260:1260"
       - "1261:1261"
