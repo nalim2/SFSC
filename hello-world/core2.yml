@@ -1,7 +1,7 @@
 version: "3"
 services:
   core2:
-    image: 'docker-core:0.1.0-SNAPSHOT'
+    image: "docker-core:latest"
     ports:
       - "1260:1260"
       - "1261:1261"
