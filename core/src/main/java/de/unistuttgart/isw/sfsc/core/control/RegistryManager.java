@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 class RegistryManager implements TopicListener {
 
-  public static final String TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
+  public static final String TOPIC = "registry";
 
   private static final Logger logger = LoggerFactory.getLogger(RegistryManager.class);
 
