@@ -5,13 +5,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ConsumerFuture<T, U> implements Consumer<T>, Future<U> {
 
-  private volatile U output;
-  private final FutureTask<U> future = new FutureTask<>(() -> output);
+  private final AtomicReference<U> output = new AtomicReference<>();
+  private final FutureTask<U> future = new FutureTask<>(output::get);
   private final Function<T, U> converter;
 
   public ConsumerFuture(Function<T, U> converter) {
@@ -20,7 +21,7 @@ public class ConsumerFuture<T, U> implements Consumer<T>, Future<U> {
 
   @Override
   public void accept(T input) {
-    output = converter.apply(input);
+    output.set(converter.apply(input));
     future.run();
   }
 
