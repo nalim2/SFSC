@@ -21,8 +21,8 @@ public class HelloWorld {
         adapter1.dataConnection().subscriptionManager().subscribe("topic1");
         System.out.println("adapter1 sent subscription");
 
-        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataConnection().subEventInbox().take()))));
-        System.out.println("adapter1 received subscription " + new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataConnection().subEventInbox().take()))));
+        System.out.println("adapter1 received subscription " + SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataConnection().subEventInbox().take())));
+        System.out.println("adapter1 received subscription " + SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataConnection().subEventInbox().take())));
 
         adapter1.dataConnection().publisher().publish("topic1", "messageFromAdapter1".getBytes());
         System.out.println("adapter1 sent message");
@@ -41,8 +41,8 @@ public class HelloWorld {
         adapter2.dataConnection().subscriptionManager().subscribe("topic2");
         System.out.println("adapter2 sent subscription");
 
-        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataConnection().subEventInbox().take()))));
-        System.out.println("adapter2 received subscription " +  new String(SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataConnection().subEventInbox().take()))));
+        System.out.println("adapter2 received subscription " +  SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataConnection().subEventInbox().take())));
+        System.out.println("adapter2 received subscription " +  SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataConnection().subEventInbox().take())));
 
         adapter2.dataConnection().publisher().publish("topic2", "messageFromAdapter2".getBytes());
         System.out.println("adapter2 sent message");
