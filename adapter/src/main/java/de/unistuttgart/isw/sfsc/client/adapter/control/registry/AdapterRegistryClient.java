@@ -17,7 +17,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +35,11 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("registry created exception", exception);
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
   private final Publisher publisher;
-  private final Pattern pattern;
   private final String topic;
 
   AdapterRegistryClient(Publisher publisher, String name) {
-    topic = TOPIC + "///" + name; //todo ///
-    pattern = Pattern.compile("\\A" + topic + "\\z");
     this.publisher = publisher;
+    topic = TOPIC + "///" + name; //todo ///
   }
 
   public static AdapterRegistryClient create(Publisher publisher, String name) {
@@ -90,7 +87,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
 
   @Override
   public boolean test(String topic) {
-    return pattern.matcher(topic).matches();
+    return topic.equals(this.topic);
   }
 
   @Override

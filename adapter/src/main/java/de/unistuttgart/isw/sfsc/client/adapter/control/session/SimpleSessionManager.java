@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +24,10 @@ public class SimpleSessionManager implements SessionManager {
   private final Set<String> missing = new HashSet<>(TOPICS);
   private final ConsumerFuture<WelcomeMessage, WelcomeMessage> welcomeMessageConsumer = new ConsumerFuture<>(x -> x);
   private final FutureTask<Void> ready = new FutureTask<>(() -> null);
-  private final Pattern pattern;
   private final String topic;
 
   SimpleSessionManager(String name) {
     topic = TOPIC + "///" + name; //todo ///
-    pattern = Pattern.compile("\\A" + topic + "\\z");
   }
 
   public static SimpleSessionManager create(String name) {
@@ -39,7 +36,7 @@ public class SimpleSessionManager implements SessionManager {
 
   @Override
   public boolean test(String topic) {
-    return pattern.matcher(topic).matches();
+    return topic.equals(this.topic);
   }
 
   @Override

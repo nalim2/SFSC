@@ -13,7 +13,6 @@ import de.unistuttgart.isw.sfsc.protocol.registry.ReadResponse;
 import de.unistuttgart.isw.sfsc.protocol.registry.RegistryMessage;
 import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zmq.processors.MessageDistributor.TopicListener;
@@ -21,9 +20,10 @@ import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class RegistryEventProcessor implements TopicListener {
 
+  private static final String TOPIC = "registry";
+
   private static final Logger logger = LoggerFactory.getLogger(RegistryEventProcessor.class);
 
-  private final Pattern pattern = Pattern.compile("\\Aregistry/(?=.+)");
   private final Publisher publisher;
   private final Registry registry;
 
@@ -34,7 +34,7 @@ class RegistryEventProcessor implements TopicListener {
 
   @Override
   public boolean test(String topic) {
-    return pattern.matcher(topic).matches();
+    return topic.startsWith(TOPIC);
   }
 
   @Override
