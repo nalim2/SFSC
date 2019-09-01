@@ -82,6 +82,11 @@
         <artifactId>core</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>de.unistuttgart.isw.sfsc</groupId>
+        <artifactId>adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
