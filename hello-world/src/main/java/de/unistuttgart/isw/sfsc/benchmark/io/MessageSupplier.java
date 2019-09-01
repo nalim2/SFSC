@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-class MessageSupplier implements Supplier<byte[]> {
+class MessageSupplier implements Supplier<BenchmarkMessage> {
 
   private final Supplier<Long> idGenerator = new AtomicLong(1)::getAndIncrement;
   private final int messageSizeBytes;
@@ -16,8 +16,8 @@ class MessageSupplier implements Supplier<byte[]> {
   }
 
   @Override
-  public byte[] get() {
-    return message(messageSizeBytes).toByteArray();
+  public BenchmarkMessage get() {
+    return message(messageSizeBytes);
   }
 
   BenchmarkMessage message(int messageSizeBytes) {

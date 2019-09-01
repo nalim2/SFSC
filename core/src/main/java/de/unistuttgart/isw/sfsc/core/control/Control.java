@@ -1,48 +1,63 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.Forwarder;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
+import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import protocol.control.ControlProtocol;
-import zmq.pubsubsocketpair.PubSubSocketPair;
-import zmq.reactor.ContextConfiguration;
-import zmq.reactor.Reactor;
 
 public class Control implements AutoCloseable {
 
-  private final ExecutorService executorService = Executors.newCachedThreadPool();
-  private final PubSubSocketPair pubSubSocketPair;
-  private final ControlInboxHandler controlMessageHandler;
-  private final SubscriptionEventInboxHandler subscriptionEventInboxHandler;
-  private final Reactor reactor;
+  private static final String REGISTRY_BASE_TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
+  private static final String SESSION_BASE_TOPIC = "session";
 
-  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+  private final PubSubSocketPair pubSubSocketPair;
+  private final Reactor reactor;
+  private final ReactiveInbox reactiveDataInbox;
+  private final ReactiveInbox reactiveSubscriptionInbox;
+
+  Control(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)
+      throws ExecutionException, InterruptedException {
     reactor = Reactor.create(contextConfiguration);
-    pubSubSocketPair = PubSubSocketPair.create(reactor, ControlProtocol.class);
-    controlMessageHandler = ControlInboxHandler.create(pubSubSocketPair, executorService, configuration);
-    subscriptionEventInboxHandler = SubscriptionEventInboxHandler.create(pubSubSocketPair, configuration);
+    pubSubSocketPair = PubSubSocketPair.create(reactor);
+    PubSubConnection pubSubConnection = pubSubSocketPair.connection();
+
+    SessionManager sessionManager = new SessionManager(configuration, pubSubConnection.publisher());
+    RegistryManager registryManager = new RegistryManager(pubSubConnection.publisher(), registry);
+
+    MessageDistributor messageDistributor = new MessageDistributor();
+    messageDistributor.add(sessionManager);
+    messageDistributor.add(registryManager);
+
+    pubSubConnection.subscriptionManager().subscribe(sessionManager.getTopic());
+    pubSubConnection.subscriptionManager().subscribe(registryManager.getTopic());
+
+    reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
+    reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(),
+        new Forwarder(pubSubConnection.subscriptionManager().outbox())
+            .andThen(new SubscriptionEventProcessor(sessionManager)));
   }
 
-  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration)
+  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)
       throws ExecutionException, InterruptedException {
-    Control control = new Control(contextConfiguration, configuration);
-    bind(control.pubSubSocketPair, configuration);
+    Control control = new Control(contextConfiguration, configuration, registry);
+    control.pubSubSocketPair.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT)));
+    control.pubSubSocketPair.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)));
     return control;
   }
 
-  static void bind(PubSubSocketPair pubSubSocketPair, Configuration<CoreOption> configuration) {
-    pubSubSocketPair.getPublisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT)));
-    pubSubSocketPair.getSubscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)));
-  }
-
   @Override
-  public void close() throws Exception {
+  public void close() {
     reactor.close();
     pubSubSocketPair.close();
-    subscriptionEventInboxHandler.close();
-    controlMessageHandler.close();
-    executorService.shutdownNow();
+    reactiveSubscriptionInbox.close();
+    reactiveDataInbox.close();
   }
 }

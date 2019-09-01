@@ -12,9 +12,7 @@ public enum CoreOption implements Predicate<String> {
   CONTROL_PUB_PORT(any -> true),
   CONTROL_SUB_PORT(any -> true),
   DATA_PUB_PORT(any -> true),
-  DATA_SUB_PORT(any -> true),
-  REGISTRY_PUB_PORT(any -> true),
-  REGISTRY_SUB_PORT(any -> true);
+  DATA_SUB_PORT(any -> true);
 
   private final Predicate<String> validator;
 

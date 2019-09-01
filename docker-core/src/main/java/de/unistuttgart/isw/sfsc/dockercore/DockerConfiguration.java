@@ -15,8 +15,6 @@ class DockerConfiguration {
   private static final String DEFAULT_CONTROL_SUB_PORT = "1253";
   private static final String DEFAULT_DATA_PUB_PORT = "1254";
   private static final String DEFAULT_DATA_SUB_PORT = "1255";
-  private static final String DEFAULT_REGISTRY_PUB_PORT = "1256";
-  private static final String DEFAULT_REGISTRY_SUB_PORT = "1257";
 
   private final String host;
   private final String backendHost;
@@ -26,11 +24,9 @@ class DockerConfiguration {
   private final String controlSubPort;
   private final String dataPubPort;
   private final String dataSubPort;
-  private final String registryPubPort;
-  private final String registrySubPort;
 
   DockerConfiguration(String host, String backendHost, String hazelcastPort, String backendPort, String controlPubPort, String controlSubPort,
-      String dataPubPort, String dataSubPort, String registryPubPort, String registrySubPort) {
+      String dataPubPort, String dataSubPort) {
     this.host = Objects.requireNonNull(host);
     this.backendHost = backendHost;
     this.hazelcastPort = hazelcastPort;
@@ -39,8 +35,6 @@ class DockerConfiguration {
     this.controlSubPort = controlSubPort;
     this.dataPubPort = dataPubPort;
     this.dataSubPort = dataSubPort;
-    this.registryPubPort = registryPubPort;
-    this.registrySubPort = registrySubPort;
   }
 
   static DockerConfiguration fromEnvironment() {
@@ -53,10 +47,7 @@ class DockerConfiguration {
     String controlSubPort = environment.get("CONTROL_SUB_PORT");
     String dataPubPort = environment.get("DATA_PUB_PORT");
     String dataSubPort = environment.get("DATA_SUB_PORT");
-    String registryPubPort = environment.get("REGISTRY_PUB_PORT");
-    String registrySubPort = environment.get("REGISTRY_SUB_PORT");
-    return new DockerConfiguration(host, backendHost, hazelcastPort, backendPort, controlPubPort, controlSubPort, dataPubPort, dataSubPort,
-        registryPubPort, registrySubPort);
+    return new DockerConfiguration(host, backendHost, hazelcastPort, backendPort, controlPubPort, controlSubPort, dataPubPort, dataSubPort);
   }
 
   Configuration<CoreOption> toCoreConfiguration() {
@@ -69,8 +60,6 @@ class DockerConfiguration {
     enumMap.put(CoreOption.CONTROL_SUB_PORT, getControlSubPort());
     enumMap.put(CoreOption.DATA_PUB_PORT, getDataPubPort());
     enumMap.put(CoreOption.DATA_SUB_PORT, getDataSubPort());
-    enumMap.put(CoreOption.REGISTRY_PUB_PORT, getRegistryPubPort());
-    enumMap.put(CoreOption.REGISTRY_SUB_PORT, getRegistrySubPort());
     return Configuration.create(enumMap, CoreOption.class);
   }
 
@@ -104,13 +93,5 @@ class DockerConfiguration {
 
   public String getDataSubPort() {
     return Optional.ofNullable(dataSubPort).orElse(DEFAULT_DATA_SUB_PORT);
-  }
-
-  public String getRegistryPubPort() {
-    return Optional.ofNullable(registryPubPort).orElse(DEFAULT_REGISTRY_PUB_PORT);
-  }
-
-  public String getRegistrySubPort() {
-    return Optional.ofNullable(registrySubPort).orElse(DEFAULT_REGISTRY_SUB_PORT);
   }
 }

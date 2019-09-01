@@ -1,16 +1,21 @@
 package de.unistuttgart.isw.sfsc.benchmark.io;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
-import protocol.pubsub.DataProtocol;
-import zmq.reactor.ReactiveSocket.Inbox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Receiver implements AutoCloseable {
 
-  private final ExecutorService executorService = Executors.newCachedThreadPool();
+  private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
+  private final ExecutorService executorService = Executors.newCachedThreadPool(new ExceptionLoggingThreadFactory("BenchmarkReceiver", logger));
   private final Inbox inbox;
   private final Consumer<BenchmarkMessage> consumer;
 
@@ -27,7 +32,6 @@ class Receiver implements AutoCloseable {
 
   void start() {
     executorService.execute(() -> {
-      Thread.currentThread().setName("Benchmark Receiver Thread");
       while (!Thread.interrupted()) {
         try {
           final byte[][] message = inbox.take();
@@ -37,14 +41,12 @@ class Receiver implements AutoCloseable {
               final BenchmarkMessage response = DataProtocol.PAYLOAD_FRAME.get(message, BenchmarkMessage.parser());
               final BenchmarkMessage finalResponse = BenchmarkMessage.newBuilder(response).setReceiveTimestamp(receiveTime).build();
               consumer.accept(finalResponse);
-            } catch (Exception e) {
+            } catch (InvalidProtocolBufferException e) {
               e.printStackTrace();
             }
           });
         } catch (InterruptedException | RejectedExecutionException e) {
           Thread.currentThread().interrupt();
-        } catch (Exception e) {
-          e.printStackTrace();
         }
       }
     });
