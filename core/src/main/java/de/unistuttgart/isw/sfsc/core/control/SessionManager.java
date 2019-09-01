@@ -7,7 +7,7 @@ import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class SessionManager implements SubscriptionListener {
 

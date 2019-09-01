@@ -10,20 +10,21 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import zmq.processors.MessageDistributor;
 import zmq.processors.SubscriptionEventProcessor;
-import zmq.pubsubsocketpair.SimplePubSubSocketPair;
+import zmq.pubsubsocketpair.PubSubConnection;
+import zmq.pubsubsocketpair.PubSubSocketPair;
 import zmq.reactiveinbox.ReactiveInbox;
 import zmq.reactor.Reactor;
 
 public class ControlClient implements AutoCloseable {
 
-  private final SimplePubSubSocketPair pubSubSocketPair;
+  private final PubSubSocketPair pubSubSocketPair;
   private final SessionManager sessionManager;
   private final ReactiveInbox reactiveDataInbox;
   private final ReactiveInbox reactiveSubscriptionInbox;
   private final AdapterRegistryClient registryClient;
   private final WelcomeMessage welcomeMessage;
 
-  ControlClient(SimplePubSubSocketPair pubSubSocketPair, ReactiveInbox reactiveDataInbox, ReactiveInbox reactiveSubscriptionInbox,
+  ControlClient(PubSubSocketPair pubSubSocketPair, ReactiveInbox reactiveDataInbox, ReactiveInbox reactiveSubscriptionInbox,
       SessionManager sessionManager, AdapterRegistryClient registryClient, WelcomeMessage welcomeMessage) {
     this.pubSubSocketPair = pubSubSocketPair;
     this.reactiveDataInbox = reactiveDataInbox;
@@ -36,22 +37,23 @@ public class ControlClient implements AutoCloseable {
   public static ControlClient create(Reactor reactor, BootstrapConfiguration configuration) throws ExecutionException, InterruptedException {
     String name = "adapter-" + UUID.randomUUID();
 
-    SimplePubSubSocketPair pubSubSocketPair = SimplePubSubSocketPair.create(reactor);
+    PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor);
+    PubSubConnection pubSubConnection = pubSubSocketPair.connection();
 
     SessionManager sessionManager = SimpleSessionManager.create(name);
-    AdapterRegistryClient registryClient = AdapterRegistryClient.create(pubSubSocketPair.publisher(), name);
+    AdapterRegistryClient registryClient = AdapterRegistryClient.create(pubSubConnection.publisher(), name);
     MessageDistributor messageDistributor = new MessageDistributor();
     messageDistributor.add(sessionManager);
     messageDistributor.add(registryClient);
 
-    ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubSocketPair.dataInbox(), messageDistributor);
+    ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
     pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
-    pubSubSocketPair.subscriptionManager().subscribe(SessionManager.TOPIC);
-    pubSubSocketPair.subscriptionManager().subscribe(AdapterRegistryClient.TOPIC);
+    pubSubConnection.subscriptionManager().subscribe(SessionManager.TOPIC);
+    pubSubConnection.subscriptionManager().subscribe(AdapterRegistryClient.TOPIC);
 
     WelcomeMessage welcomeMessage = sessionManager.getWelcomeMessage().get();//todo log state
 
-    ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubSocketPair.subEventInbox(), new SubscriptionEventProcessor(sessionManager));
+    ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(), new SubscriptionEventProcessor(sessionManager));
     pubSubSocketPair.publisherSocketConnector().connect(welcomeMessage.getHost(), welcomeMessage.getControlSubPort());
     sessionManager.awaitSessionReady();//todo log state
 

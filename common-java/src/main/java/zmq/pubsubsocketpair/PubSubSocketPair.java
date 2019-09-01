@@ -1,57 +1,71 @@
 package zmq.pubsubsocketpair;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import java.util.concurrent.ExecutionException;
+import org.zeromq.SocketType;
+import protocol.pubsub.DataProtocol;
+import protocol.pubsub.SubProtocol;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.SubscriptionManager;
+import zmq.reactor.ReactiveSocket;
 import zmq.reactor.ReactiveSocket.Connector;
 import zmq.reactor.ReactiveSocket.Inbox;
-import zmq.reactor.ReactiveSocket.Outbox;
+import zmq.reactor.Reactor;
 
-public interface PubSubSocketPair {
+public class PubSubSocketPair implements AutoCloseable {
 
-  Publisher publisher();
+  private final ReactiveSocket publisherSocket;
+  private final ReactiveSocket subscriberSocket;
+  private final SubscriptionManager subscriptionManager;
+  private final Publisher publisher;
 
-  Inbox dataInbox();
-
-  SubscriptionManager subscriptionManager();
-
-  Inbox subEventInbox();
-
-  Connector publisherSocketConnector();
-
-  Connector subscriberSocketConnector();
-
-  interface SubscriptionManager {
-
-    void subscribe(byte[] topic);
-
-    void subscribe(StringValue topic);
-
-    void subscribe(String topic);
-
-    void unsubscribe(byte[] topic);
-
-    void unsubscribe(StringValue topic);
-
-    void unsubscribe(String topic);
-
-    Outbox outbox();
+  PubSubSocketPair(ReactiveSocket publisherSocket, ReactiveSocket subscriberSocket) {
+    this.publisherSocket = publisherSocket;
+    this.subscriberSocket = subscriberSocket;
+    subscriptionManager = new SimpleSubscriptionManager(subscriberSocket.getOutbox());
+    publisher = new SimplePublisher(publisherSocket.getOutbox());
   }
 
-  interface Publisher {
+  public static PubSubSocketPair create(Reactor reactor) throws ExecutionException, InterruptedException {
+    ReactiveSocket publisher = reactor.createReactiveSocket(SocketType.XPUB, SubProtocol.class);
+    ReactiveSocket subscriber = reactor.createReactiveSocket(SocketType.XSUB, DataProtocol.class);
+    return new PubSubSocketPair(publisher, subscriber);
+  }
 
-    void publish(byte[] topic, byte[] data);
+  public PubSubConnection connection(){
+    return new PubSubConnection() {
+      @Override
+      public Publisher publisher() {
+        return publisher;
+      }
 
-    void publish(StringValue topic, byte[] data);
+      @Override
+      public Inbox dataInbox() {
+        return subscriberSocket.getInbox();
+      }
 
-    void publish(String topic, byte[] data);
+      @Override
+      public SubscriptionManager subscriptionManager() {
+        return subscriptionManager;
+      }
 
-    void publish(byte[] topic, Message data);
+      @Override
+      public Inbox subEventInbox() {
+        return publisherSocket.getInbox();
+      }
+    };
+  }
 
-    void publish(StringValue topic, Message data);
+  public Connector publisherSocketConnector() {
+    return publisherSocket.getConnector();
+  }
 
-    void publish(String topic, Message data);
+  public Connector subscriberSocketConnector() {
+    return subscriberSocket.getConnector();
+  }
 
-    Outbox outbox();
-
+  @Override
+  public void close() {
+    subscriberSocket.close();
+    publisherSocket.close();
   }
 }

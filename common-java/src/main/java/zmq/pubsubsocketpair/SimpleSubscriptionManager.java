@@ -5,7 +5,7 @@ import static protocol.pubsub.SubProtocol.buildTypeAndTopicFrame;
 import com.google.protobuf.StringValue;
 import protocol.pubsub.SubProtocol;
 import protocol.pubsub.SubProtocol.SubscriptionType;
-import zmq.pubsubsocketpair.PubSubSocketPair.SubscriptionManager;
+import zmq.pubsubsocketpair.PubSubConnection.SubscriptionManager;
 import zmq.reactor.ReactiveSocket.Outbox;
 
 class SimpleSubscriptionManager implements SubscriptionManager {

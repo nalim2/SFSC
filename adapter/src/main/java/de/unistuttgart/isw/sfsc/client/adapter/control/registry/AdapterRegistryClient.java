@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import registry.TimeoutRegistry;
 import zmq.processors.MessageDistributor.TopicListener;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 public class AdapterRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 

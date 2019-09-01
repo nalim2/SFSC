@@ -5,15 +5,16 @@ import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import zmq.processors.Forwarder;
-import zmq.pubsubsocketpair.SimplePubSubSocketPair;
+import zmq.pubsubsocketpair.PubSubConnection;
+import zmq.pubsubsocketpair.PubSubSocketPair;
 import zmq.reactiveinbox.ReactiveInbox;
 import zmq.reactor.ContextConfiguration;
 import zmq.reactor.Reactor;
 
 public class Data implements AutoCloseable {
 
-  private final SimplePubSubSocketPair frontend;
-  private final SimplePubSubSocketPair backend;
+  private final PubSubSocketPair frontend;
+  private final PubSubSocketPair backend;
   private final Configuration<CoreOption> configuration;
   private final ReactiveInbox backendDataInbox;
   private final ReactiveInbox backendSubEventInbox;
@@ -24,15 +25,23 @@ public class Data implements AutoCloseable {
   Data(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     this.configuration = configuration;
     reactor = Reactor.create(contextConfiguration);
-    frontend = SimplePubSubSocketPair.create(reactor);
-    backend = SimplePubSubSocketPair.create(reactor);
-    backendDataInbox = ReactiveInbox.create(backend.dataInbox(), new Forwarder(frontend.publisher().outbox()));
-    backendSubEventInbox = ReactiveInbox.create(backend.subEventInbox(), new Forwarder(frontend.subscriptionManager().outbox()));
-    frontendDataInbox = ReactiveInbox.create(frontend.dataInbox(), new Forwarder(List.of(frontend.publisher().outbox(), backend.publisher().outbox())));
-    frontendSubEventInbox = ReactiveInbox.create(frontend.subEventInbox(), new Forwarder(List.of(frontend.subscriptionManager().outbox(), backend.subscriptionManager().outbox())));
+    frontend = PubSubSocketPair.create(reactor);
+    backend = PubSubSocketPair.create(reactor);
+    PubSubConnection frontendConnection = frontend.connection();
+    PubSubConnection backendConnection = backend.connection();
+
+    backendDataInbox = ReactiveInbox.create(backendConnection.dataInbox(),
+        new Forwarder(frontendConnection.publisher().outbox()));
+    backendSubEventInbox = ReactiveInbox.create(backendConnection.subEventInbox(),
+        new Forwarder(frontendConnection.subscriptionManager().outbox()));
+    frontendDataInbox = ReactiveInbox.create(frontendConnection.dataInbox(),
+        new Forwarder(List.of(frontendConnection.publisher().outbox(), backendConnection.publisher().outbox())));
+    frontendSubEventInbox = ReactiveInbox.create(frontendConnection.subEventInbox(),
+        new Forwarder(List.of(frontendConnection.subscriptionManager().outbox(), backendConnection.subscriptionManager().outbox())));
   }
 
-  public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
+  public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration)
+      throws ExecutionException, InterruptedException {
     Data data = new Data(contextConfiguration, configuration);
     data.frontend.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)));
     data.frontend.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)));

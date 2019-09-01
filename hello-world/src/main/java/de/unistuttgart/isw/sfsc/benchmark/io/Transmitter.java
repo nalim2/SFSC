@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ExceptionLoggingThreadFactory;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class Transmitter implements AutoCloseable {
 

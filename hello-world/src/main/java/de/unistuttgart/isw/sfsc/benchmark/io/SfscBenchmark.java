@@ -36,8 +36,8 @@ public class SfscBenchmark {
       final byte[] responseTopic = pair(serverAdapter, clientAdapter, TOPIC_SIZE_BYTES);
 
       try (final Server server = Server.start(serverAdapter, responseTopic);
-          final Receiver receiver = Receiver.start(clientAdapter.dataClient().dataInbox(), consumer)) {
-        try (final Transmitter transmitter = new Transmitter(clientAdapter.dataClient().publisher(), requestTopic, messageSizeBytes)) {
+          final Receiver receiver = Receiver.start(clientAdapter.dataConnection().dataInbox(), consumer)) {
+        try (final Transmitter transmitter = new Transmitter(clientAdapter.dataConnection().publisher(), requestTopic, messageSizeBytes)) {
           System.out.println("executing benchmark");
           Thread.sleep(lingerDurationMs); //some time to warm up
           transmitter.send(periodNs);
@@ -66,8 +66,8 @@ public class SfscBenchmark {
   public static byte[] pair(RawAdapter sender, RawAdapter receiver, int topicSizeBytes) throws InterruptedException {
     byte[] topic = new byte[topicSizeBytes];
     ThreadLocalRandom.current().nextBytes(topic);
-    receiver.dataClient().subscriptionManager().subscribe(topic);
-    sender.dataClient().subEventInbox().take();
+    receiver.dataConnection().subscriptionManager().subscribe(topic);
+    sender.dataConnection().subEventInbox().take();
     return topic;
   }
 }

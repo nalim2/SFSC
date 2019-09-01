@@ -3,7 +3,7 @@ package zmq.pubsubsocketpair;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import protocol.pubsub.DataProtocol;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import zmq.reactor.ReactiveSocket.Outbox;
 
 public class SimplePublisher implements Publisher {

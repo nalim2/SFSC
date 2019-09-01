@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zmq.processors.MessageDistributor.TopicListener;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class RegistryEventProcessor implements TopicListener {
 

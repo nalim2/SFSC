@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import protocol.pubsub.DataProtocol;
 import util.ExceptionLoggingThreadFactory;
-import zmq.pubsubsocketpair.PubSubSocketPair.Publisher;
+import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import zmq.reactor.ReactiveSocket.Inbox;
 
 class Server implements AutoCloseable {
@@ -33,8 +33,8 @@ class Server implements AutoCloseable {
 
   void start() {
     executorService.execute(() -> {
-      final Inbox inbox = adapter.dataClient().dataInbox();
-      final Publisher publisher = adapter.dataClient().publisher();
+      final Inbox inbox = adapter.dataConnection().dataInbox();
+      final Publisher publisher = adapter.dataConnection().publisher();
       while (!Thread.interrupted()) {
         try {
           final byte[][] message = inbox.take();
