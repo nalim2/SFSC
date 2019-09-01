@@ -15,9 +15,6 @@ import java.util.concurrent.ExecutionException;
 
 public class Control implements AutoCloseable {
 
-  private static final String REGISTRY_BASE_TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
-  private static final String SESSION_BASE_TOPIC = "session";
-
   private final PubSubSocketPair pubSubSocketPair;
   private final Reactor reactor;
   private final ReactiveInbox reactiveDataInbox;
