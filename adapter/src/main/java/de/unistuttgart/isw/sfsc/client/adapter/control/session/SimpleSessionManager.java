@@ -27,7 +27,7 @@ public class SimpleSessionManager implements SessionManager {
   private final String topic;
 
   SimpleSessionManager(String name) {
-    topic = TOPIC + "///" + name; //todo ///
+    topic = TOPIC + "://" + name;
   }
 
   public static SimpleSessionManager create(String name) {

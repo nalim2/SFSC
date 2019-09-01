@@ -39,7 +39,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
 
   AdapterRegistryClient(Publisher publisher, String name) {
     this.publisher = publisher;
-    topic = TOPIC + "///" + name; //todo ///
+    topic = TOPIC + "://" + name;
   }
 
   public static AdapterRegistryClient create(Publisher publisher, String name) {
