@@ -1,15 +1,15 @@
 package de.unistuttgart.isw.sfsc.core.data;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.Forwarder;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import zmq.processors.Forwarder;
-import zmq.pubsubsocketpair.PubSubConnection;
-import zmq.pubsubsocketpair.PubSubSocketPair;
-import zmq.reactiveinbox.ReactiveInbox;
-import zmq.reactor.ContextConfiguration;
-import zmq.reactor.Reactor;
 
 public class Data implements AutoCloseable {
 

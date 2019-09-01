@@ -1,9 +1,11 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
-import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
-import static protocol.pubsub.DataProtocol.TOPIC_FRAME;
+import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
+import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateResponse;
@@ -15,12 +17,10 @@ import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zmq.processors.MessageDistributor.TopicListener;
-import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class RegistryManager implements TopicListener {
 
-  public static final String TOPIC = "registry";
+  public static final String TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
 
   private static final Logger logger = LoggerFactory.getLogger(RegistryManager.class);
 
@@ -33,12 +33,17 @@ class RegistryManager implements TopicListener {
   }
 
   @Override
+  public String getTopic(){
+    return TOPIC;
+  }
+
+  @Override
   public boolean test(String topic) {
     return topic.startsWith(TOPIC);
   }
 
   @Override
-  public void accept(byte[][] message) {
+  public void processMessage(byte[][] message) {
     try {
       RegistryMessage registryMessage = PAYLOAD_FRAME.get(message, RegistryMessage.parser());
       switch (registryMessage.getPayloadCase()) {
@@ -67,7 +72,7 @@ class RegistryManager implements TopicListener {
           break;
         }
         default: {
-          logger.warn("received registry message with currently unsupported type {}", registryMessage.getPayloadCase());
+          logger.warn("received de.unistuttgart.isw.sfsc.commonjava.registry message with currently unsupported type {}", registryMessage.getPayloadCase());
           break;
         }
       }

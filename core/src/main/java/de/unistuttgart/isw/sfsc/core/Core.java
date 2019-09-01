@@ -1,12 +1,12 @@
 package de.unistuttgart.isw.sfsc.core;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.core.control.Control;
 import de.unistuttgart.isw.sfsc.core.data.Data;
 import de.unistuttgart.isw.sfsc.core.hazelcast.HazelcastNode;
 import java.util.concurrent.ExecutionException;
-import zmq.reactor.ContextConfiguration;
 
 public class Core implements AutoCloseable {
 

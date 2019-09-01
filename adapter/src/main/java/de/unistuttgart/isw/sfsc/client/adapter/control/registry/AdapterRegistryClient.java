@@ -1,10 +1,13 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.registry;
 
-import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
+import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import consumerfuture.ConsumerFuture;
+import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
+import de.unistuttgart.isw.sfsc.commonjava.util.ConsumerFuture;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.DeleteRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.ReadRequest;
@@ -20,19 +23,16 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import registry.TimeoutRegistry;
-import zmq.processors.MessageDistributor.TopicListener;
-import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 public class AdapterRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
-  public static final String TOPIC = "registry";
+  public static final String TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
   private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
   private static final Logger logger = LoggerFactory.getLogger(AdapterRegistryClient.class);
 
   private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
-  private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("registry created exception", exception);
+  private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("de.unistuttgart.isw.sfsc.commonjava.registry created exception", exception);
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
   private final Publisher publisher;
   private final String topic;
@@ -86,12 +86,17 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   }
 
   @Override
+  public String getTopic() {
+    return topic;
+  }
+
+  @Override
   public boolean test(String topic) {
     return topic.equals(this.topic);
   }
 
   @Override
-  public void accept(byte[][] message) {
+  public void processMessage(byte[][] message) {
     try {
       RegistryMessage reply = PAYLOAD_FRAME.get(message, RegistryMessage.parser());
       Consumer<? super Message> consumer = timeoutRegistry.remove(reply.getMessageId());
@@ -110,7 +115,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
             break;
           }
           default: {
-            logger.warn("received registry message with currently unsupported type {}", reply.getPayloadCase());
+            logger.warn("received de.unistuttgart.isw.sfsc.commonjava.registry message with currently unsupported type {}", reply.getPayloadCase());
             break;
           }
 

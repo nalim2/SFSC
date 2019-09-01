@@ -2,12 +2,12 @@ package de.unistuttgart.isw.sfsc.client.adapter;
 
 import de.unistuttgart.isw.sfsc.client.adapter.control.ControlClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
 import java.util.concurrent.ExecutionException;
-import zmq.pubsubsocketpair.PubSubConnection;
-import zmq.pubsubsocketpair.PubSubSocketPair;
-import zmq.reactor.ContextConfiguration;
-import zmq.reactor.Reactor;
 
 public class RawAdapter implements AutoCloseable {
 

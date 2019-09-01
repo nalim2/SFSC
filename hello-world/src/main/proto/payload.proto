@@ -1,8 +1,7 @@
 syntax = "proto3";
 
-package sfsc;
+package de.unistuttgart.isw.sfsc.benchmark;
 
-option java_package = "de.unistuttgart.isw.sfsc.benchmark";
 option java_multiple_files = true;
 
 message BenchmarkMessage {

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package de.unistuttgart.isw.sfsc.protocol.control;
+package de.unistuttgart.isw.sfsc.protocol.session;
 
 option java_multiple_files = true;
 

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package de.unistuttgart.isw.sfsc.protocol.control;
+package de.unistuttgart.isw.sfsc.protocol.session;
 
 import "session/welcome.proto";
 

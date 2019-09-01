@@ -1,21 +1,21 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.Forwarder;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import java.util.concurrent.ExecutionException;
-import zmq.processors.Forwarder;
-import zmq.processors.MessageDistributor;
-import zmq.processors.SubscriptionEventProcessor;
-import zmq.pubsubsocketpair.PubSubConnection;
-import zmq.pubsubsocketpair.PubSubSocketPair;
-import zmq.reactiveinbox.ReactiveInbox;
-import zmq.reactor.ContextConfiguration;
-import zmq.reactor.Reactor;
 
 public class Control implements AutoCloseable {
 
-  private static final String REGISTRY_BASE_TOPIC = "registry";
+  private static final String REGISTRY_BASE_TOPIC = "de/unistuttgart/isw/sfsc/commonjava/registry";
   private static final String SESSION_BASE_TOPIC = "session";
 
   private final PubSubSocketPair pubSubSocketPair;
@@ -36,8 +36,8 @@ public class Control implements AutoCloseable {
     messageDistributor.add(sessionManager);
     messageDistributor.add(registryManager);
 
-    pubSubConnection.subscriptionManager().subscribe(SessionManager.TOPIC);
-    pubSubConnection.subscriptionManager().subscribe(RegistryManager.TOPIC);
+    pubSubConnection.subscriptionManager().subscribe(sessionManager.getTopic());
+    pubSubConnection.subscriptionManager().subscribe(registryManager.getTopic());
 
     reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
     reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(),

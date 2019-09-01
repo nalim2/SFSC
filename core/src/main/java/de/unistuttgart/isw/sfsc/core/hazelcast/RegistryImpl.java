@@ -4,9 +4,9 @@ import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.ReplicatedMap;
+import de.unistuttgart.isw.sfsc.commonjava.registry.SimpleRegistrySet;
 import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor;
 import java.util.Set;
-import registry.SimpleRegistrySet;
 
 class RegistryImpl implements Registry {
 

@@ -5,15 +5,15 @@ import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryC
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.session.SessionManager;
 import de.unistuttgart.isw.sfsc.client.adapter.control.session.SimpleSessionManager;
-import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import zmq.processors.MessageDistributor;
-import zmq.processors.SubscriptionEventProcessor;
-import zmq.pubsubsocketpair.PubSubConnection;
-import zmq.pubsubsocketpair.PubSubSocketPair;
-import zmq.reactiveinbox.ReactiveInbox;
-import zmq.reactor.Reactor;
 
 public class ControlClient implements AutoCloseable {
 
@@ -42,14 +42,15 @@ public class ControlClient implements AutoCloseable {
 
     SessionManager sessionManager = SimpleSessionManager.create(name);
     AdapterRegistryClient registryClient = AdapterRegistryClient.create(pubSubConnection.publisher(), name);
+
     MessageDistributor messageDistributor = new MessageDistributor();
     messageDistributor.add(sessionManager);
     messageDistributor.add(registryClient);
 
     ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
     pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
-    pubSubConnection.subscriptionManager().subscribe(SessionManager.TOPIC);
-    pubSubConnection.subscriptionManager().subscribe(AdapterRegistryClient.TOPIC);
+    pubSubConnection.subscriptionManager().subscribe(sessionManager.getTopic());
+    pubSubConnection.subscriptionManager().subscribe(registryClient.getTopic());
 
     WelcomeMessage welcomeMessage = sessionManager.getWelcomeMessage().get();//todo log state
 

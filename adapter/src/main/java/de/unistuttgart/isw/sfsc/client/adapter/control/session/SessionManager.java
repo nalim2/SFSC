@@ -1,10 +1,10 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.session;
 
-import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
+import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import zmq.processors.MessageDistributor.TopicListener;
-import zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
 
 public interface SessionManager extends TopicListener, SubscriptionListener, AutoCloseable {
 

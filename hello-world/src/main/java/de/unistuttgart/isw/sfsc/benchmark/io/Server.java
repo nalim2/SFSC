@@ -3,15 +3,15 @@ package de.unistuttgart.isw.sfsc.benchmark.io;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
 import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import protocol.pubsub.DataProtocol;
-import util.ExceptionLoggingThreadFactory;
-import zmq.pubsubsocketpair.PubSubConnection.Publisher;
-import zmq.reactor.ReactiveSocket.Inbox;
 
 class Server implements AutoCloseable {
 

@@ -1,13 +1,13 @@
 package de.unistuttgart.isw.sfsc.benchmark.io;
 
 import com.google.protobuf.Message;
+import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.ExceptionLoggingThreadFactory;
-import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class Transmitter implements AutoCloseable {
 

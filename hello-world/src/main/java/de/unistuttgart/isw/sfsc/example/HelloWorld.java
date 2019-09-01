@@ -1,11 +1,11 @@
 package de.unistuttgart.isw.sfsc.example;
 
-import static protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
+import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
 import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
-import protocol.pubsub.DataProtocol;
-import protocol.pubsub.SubProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 
 public class HelloWorld {
 

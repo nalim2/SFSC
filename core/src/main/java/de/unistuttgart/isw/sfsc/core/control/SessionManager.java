@@ -1,14 +1,14 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
-import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
-import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
+import de.unistuttgart.isw.sfsc.protocol.session.SessionMessage;
+import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zmq.processors.MessageDistributor.TopicListener;
-import zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
-import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
 class SessionManager implements SubscriptionListener, TopicListener {
 
@@ -46,12 +46,18 @@ class SessionManager implements SubscriptionListener, TopicListener {
   }
 
   @Override
-  public void accept(byte[][] bytes) {
-    throw new UnsupportedOperationException("not yet implemented");
+  public String getTopic() {
+    return TOPIC;
   }
 
   @Override
   public boolean test(String s) {
     return false;
   }
+
+  @Override
+  public void processMessage(byte[][] bytes) {
+    throw new UnsupportedOperationException("not yet implemented");
+  }
+
 }

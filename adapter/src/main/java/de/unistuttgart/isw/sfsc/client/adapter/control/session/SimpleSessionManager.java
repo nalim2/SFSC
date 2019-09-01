@@ -1,12 +1,12 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.session;
 
-import static protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
+import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import consumerfuture.ConsumerFuture;
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryClient;
-import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
-import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
+import de.unistuttgart.isw.sfsc.commonjava.util.ConsumerFuture;
+import de.unistuttgart.isw.sfsc.protocol.session.SessionMessage;
+import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -35,12 +35,17 @@ public class SimpleSessionManager implements SessionManager {
   }
 
   @Override
+  public String getTopic() {
+    return topic;
+  }
+
+  @Override
   public boolean test(String topic) {
     return topic.equals(this.topic);
   }
 
   @Override
-  public void accept(byte[][] controlMessage) {
+  public void processMessage(byte[][] controlMessage) {
     try {
       SessionMessage request = PAYLOAD_FRAME.get(controlMessage, SessionMessage.parser());
       switch (request.getPayloadCase()) {
