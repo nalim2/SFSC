@@ -25,14 +25,14 @@ class SessionManager implements SubscriptionListener, TopicListener {
 
   @Override
   public void onSubscription(String topic) {
-    logger.info("Subscription to topic {}", topic);
+    logger.info("Received subscription to topic {}", topic);
     SessionMessage payload = SessionMessage.newBuilder().setWelcomeMessage(welcome).build();
     publisher.publish(topic, payload);
   }
 
   @Override
   public void onUnsubscription(String topic) {
-    logger.info("Unsubscription from topic {}", topic);
+    logger.info("Received unsubscription from topic {}", topic);
   }
 
   static WelcomeMessage createWelcomeMessage(Configuration<CoreOption> configuration) {

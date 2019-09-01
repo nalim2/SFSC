@@ -76,6 +76,7 @@ public class SimpleSessionManager implements SessionManager {
 
   @Override
   public void onSubscription(String topic) {
+    logger.debug("Received subscription to topic {}", topic);
     missing.remove(topic);
     if (missing.isEmpty()) {
       ready.run();
@@ -84,6 +85,7 @@ public class SimpleSessionManager implements SessionManager {
 
   @Override
   public void onUnsubscription(String topic) {
+    logger.debug("Received unsubscription from topic {}", topic);
   }
 
   @Override
