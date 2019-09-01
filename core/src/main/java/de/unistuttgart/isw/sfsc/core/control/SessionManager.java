@@ -6,10 +6,13 @@ import de.unistuttgart.isw.sfsc.protocol.control.SessionMessage;
 import de.unistuttgart.isw.sfsc.protocol.control.WelcomeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import zmq.processors.MessageDistributor.TopicListener;
 import zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
 import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
-class SessionManager implements SubscriptionListener {
+class SessionManager implements SubscriptionListener, TopicListener {
+
+  public static final String TOPIC = "session";
 
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
   private final Publisher publisher;
@@ -40,5 +43,15 @@ class SessionManager implements SubscriptionListener {
         .setDataPubPort(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)))
         .setDataSubPort(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT)))
         .build();
+  }
+
+  @Override
+  public void accept(byte[][] bytes) {
+    throw new UnsupportedOperationException("not yet implemented");
+  }
+
+  @Override
+  public boolean test(String s) {
+    return false;
   }
 }

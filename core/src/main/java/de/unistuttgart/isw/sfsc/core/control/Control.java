@@ -28,12 +28,21 @@ public class Control implements AutoCloseable {
     reactor = Reactor.create(contextConfiguration);
     pubSubSocketPair = PubSubSocketPair.create(reactor);
     PubSubConnection pubSubConnection = pubSubSocketPair.connection();
+
+    SessionManager sessionManager = new SessionManager(configuration, pubSubConnection.publisher());
+    RegistryManager registryManager = new RegistryManager(pubSubConnection.publisher(), registry);
+
     MessageDistributor messageDistributor = new MessageDistributor();
-    messageDistributor.add(new RegistryEventProcessor(pubSubConnection.publisher(), registry));
+    messageDistributor.add(sessionManager);
+    messageDistributor.add(registryManager);
+
+    pubSubConnection.subscriptionManager().subscribe(SessionManager.TOPIC);
+    pubSubConnection.subscriptionManager().subscribe(RegistryManager.TOPIC);
+
     reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
     reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(),
         new Forwarder(pubSubConnection.subscriptionManager().outbox())
-            .andThen(new SubscriptionEventProcessor(new SessionManager(configuration, pubSubConnection.publisher()))));
+            .andThen(new SubscriptionEventProcessor(sessionManager)));
   }
 
   public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)

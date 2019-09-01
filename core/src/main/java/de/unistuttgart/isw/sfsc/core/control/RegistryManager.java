@@ -18,16 +18,16 @@ import org.slf4j.LoggerFactory;
 import zmq.processors.MessageDistributor.TopicListener;
 import zmq.pubsubsocketpair.PubSubConnection.Publisher;
 
-class RegistryEventProcessor implements TopicListener {
+class RegistryManager implements TopicListener {
 
-  private static final String TOPIC = "registry";
+  public static final String TOPIC = "registry";
 
-  private static final Logger logger = LoggerFactory.getLogger(RegistryEventProcessor.class);
+  private static final Logger logger = LoggerFactory.getLogger(RegistryManager.class);
 
   private final Publisher publisher;
   private final Registry registry;
 
-  RegistryEventProcessor(Publisher publisher, Registry registry) {
+  RegistryManager(Publisher publisher, Registry registry) {
     this.publisher = publisher;
     this.registry = registry;
   }
