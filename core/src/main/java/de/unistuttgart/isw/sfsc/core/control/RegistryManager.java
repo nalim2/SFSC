@@ -49,9 +49,12 @@ class RegistryManager implements TopicListener {
       switch (registryMessage.getPayloadCase()) {
         case CREATE_REQUEST: {
           CreateRequest createRequest = PAYLOAD_FRAME.get(message, CreateRequest.parser());
-          registry.create(createRequest.getService());
+          ServiceDescriptor serviceDescriptor = createRequest.getService();
+          registry.create(serviceDescriptor);
           byte[] topic = TOPIC_FRAME.get(message);
-          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage).setCreateResponse(CreateResponse.newBuilder().build()).build();
+          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage)
+              .setCreateResponse(CreateResponse.newBuilder().setService(serviceDescriptor).build())
+              .build();
           publisher.publish(topic, payload);
           break;
         }
@@ -59,7 +62,8 @@ class RegistryManager implements TopicListener {
           Set<ServiceDescriptor> services = registry.read();
           byte[] topic = TOPIC_FRAME.get(message);
           RegistryMessage payload = RegistryMessage.newBuilder(registryMessage)
-              .setReadResponse(ReadResponse.newBuilder().addAllServices(services).build()).build();
+              .setReadResponse(ReadResponse.newBuilder().addAllServices(services).build())
+              .build();
           publisher.publish(topic, payload);
           break;
         }
@@ -67,7 +71,9 @@ class RegistryManager implements TopicListener {
           DeleteRequest deleteRequest = PAYLOAD_FRAME.get(message, DeleteRequest.parser());
           registry.delete(deleteRequest.getService());
           byte[] topic = TOPIC_FRAME.get(message);
-          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage).setDeleteResponse(DeleteResponse.newBuilder().build()).build();
+          RegistryMessage payload = RegistryMessage.newBuilder(registryMessage)
+              .setDeleteResponse(DeleteResponse.newBuilder().build())
+              .build();
           publisher.publish(topic, payload);
           break;
         }

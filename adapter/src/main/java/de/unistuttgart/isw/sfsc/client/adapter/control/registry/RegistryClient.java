@@ -1,15 +1,16 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.registry;
 
+import com.google.protobuf.ByteString;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public interface RegistryClient {
 
-  Future<ServiceHandle> addService(ServiceDeclaration serviceDeclaration) throws ExecutionException, InterruptedException;
+  Future<Map<String, ByteString>> addService(Map<String, ByteString> service);
 
-  Future<Set<ServiceHandle>> getServices() throws ExecutionException, InterruptedException;
+  Future<Set<Map<String, ByteString>>> getServices();
 
-  Future<Void> removeService(ServiceHandle serviceHandle) throws ExecutionException, InterruptedException;
+  Future<Void> removeService(Map<String, ByteString> service);
 
 }
