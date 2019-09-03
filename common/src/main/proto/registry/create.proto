@@ -11,4 +11,5 @@ message CreateRequest {
 }
 
 message CreateResponse {
+  ServiceDescriptor service = 1;
 }
