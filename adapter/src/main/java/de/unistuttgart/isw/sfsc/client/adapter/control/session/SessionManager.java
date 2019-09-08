@@ -1,6 +1,6 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.session;
 
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
 import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
 import java.util.concurrent.ExecutionException;

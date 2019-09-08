@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox.HighLevelInbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.Forwarder;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
@@ -29,14 +29,12 @@ public class Control implements AutoCloseable {
     SessionManager sessionManager = new SessionManager(configuration, pubSubConnection.publisher());
     RegistryManager registryManager = new RegistryManager(pubSubConnection.publisher(), registry);
 
-    MessageDistributor messageDistributor = new MessageDistributor();
-    messageDistributor.add(sessionManager);
-    messageDistributor.add(registryManager);
+    HighLevelInbox highLevelInbox = new HighLevelInbox(pubSubConnection.subscriptionManager());
+    highLevelInbox.add(sessionManager);
+    highLevelInbox.add(registryManager);
 
-    pubSubConnection.subscriptionManager().subscribe(sessionManager.getTopic());
-    pubSubConnection.subscriptionManager().subscribe(registryManager.getTopic());
+    reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), highLevelInbox);
 
-    reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
     reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(),
         new Forwarder(pubSubConnection.subscriptionManager().outbox())
             .andThen(new SubscriptionEventProcessor(sessionManager)));

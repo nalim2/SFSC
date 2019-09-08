@@ -4,7 +4,7 @@ import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.P
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;

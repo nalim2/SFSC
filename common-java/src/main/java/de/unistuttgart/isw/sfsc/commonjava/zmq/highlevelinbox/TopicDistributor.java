@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.processors;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
@@ -10,9 +10,9 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MessageDistributor implements Consumer<byte[][]> {
+class TopicDistributor implements Consumer<byte[][]> {
 
-  private static final Logger logger = LoggerFactory.getLogger(MessageDistributor.class);
+  private static final Logger logger = LoggerFactory.getLogger(TopicDistributor.class);
   private final Set<TopicListener> topicListeners = ConcurrentHashMap.newKeySet();
 
   public void add(TopicListener topicListener) {
@@ -37,12 +37,4 @@ public class MessageDistributor implements Consumer<byte[][]> {
     }
   }
 
-  public interface TopicListener {
-
-    String getTopic();
-
-    boolean test(String topic);
-
-    void processMessage(byte[][] message);
-  }
 }

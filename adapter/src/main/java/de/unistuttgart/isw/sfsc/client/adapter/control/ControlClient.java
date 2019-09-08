@@ -5,7 +5,7 @@ import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryC
 import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.control.session.SessionManager;
 import de.unistuttgart.isw.sfsc.client.adapter.control.session.SimpleSessionManager;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.MessageDistributor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox.HighLevelInbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
@@ -43,15 +43,13 @@ public class ControlClient implements AutoCloseable {
     SessionManager sessionManager = SimpleSessionManager.create(name);
     AdapterRegistryClient registryClient = AdapterRegistryClient.create(pubSubConnection.publisher(), name);
 
-    MessageDistributor messageDistributor = new MessageDistributor();
-    messageDistributor.add(sessionManager);
-    messageDistributor.add(registryClient);
+    HighLevelInbox highLevelInbox = new HighLevelInbox(pubSubConnection.subscriptionManager());
+    highLevelInbox.add(sessionManager);
+    highLevelInbox.add(registryClient);
 
-    ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), messageDistributor);
+    ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), highLevelInbox);
+
     pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
-    pubSubConnection.subscriptionManager().subscribe(sessionManager.getTopic());
-    pubSubConnection.subscriptionManager().subscribe(registryClient.getTopic());
-
     WelcomeMessage welcomeMessage = sessionManager.getWelcomeMessage().get();//todo log state
 
     ReactiveInbox reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(), new SubscriptionEventProcessor(sessionManager));
