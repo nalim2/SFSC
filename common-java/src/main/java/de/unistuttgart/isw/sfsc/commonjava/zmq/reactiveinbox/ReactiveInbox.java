@@ -32,7 +32,7 @@ public class ReactiveInbox implements AutoCloseable {
   }
 
   void startDaemon() {
-    daemonExecutor.submit(this::handleDataInboxLoop);
+    daemonExecutor.execute(this::handleDataInboxLoop);
   }
 
   void handleDataInboxLoop() {
