@@ -11,16 +11,16 @@ import java.util.Set;
 class RegistryImpl implements Registry {
 
   private final SimpleRegistrySet<ServiceDescriptor> registry = SimpleRegistrySet.getInstance();
-  private final ReplicatedMap<ServiceDescriptor, Void> replicationMap;
+  private final ReplicatedMap<ServiceDescriptor, Boolean> replicationMap; //for some reason, ReplicatedMap does a nn check on value. Void -> Boolean
 
-  RegistryImpl(ReplicatedMap<ServiceDescriptor, Void> replicationMap) {
+  RegistryImpl(ReplicatedMap<ServiceDescriptor, Boolean> replicationMap) {
     this.replicationMap = replicationMap;
     replicationMap.addEntryListener(new Listener(registry));
     registry.addAll(replicationMap.keySet());
   }
 
   public void create(ServiceDescriptor serviceDescriptor) {
-    replicationMap.put(serviceDescriptor, null);
+    replicationMap.put(serviceDescriptor, Boolean.TRUE);
   }
 
   public Set<ServiceDescriptor> read() {
@@ -31,7 +31,7 @@ class RegistryImpl implements Registry {
     replicationMap.remove(serviceDescriptor);
   }
 
-  static class Listener implements EntryListener<ServiceDescriptor, Void> {
+  static class Listener implements EntryListener<ServiceDescriptor, Boolean> {
 
     private final SimpleRegistrySet<ServiceDescriptor> registry;
 
@@ -40,21 +40,21 @@ class RegistryImpl implements Registry {
     }
 
     @Override
-    public void entryRemoved(EntryEvent<ServiceDescriptor, Void> event) {
+    public void entryRemoved(EntryEvent<ServiceDescriptor, Boolean> event) {
       registry.remove(event.getKey());
     }
 
     @Override
-    public void entryAdded(EntryEvent<ServiceDescriptor, Void> event) {
+    public void entryAdded(EntryEvent<ServiceDescriptor, Boolean> event) {
       registry.add(event.getKey());
     }
 
     @Override
-    public void entryEvicted(EntryEvent<ServiceDescriptor, Void> event) {
+    public void entryEvicted(EntryEvent<ServiceDescriptor, Boolean> event) {
     }
 
     @Override
-    public void entryUpdated(EntryEvent<ServiceDescriptor, Void> event) {
+    public void entryUpdated(EntryEvent<ServiceDescriptor, Boolean> event) {
     }
 
     @Override
