@@ -1,6 +1,7 @@
 package de.unistuttgart.isw.sfsc.client.adapter.control.registry;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
+import static de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry.DEFAULT_TIMEOUT_MS;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -29,12 +30,11 @@ import org.slf4j.LoggerFactory;
 public class AdapterRegistryClient implements RegistryClient, TopicListener, AutoCloseable {
 
   public static final String TOPIC = "registry";
-  private static final int DEFAULT_TIMEOUT_MS = 500; //todo
 
   private static final Logger logger = LoggerFactory.getLogger(AdapterRegistryClient.class);
 
   private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
-  private final Consumer<Exception> exceptionConsumer = exception -> logger.warn("registry created exception", exception);
+  private final Runnable timeoutRunnable = ()-> logger.warn("registry timeout");
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
   private final Publisher publisher;
   private final String topic;
@@ -65,7 +65,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
             .setService(ServiceDescriptor.newBuilder().putAllTags(service).build())
             .build())
         .build();
-    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
+    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, timeoutRunnable);
 
     publisher.publish(topic, message);
     return consumerFuture;
@@ -87,7 +87,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
         .setMessageId(id)
         .setReadRequest(ReadRequest.getDefaultInstance())
         .build();
-    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
+    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, timeoutRunnable);
 
     publisher.publish(topic, message);
     return consumerFuture;
@@ -104,7 +104,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
             .setService(ServiceDescriptor.newBuilder().putAllTags(service).build())
             .build())
         .build();
-    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, exceptionConsumer);
+    timeoutRegistry.put(id, consumerFuture, DEFAULT_TIMEOUT_MS, timeoutRunnable);
 
     publisher.publish(topic, message);
     return consumerFuture;

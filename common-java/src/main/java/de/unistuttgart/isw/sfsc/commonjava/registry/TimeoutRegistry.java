@@ -6,12 +6,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TimeoutRegistry<K, V> implements AutoCloseable {
+
+  public static final int DEFAULT_TIMEOUT_MS = 500;
 
   private static final Logger logger = LoggerFactory.getLogger(TimeoutRegistry.class);
 
@@ -19,10 +19,10 @@ public class TimeoutRegistry<K, V> implements AutoCloseable {
   private final ScheduledExecutorService scheduledExecutorService = Executors
       .newScheduledThreadPool(0, new ExceptionLoggingThreadFactory(getClass().getName(), logger));
 
-  public void put(K key, V value, int timeoutMs, Consumer<Exception> exceptionConsumer) {
+  public void put(K key, V value, int timeoutMs, Runnable timeoutRunnable) {
     ScheduledFuture<?> scheduledFuture = scheduledExecutorService.schedule(() -> {
           if (map.remove(key) != null) {
-            exceptionConsumer.accept(new TimeoutException());
+            timeoutRunnable.run();
           }
         },
         timeoutMs,
