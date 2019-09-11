@@ -1,7 +1,6 @@
 package de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.Frame;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,12 +36,8 @@ public enum SubProtocol implements Frame {
     return Arrays.copyOfRange(typeAndTopicFrame, TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION + 1, typeAndTopicFrame.length);
   }
 
-  public static StringValue getTopicMessage(byte[] typeAndTopicFrame) throws InvalidProtocolBufferException {
-    return StringValue.parseFrom(getRawTopic(typeAndTopicFrame));
-  }
-
-  public static String getTopic(byte[] typeAndTopicFrame) throws InvalidProtocolBufferException {
-    return getTopicMessage(typeAndTopicFrame).getValue();
+  public static String getTopic(byte[] typeAndTopicFrame) {
+    return ByteString.copyFrom(getRawTopic(typeAndTopicFrame)).toStringUtf8();
   }
 
   public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, byte[] topic) {
@@ -52,12 +47,8 @@ public enum SubProtocol implements Frame {
     return data;
   }
 
-  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, StringValue topic) {
-    return buildTypeAndTopicFrame(subscriptionType, topic.toByteArray());
-  }
-
   public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, String topic) {
-    return buildTypeAndTopicFrame(subscriptionType, StringValue.newBuilder().setValue(topic).build());
+    return buildTypeAndTopicFrame(subscriptionType, ByteString.copyFromUtf8(topic).toByteArray());
   }
 
   public enum SubscriptionType {
