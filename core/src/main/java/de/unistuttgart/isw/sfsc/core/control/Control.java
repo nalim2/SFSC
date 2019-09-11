@@ -1,7 +1,6 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
 import de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox.HighLevelInbox;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.Forwarder;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
@@ -34,10 +33,7 @@ public class Control implements AutoCloseable {
     highLevelInbox.add(registryManager);
 
     reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), highLevelInbox);
-
-    reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(),
-        new Forwarder(pubSubConnection.subscriptionManager().outbox())
-            .andThen(new SubscriptionEventProcessor(sessionManager)));
+    reactiveSubscriptionInbox = ReactiveInbox.create(pubSubConnection.subEventInbox(), new SubscriptionEventProcessor(sessionManager));
   }
 
   public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)
