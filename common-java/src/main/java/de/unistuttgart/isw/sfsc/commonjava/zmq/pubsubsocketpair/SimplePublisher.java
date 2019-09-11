@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
@@ -21,19 +21,11 @@ public class SimplePublisher implements Publisher {
     outbox.add(message);
   }
 
-  public void publish(StringValue topic, byte[] data) {
-    publish(topic.toByteArray(), data);
-  }
-
   public void publish(String topic, byte[] data) {
-   publish(StringValue.newBuilder().setValue(topic).build(), data);
+   publish(ByteString.copyFromUtf8(topic).toByteArray(), data);
   }
 
   public void publish(byte[] topic, Message data) {
-    publish(topic, data.toByteArray());
-  }
-
-  public void publish(StringValue topic, Message data) {
     publish(topic, data.toByteArray());
   }
 

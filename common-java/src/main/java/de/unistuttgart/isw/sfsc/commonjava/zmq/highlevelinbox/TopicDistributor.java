@@ -2,8 +2,7 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.ByteString;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -25,16 +24,12 @@ class TopicDistributor implements Consumer<byte[][]> {
 
   @Override
   public void accept(byte[][] message) {
-    try {
-      StringValue topic = TOPIC_FRAME.get(message, StringValue.parser());
-      topicListeners.forEach(topicListener -> {
-        if (topicListener.test(topic.getValue())) {
-          topicListener.processMessage(message); //for performance reasons, all consumers share the original array //todo executor?
-        }
-      });
-    } catch (InvalidProtocolBufferException e) {
-      logger.warn("Received malformed topic", e);
-    }
+    String topic = ByteString.copyFrom(TOPIC_FRAME.get(message)).toStringUtf8();
+    topicListeners.forEach(topicListener -> {
+      if (topicListener.test(topic)) {
+        topicListener.processMessage(message); //for performance reasons, all consumers share the original array //todo executor?
+      }
+    });
   }
 
 }

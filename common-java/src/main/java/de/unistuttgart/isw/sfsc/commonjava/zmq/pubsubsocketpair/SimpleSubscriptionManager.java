@@ -2,7 +2,7 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.buildTypeAndTopicFrame;
 
-import com.google.protobuf.StringValue;
+import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.SubscriptionType;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.SubscriptionManager;
@@ -22,13 +22,8 @@ class SimpleSubscriptionManager implements SubscriptionManager {
   }
 
   @Override
-  public void subscribe(StringValue topic) {
-    subscribe(topic.toByteArray());
-  }
-
-  @Override
   public void subscribe(String topic) {
-    subscribe(StringValue.newBuilder().setValue(topic).build());
+    subscribe(ByteString.copyFromUtf8(topic).toByteArray());
   }
 
   @Override
@@ -37,13 +32,8 @@ class SimpleSubscriptionManager implements SubscriptionManager {
   }
 
   @Override
-  public void unsubscribe(StringValue topic) {
-    unsubscribe(topic.toByteArray());
-  }
-
-  @Override
   public void unsubscribe(String topic) {
-    unsubscribe(StringValue.newBuilder().setValue(topic).build());
+    unsubscribe(ByteString.copyFromUtf8(topic).toByteArray());
   }
 
   @Override

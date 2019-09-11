@@ -2,7 +2,6 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.processors;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.SubscriptionType;
 import java.util.function.Consumer;
@@ -23,7 +22,6 @@ public class SubscriptionEventProcessor implements Consumer<byte[][]> {
   public void accept(byte[][] subscriptionMessage) {
     byte[] typeAndTopicFrame = TYPE_AND_TOPIC_FRAME.get(subscriptionMessage);
     SubscriptionType subscriptionType = SubProtocol.getSubscriptionType(typeAndTopicFrame);
-    try {
       switch (subscriptionType) {
         case SUBSCRIPTION: {
           String topic = SubProtocol.getTopic(typeAndTopicFrame);
@@ -40,9 +38,6 @@ public class SubscriptionEventProcessor implements Consumer<byte[][]> {
           break;
         }
       }
-    } catch (InvalidProtocolBufferException e) {
-      logger.warn("Received malformed topic", e);
-    }
   }
 
   public interface SubscriptionListener {
