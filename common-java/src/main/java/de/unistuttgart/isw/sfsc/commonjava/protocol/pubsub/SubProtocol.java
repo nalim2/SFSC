@@ -35,9 +35,12 @@ public enum SubProtocol implements Frame {
   public static byte[] getRawTopic(byte[] typeAndTopicFrame) {
     return Arrays.copyOfRange(typeAndTopicFrame, TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION + 1, typeAndTopicFrame.length);
   }
+  public static ByteString getTopicMessage(byte[] typeAndTopicFrame) {
+    return ByteString.copyFrom(getRawTopic(typeAndTopicFrame));
+  }
 
   public static String getTopic(byte[] typeAndTopicFrame) {
-    return ByteString.copyFrom(getRawTopic(typeAndTopicFrame)).toStringUtf8();
+    return getTopicMessage(typeAndTopicFrame).toStringUtf8();
   }
 
   public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, byte[] topic) {
@@ -47,8 +50,12 @@ public enum SubProtocol implements Frame {
     return data;
   }
 
+  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, ByteString topic) {
+    return buildTypeAndTopicFrame(subscriptionType, topic.toByteArray());
+  }
+
   public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, String topic) {
-    return buildTypeAndTopicFrame(subscriptionType, ByteString.copyFromUtf8(topic).toByteArray());
+    return buildTypeAndTopicFrame(subscriptionType, ByteString.copyFromUtf8(topic));
   }
 
   public enum SubscriptionType {
