@@ -48,7 +48,7 @@ class RegistryManager implements TopicListener {
       RegistryMessage registryMessage = PAYLOAD_FRAME.get(message, RegistryMessage.parser());
       switch (registryMessage.getPayloadCase()) {
         case CREATE_REQUEST: {
-          CreateRequest createRequest = PAYLOAD_FRAME.get(message, CreateRequest.parser());
+          CreateRequest createRequest = registryMessage.getCreateRequest();
           ServiceDescriptor serviceDescriptor = createRequest.getService();
           registry.create(serviceDescriptor);
           byte[] topic = TOPIC_FRAME.get(message);
@@ -68,7 +68,7 @@ class RegistryManager implements TopicListener {
           break;
         }
         case DELETE_REQUEST: {
-          DeleteRequest deleteRequest = PAYLOAD_FRAME.get(message, DeleteRequest.parser());
+          DeleteRequest deleteRequest = registryMessage.getDeleteRequest();
           registry.delete(deleteRequest.getService());
           byte[] topic = TOPIC_FRAME.get(message);
           RegistryMessage payload = RegistryMessage.newBuilder(registryMessage)
