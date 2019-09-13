@@ -3,8 +3,8 @@ package de.unistuttgart.isw.sfsc.benchmark.io;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
-import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 

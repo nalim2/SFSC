@@ -2,8 +2,8 @@ package de.unistuttgart.isw.sfsc.example;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
-import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 

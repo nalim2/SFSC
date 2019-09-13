@@ -1,7 +1,7 @@
-package de.unistuttgart.isw.sfsc.client.adapter;
+package de.unistuttgart.isw.sfsc.client.adapter.raw;
 
-import de.unistuttgart.isw.sfsc.client.adapter.control.ControlClient;
-import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.ControlClient;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
@@ -43,6 +43,14 @@ public class RawAdapter implements AutoCloseable {
 
   public PubSubConnection dataConnection() {
     return dataPubSubSocketPair.connection();
+  }
+
+  public String coreId(){
+    return controlClient.welcomeMessage().getCoreId();
+  }
+
+  public String adapterId(){
+    return controlClient.welcomeMessage().getAdapterId();
   }
 
   @Override

@@ -1,10 +1,10 @@
-package de.unistuttgart.isw.sfsc.client.adapter.control;
+package de.unistuttgart.isw.sfsc.client.adapter.raw.control;
 
-import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryClient;
-import de.unistuttgart.isw.sfsc.client.adapter.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.client.adapter.control.session.SessionManager;
-import de.unistuttgart.isw.sfsc.client.adapter.control.session.SimpleSessionManager;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.AdapterRegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.session.SessionManager;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.session.SimpleSessionManager;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.ComfortInbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;

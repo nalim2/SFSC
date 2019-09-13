@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.client.adapter;
+package de.unistuttgart.isw.sfsc.client.adapter.raw;
 
 public class BootstrapConfiguration {
   private final String coreHost;

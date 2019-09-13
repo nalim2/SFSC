@@ -2,7 +2,7 @@ package de.unistuttgart.isw.sfsc.benchmark.io;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
-import de.unistuttgart.isw.sfsc.client.adapter.RawAdapter;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;

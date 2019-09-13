@@ -1,9 +1,9 @@
-package de.unistuttgart.isw.sfsc.client.adapter.control.session;
+package de.unistuttgart.isw.sfsc.client.adapter.raw.control.session;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.client.adapter.control.registry.AdapterRegistryClient;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.AdapterRegistryClient;
 import de.unistuttgart.isw.sfsc.commonjava.util.ConsumerFuture;
 import de.unistuttgart.isw.sfsc.protocol.session.SessionMessage;
 import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
