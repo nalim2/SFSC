@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-class TopicDistributor implements Consumer<byte[][]> {
+class Multiplexer implements Consumer<byte[][]> {
 
   private final Set<TopicListener> topicListeners = ConcurrentHashMap.newKeySet();
 
