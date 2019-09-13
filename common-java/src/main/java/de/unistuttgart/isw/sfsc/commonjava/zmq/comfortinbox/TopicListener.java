@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.highlevelinbox;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox;
 
 public interface TopicListener {
 
