@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.example.plc4x.messages;
+option java_multiple_files = true;
+
+message Plc4xMessage {
+  Type type = 1;
+  string name = 2;
+  string query = 3;
+  bytes value = 4;
+
+  enum Type {
+    READ_REQUEST = 0;
+    READ_RESPONSE = 1;
+    WRITE_REQUEST = 2;
+    WRITE_RESPONSE = 3;
+  }
+
+}

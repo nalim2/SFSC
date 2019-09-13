@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.client.adapter.control.registry;
+package de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 import static de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry.DEFAULT_TIMEOUT_MS;

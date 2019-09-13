@@ -2,7 +2,7 @@ package de.unistuttgart.isw.sfsc.benchmark;
 
 import de.unistuttgart.isw.sfsc.benchmark.evaluation.Evaluator;
 import de.unistuttgart.isw.sfsc.benchmark.io.SfscBenchmark;
-import de.unistuttgart.isw.sfsc.client.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.BootstrapConfiguration;
 
 public class Main {
 

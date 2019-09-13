@@ -10,4 +10,6 @@ message WelcomeMessage {
   int32 control_sub_port = 3;
   int32 data_pub_port = 4;
   int32 data_sub_port = 5;
+  string coreId = 6;
+  string adapterId = 7;
 }

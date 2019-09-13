@@ -14,6 +14,7 @@
 
   <properties>
     <apache-commons-math3.version>3.6.1</apache-commons-math3.version>
+    <plc4j-driver-opcua.version>0.4.0</plc4j-driver-opcua.version>
   </properties>
 
   <dependencies>
@@ -25,6 +26,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <version>${apache-commons-math3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.plc4x</groupId>
+      <artifactId>plc4j-driver-opcua</artifactId>
+      <version>${plc4j-driver-opcua.version}</version>
     </dependency>
   </dependencies>
 
