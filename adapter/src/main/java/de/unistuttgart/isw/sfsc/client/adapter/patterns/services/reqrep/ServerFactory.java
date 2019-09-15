@@ -50,7 +50,7 @@ public class ServerFactory {
 
     @Override
     public void accept(SfscMessage sfscMessage) {
-      if (sfscMessage.getError() != null) {
+      if (sfscMessage.getError() != SfscError.NO_ERROR) {
         logger.warn("Received message with error {}", sfscMessage.getError());
       } else {
         try {
