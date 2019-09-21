@@ -2,6 +2,7 @@ package de.unistuttgart.isw.sfsc.client.adapter.raw.control.session;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.AdapterRegistryClient;
 import de.unistuttgart.isw.sfsc.commonjava.util.ConsumerFuture;
@@ -24,10 +25,10 @@ public class SimpleSessionManager implements SessionManager {
   private final Set<String> missing = new HashSet<>(TOPICS);
   private final ConsumerFuture<WelcomeMessage, WelcomeMessage> welcomeMessageConsumer = new ConsumerFuture<>(x -> x);
   private final FutureTask<Void> ready = new FutureTask<>(() -> null);
-  private final String topic;
+  private final ByteString topic;
 
   SimpleSessionManager(String name) {
-    topic = TOPIC + "://" + name;
+    topic = ByteString.copyFromUtf8(TOPIC + "://" + name);
   }
 
   public static SimpleSessionManager create(String name) {
@@ -35,12 +36,12 @@ public class SimpleSessionManager implements SessionManager {
   }
 
   @Override
-  public String getTopic() {
+  public ByteString getTopic() {
     return topic;
   }
 
   @Override
-  public boolean test(String topic) {
+  public boolean test(ByteString topic) {
     return topic.equals(this.topic);
   }
 
@@ -75,7 +76,8 @@ public class SimpleSessionManager implements SessionManager {
   }
 
   @Override
-  public void onSubscription(String topic) {
+  public void onSubscription(ByteString topicByteString) {
+    String topic = topicByteString.toStringUtf8();
     logger.debug("Received subscription to topic {}", topic);
     missing.remove(topic);
     if (missing.isEmpty()) {
@@ -84,8 +86,8 @@ public class SimpleSessionManager implements SessionManager {
   }
 
   @Override
-  public void onUnsubscription(String topic) {
-    logger.debug("Received unsubscription from topic {}", topic);
+  public void onUnsubscription(ByteString topic) {
+    logger.debug("Received unsubscription from topic {}", topic.toStringUtf8());
   }
 
   @Override

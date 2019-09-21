@@ -3,14 +3,14 @@ package de.unistuttgart.isw.sfsc.client.adapter.patterns.services.pubsub;
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 
 import com.google.protobuf.ByteString;
+import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessage;
+import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessageImpl;
+import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.ComfortInbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
 import de.unistuttgart.isw.sfsc.patterns.SfscError;
 import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor.Tags;
-import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessage;
-import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessageImpl;
-import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -31,15 +31,15 @@ public class SubscriberFactory {
       Map<String, ByteString> subscriberTags = tagCompleter.completeSubscriber(tags);
 
       TopicListener topicListener = new TopicListener() {
-        String topic = subscriberTags.get(Tags.TOPIC.name()).toStringUtf8();
+        ByteString topic = subscriberTags.get(Tags.TOPIC.name());
 
         @Override
-        public String getTopic() {
+        public ByteString getTopic() {
           return topic;
         }
 
         @Override
-        public boolean test(String topic) {
+        public boolean test(ByteString topic) {
           return this.topic.equals(topic);
         }
 

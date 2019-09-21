@@ -3,6 +3,7 @@ package de.unistuttgart.isw.sfsc.core.control;
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
@@ -20,7 +21,8 @@ import org.slf4j.LoggerFactory;
 
 class RegistryManager implements TopicListener {
 
-  public static final String TOPIC = "registry";
+  private static final String TOPIC = "registry";
+  private static final ByteString TOPIC_BYTE_STRING = ByteString.copyFromUtf8(TOPIC);
 
   private static final Logger logger = LoggerFactory.getLogger(RegistryManager.class);
 
@@ -33,13 +35,13 @@ class RegistryManager implements TopicListener {
   }
 
   @Override
-  public String getTopic() {
-    return TOPIC;
+  public ByteString getTopic() {
+    return TOPIC_BYTE_STRING;
   }
 
   @Override
-  public boolean test(String topic) {
-    return topic.startsWith(TOPIC);
+  public boolean test(ByteString topic) {
+    return topic.toStringUtf8().startsWith(TOPIC);
   }
 
   @Override

@@ -37,11 +37,11 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   private final Runnable timeoutRunnable = ()-> logger.warn("registry timeout");
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
   private final Publisher publisher;
-  private final String topic;
+  private final ByteString topic;
 
   AdapterRegistryClient(Publisher publisher, String name) {
     this.publisher = publisher;
-    topic = TOPIC + "://" + name;
+    topic = ByteString.copyFromUtf8(TOPIC + "://" + name);
   }
 
   public static AdapterRegistryClient create(Publisher publisher, String name) {
@@ -111,12 +111,12 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   }
 
   @Override
-  public String getTopic() {
+  public ByteString getTopic() {
     return topic;
   }
 
   @Override
-  public boolean test(String topic) {
+  public boolean test(ByteString topic) {
     return topic.equals(this.topic);
   }
 

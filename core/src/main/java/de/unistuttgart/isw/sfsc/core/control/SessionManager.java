@@ -1,5 +1,6 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
+import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
@@ -12,7 +13,8 @@ import org.slf4j.LoggerFactory;
 
 class SessionManager implements SubscriptionListener, TopicListener {
 
-  public static final String TOPIC = "session";
+  private static final String TOPIC = "session";
+  private final ByteString TOPIC_BYTE_STRING = ByteString.copyFromUtf8(TOPIC);
 
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
   private final Publisher publisher;
@@ -24,15 +26,15 @@ class SessionManager implements SubscriptionListener, TopicListener {
   }
 
   @Override
-  public void onSubscription(String topic) {
-    logger.info("Received subscription to topic {}", topic);
+  public void onSubscription(ByteString topic) {
+    logger.info("Received subscription to topic {}", topic.toStringUtf8());
     SessionMessage payload = SessionMessage.newBuilder().setWelcomeMessage(welcome).build();
     publisher.publish(topic, payload);
   }
 
   @Override
-  public void onUnsubscription(String topic) {
-    logger.info("Received unsubscription from topic {}", topic);
+  public void onUnsubscription(ByteString topic) {
+    logger.info("Received unsubscription from topic {}", topic.toStringUtf8());
   }
 
   static WelcomeMessage createWelcomeMessage(Configuration<CoreOption> configuration) {
@@ -46,12 +48,12 @@ class SessionManager implements SubscriptionListener, TopicListener {
   }
 
   @Override
-  public String getTopic() {
-    return TOPIC;
+  public ByteString getTopic() {
+    return TOPIC_BYTE_STRING;
   }
 
   @Override
-  public boolean test(String s) {
+  public boolean test(ByteString topic) {
     return false;
   }
 
