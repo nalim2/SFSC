@@ -1,14 +1,14 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager;
 
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.SubscriptionManager;
 import java.util.function.Consumer;
 
-public class ComfortInbox implements Consumer<byte[][]> {
+public class InboxManager implements Consumer<byte[][]> {
 
   private final Multiplexer multiplexer = new Multiplexer();
   private final SubscriptionManager subscriptionManager;
 
-  public ComfortInbox(SubscriptionManager subscriptionManager) {
+  public InboxManager(SubscriptionManager subscriptionManager) {
     this.subscriptionManager = subscriptionManager;
   }
 

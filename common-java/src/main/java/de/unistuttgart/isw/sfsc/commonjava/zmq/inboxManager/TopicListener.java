@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager;
 
 import com.google.protobuf.ByteString;
 

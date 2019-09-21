@@ -8,7 +8,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.util.ConsumerFuture;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateResponse;

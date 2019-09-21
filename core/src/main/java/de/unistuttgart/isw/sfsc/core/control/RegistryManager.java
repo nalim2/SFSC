@@ -5,7 +5,7 @@ import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.T
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;

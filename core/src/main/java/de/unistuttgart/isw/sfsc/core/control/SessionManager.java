@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.core.control;
 
 import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
