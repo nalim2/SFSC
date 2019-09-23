@@ -35,8 +35,8 @@ class RegistryManager implements TopicListener {
   }
 
   @Override
-  public ByteString getTopic() {
-    return TOPIC_BYTE_STRING;
+  public Set<ByteString> getTopics() {
+    return Set.of(TOPIC_BYTE_STRING);
   }
 
   @Override

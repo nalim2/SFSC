@@ -13,12 +13,12 @@ public class InboxManager implements Consumer<byte[][]> {
   }
 
   public void addTopic(TopicListener topicListener) {
-    subscriptionManager.subscribe(topicListener.getTopic());
+    topicListener.getTopics().forEach(subscriptionManager::subscribe);
     multiplexer.add(topicListener);
   }
 
   public void removeTopic(TopicListener topicListener) {
-    subscriptionManager.unsubscribe(topicListener.getTopic());
+    topicListener.getTopics().forEach(subscriptionManager::unsubscribe);
     multiplexer.remove(topicListener);
   }
 

@@ -36,8 +36,8 @@ public class SimpleSessionManager implements SessionManager {
   }
 
   @Override
-  public ByteString getTopic() {
-    return topic;
+  public Set<ByteString> getTopics() {
+    return Set.of(topic);
   }
 
   @Override

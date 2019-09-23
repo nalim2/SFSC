@@ -111,8 +111,8 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   }
 
   @Override
-  public ByteString getTopic() {
-    return topic;
+  public Set<ByteString> getTopics() {
+    return Set.of(topic);
   }
 
   @Override

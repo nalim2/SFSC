@@ -8,6 +8,7 @@ import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.protocol.session.SessionMessage;
 import de.unistuttgart.isw.sfsc.protocol.session.WelcomeMessage;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,8 @@ class SessionManager implements SubscriptionListener, TopicListener {
   }
 
   @Override
-  public ByteString getTopic() {
-    return TOPIC_BYTE_STRING;
+  public Set<ByteString> getTopics() {
+    return Set.of(TOPIC_BYTE_STRING);
   }
 
   @Override
