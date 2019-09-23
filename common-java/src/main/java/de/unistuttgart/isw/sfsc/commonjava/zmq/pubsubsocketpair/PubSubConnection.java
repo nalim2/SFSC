@@ -2,13 +2,12 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
 
 public interface PubSubConnection {
 
-  Publisher publisher();
+  OutputPublisher publisher();
 
   Inbox dataInbox();
 
@@ -33,7 +32,7 @@ public interface PubSubConnection {
     Outbox outbox();
   }
 
-  interface Publisher {
+  interface OutputPublisher {
 
     void publish(byte[] topic, byte[] data);
 

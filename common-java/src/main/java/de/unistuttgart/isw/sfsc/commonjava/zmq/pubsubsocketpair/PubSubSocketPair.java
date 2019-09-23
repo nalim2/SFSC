@@ -2,7 +2,7 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.SubscriptionManager;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
@@ -16,13 +16,13 @@ public class PubSubSocketPair implements AutoCloseable {
   private final ReactiveSocket publisherSocket;
   private final ReactiveSocket subscriberSocket;
   private final SubscriptionManager subscriptionManager;
-  private final Publisher publisher;
+  private final OutputPublisher publisher;
 
   PubSubSocketPair(ReactiveSocket publisherSocket, ReactiveSocket subscriberSocket) {
     this.publisherSocket = publisherSocket;
     this.subscriberSocket = subscriberSocket;
     subscriptionManager = new SimpleSubscriptionManager(subscriberSocket.getOutbox());
-    publisher = new SimplePublisher(publisherSocket.getOutbox());
+    publisher = new SimpleOutputPublisher(publisherSocket.getOutbox());
   }
 
   public static PubSubSocketPair create(Reactor reactor) throws ExecutionException, InterruptedException {
@@ -34,7 +34,7 @@ public class PubSubSocketPair implements AutoCloseable {
   public PubSubConnection connection(){
     return new PubSubConnection() {
       @Override
-      public Publisher publisher() {
+      public OutputPublisher publisher() {
         return publisher;
       }
 

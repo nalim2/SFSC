@@ -2,16 +2,15 @@ package de.unistuttgart.isw.sfsc.client.adapter.patterns.services.reqrep;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
-import de.unistuttgart.isw.sfsc.patterns.reqrep.RequestReplyMessage;
-import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor.Tags;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessage;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessageImpl;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.pubsub.SubscriberFactory;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
+import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
+import de.unistuttgart.isw.sfsc.patterns.reqrep.RequestReplyMessage;
+import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor.Tags;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -24,13 +23,13 @@ import org.slf4j.LoggerFactory;
 public class ClientFactory {
 
   private final TagCompleter tagCompleter;
-  private final PubSubConnection.Publisher publisher;
+  private final OutputPublisher publisher;
   private final RegistryClient registryClient;
   private final TimeoutRegistry<Integer, Consumer<SfscMessage>> timeoutRegistry;
   private final Supplier<Integer> idGenerator = new AtomicInteger()::getAndIncrement;
   private final SubscriberFactory subscriberFactory;
 
-  public ClientFactory(TagCompleter tagCompleter, Publisher publisher, RegistryClient registryClient,
+  public ClientFactory(TagCompleter tagCompleter, OutputPublisher publisher, RegistryClient registryClient,
       TimeoutRegistry<Integer, Consumer<SfscMessage>> timeoutRegistry, SubscriberFactory subscriberFactory) {
     this.tagCompleter = tagCompleter;
     this.publisher = publisher;

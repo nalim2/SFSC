@@ -2,15 +2,14 @@ package de.unistuttgart.isw.sfsc.client.adapter.patterns.services.reqrep;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
-import de.unistuttgart.isw.sfsc.patterns.SfscError;
-import de.unistuttgart.isw.sfsc.patterns.reqrep.RequestReplyMessage;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessage;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessageImpl;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.pubsub.Subscriber;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.pubsub.SubscriberFactory;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
+import de.unistuttgart.isw.sfsc.patterns.SfscError;
+import de.unistuttgart.isw.sfsc.patterns.reqrep.RequestReplyMessage;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -22,9 +21,9 @@ public class ServerFactory {
 
   private final TagCompleter tagCompleter;
   private final SubscriberFactory subscriberFactory;
-  private final PubSubConnection.Publisher publisher;
+  private final OutputPublisher publisher;
 
-  public ServerFactory(TagCompleter tagCompleter, PubSubConnection.Publisher publisher, SubscriberFactory subscriberFactory) {
+  public ServerFactory(TagCompleter tagCompleter, OutputPublisher publisher, SubscriberFactory subscriberFactory) {
     this.tagCompleter = tagCompleter;
     this.publisher = publisher;
     this.subscriberFactory = subscriberFactory;
@@ -41,9 +40,9 @@ public class ServerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerConsumer.class);
     private final Function<SfscMessage, byte[]> server;
-    private final PubSubConnection.Publisher publisher;
+    private final OutputPublisher publisher;
 
-    ServerConsumer(Function<SfscMessage, byte[]> server, Publisher publisher) {
+    ServerConsumer(Function<SfscMessage, byte[]> server, OutputPublisher publisher) {
       this.server = server;
       this.publisher = publisher;
     }

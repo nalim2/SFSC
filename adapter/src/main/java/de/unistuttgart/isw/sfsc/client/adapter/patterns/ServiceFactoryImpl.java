@@ -1,10 +1,6 @@
 package de.unistuttgart.isw.sfsc.client.adapter.patterns;
 
 import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
-import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.ComfortInbox;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.Service;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.pubsub.Publisher;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.pubsub.PublisherFactory;
@@ -15,6 +11,10 @@ import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.reqrep.ClientFa
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.reqrep.Server;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.reqrep.ServerFactory;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
+import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
+import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxManager;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -35,11 +35,11 @@ public class ServiceFactoryImpl implements ServiceFactory, AutoCloseable {
 
   public ServiceFactoryImpl(RawAdapter rawAdapter) {
     this.rawAdapter = rawAdapter;
-    ComfortInbox comfortInbox = new ComfortInbox(rawAdapter.dataConnection().subscriptionManager());
-    reactiveInbox = ReactiveInbox.create(rawAdapter.dataConnection().dataInbox(), comfortInbox);
+    InboxManager inboxManager = new InboxManager(rawAdapter.dataConnection().subscriptionManager());
+    reactiveInbox = ReactiveInbox.create(rawAdapter.dataConnection().dataInbox(), inboxManager);
     TagCompleter tagCompleter = new TagCompleter(rawAdapter.adapterId(), rawAdapter.coreId());
     publisherFactory = new PublisherFactory(tagCompleter, rawAdapter.dataConnection().publisher(), rawAdapter.registryClient());
-    subscriberFactory = new SubscriberFactory(tagCompleter, rawAdapter.registryClient(), comfortInbox);
+    subscriberFactory = new SubscriberFactory(tagCompleter, rawAdapter.registryClient(), inboxManager);
     serverFactory = new ServerFactory(tagCompleter, rawAdapter.dataConnection().publisher(), subscriberFactory);
     clientFactory = new ClientFactory(tagCompleter, rawAdapter.dataConnection().publisher(), rawAdapter.registryClient(), timeoutRegistry, subscriberFactory);
   }

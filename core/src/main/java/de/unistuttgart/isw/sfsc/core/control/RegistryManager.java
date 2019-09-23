@@ -3,9 +3,10 @@ package de.unistuttgart.isw.sfsc.core.control;
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.PAYLOAD_FRAME;
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateResponse;
@@ -20,26 +21,27 @@ import org.slf4j.LoggerFactory;
 
 class RegistryManager implements TopicListener {
 
-  public static final String TOPIC = "registry";
+  private static final String TOPIC = "registry";
+  private static final ByteString TOPIC_BYTE_STRING = ByteString.copyFromUtf8(TOPIC);
 
   private static final Logger logger = LoggerFactory.getLogger(RegistryManager.class);
 
-  private final Publisher publisher;
+  private final OutputPublisher publisher;
   private final Registry registry;
 
-  RegistryManager(Publisher publisher, Registry registry) {
+  RegistryManager(OutputPublisher publisher, Registry registry) {
     this.publisher = publisher;
     this.registry = registry;
   }
 
   @Override
-  public String getTopic() {
-    return TOPIC;
+  public Set<ByteString> getTopics() {
+    return Set.of(TOPIC_BYTE_STRING);
   }
 
   @Override
-  public boolean test(String topic) {
-    return topic.startsWith(TOPIC);
+  public boolean test(ByteString topic) {
+    return topic.toStringUtf8().startsWith(TOPIC);
   }
 
   @Override

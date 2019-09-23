@@ -2,16 +2,15 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
 
-public class SimplePublisher implements Publisher {
+public class SimpleOutputPublisher implements OutputPublisher {
 
   private final Outbox outbox;
 
-  SimplePublisher(Outbox outbox) {
+  SimpleOutputPublisher(Outbox outbox) {
     this.outbox = outbox;
   }
 

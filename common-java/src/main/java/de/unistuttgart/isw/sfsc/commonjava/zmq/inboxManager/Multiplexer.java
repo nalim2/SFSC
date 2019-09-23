@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.TOPIC_FRAME;
 
@@ -21,7 +21,7 @@ class Multiplexer implements Consumer<byte[][]> {
 
   @Override
   public void accept(byte[][] message) {
-    String topic = ByteString.copyFrom(TOPIC_FRAME.get(message)).toStringUtf8();
+    ByteString topic = ByteString.copyFrom(TOPIC_FRAME.get(message));
     topicListeners.forEach(topicListener -> {
       if (topicListener.test(topic)) {
         topicListener.processMessage(message); //for performance reasons, all consumers share the original array //todo executor?

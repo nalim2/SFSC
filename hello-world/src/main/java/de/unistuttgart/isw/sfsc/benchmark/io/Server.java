@@ -5,7 +5,7 @@ import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +34,7 @@ class Server implements AutoCloseable {
   void start() {
     executorService.execute(() -> {
       final Inbox inbox = adapter.dataConnection().dataInbox();
-      final Publisher publisher = adapter.dataConnection().publisher();
+      final OutputPublisher publisher = adapter.dataConnection().publisher();
       while (!Thread.interrupted()) {
         try {
           final byte[][] message = inbox.take();

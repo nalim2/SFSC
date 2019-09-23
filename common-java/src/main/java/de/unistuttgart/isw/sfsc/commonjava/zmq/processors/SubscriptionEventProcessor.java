@@ -2,6 +2,7 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.processors;
 
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
 
+import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.SubscriptionType;
 import java.util.function.Consumer;
@@ -24,12 +25,12 @@ public class SubscriptionEventProcessor implements Consumer<byte[][]> {
     SubscriptionType subscriptionType = SubProtocol.getSubscriptionType(typeAndTopicFrame);
       switch (subscriptionType) {
         case SUBSCRIPTION: {
-          String topic = SubProtocol.getTopic(typeAndTopicFrame);
+          ByteString topic = SubProtocol.getTopicMessage(typeAndTopicFrame);
           subscriptionListener.onSubscription(topic);
           break;
         }
         case UNSUBSCRIPTION: {
-          String topic = SubProtocol.getTopic(typeAndTopicFrame);
+          ByteString topic = SubProtocol.getTopicMessage(typeAndTopicFrame);
           subscriptionListener.onUnsubscription(topic);
           break;
         }
@@ -42,8 +43,8 @@ public class SubscriptionEventProcessor implements Consumer<byte[][]> {
 
   public interface SubscriptionListener {
 
-    void onSubscription(String topic);
+    void onSubscription(ByteString topic);
 
-    void onUnsubscription(String topic);
+    void onUnsubscription(ByteString topic);
   }
 }

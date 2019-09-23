@@ -8,8 +8,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.util.ConsumerFuture;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.comfortinbox.TopicListener;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateResponse;
 import de.unistuttgart.isw.sfsc.protocol.registry.DeleteRequest;
@@ -36,15 +36,15 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
   private final Runnable timeoutRunnable = ()-> logger.warn("registry timeout");
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
-  private final Publisher publisher;
-  private final String topic;
+  private final OutputPublisher publisher;
+  private final ByteString topic;
 
-  AdapterRegistryClient(Publisher publisher, String name) {
+  AdapterRegistryClient(OutputPublisher publisher, String name) {
     this.publisher = publisher;
-    topic = TOPIC + "://" + name;
+    topic = ByteString.copyFromUtf8(TOPIC + "://" + name);
   }
 
-  public static AdapterRegistryClient create(Publisher publisher, String name) {
+  public static AdapterRegistryClient create(OutputPublisher publisher, String name) {
     return new AdapterRegistryClient(publisher, name);
   }
 
@@ -111,12 +111,12 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   }
 
   @Override
-  public String getTopic() {
-    return topic;
+  public Set<ByteString> getTopics() {
+    return Set.of(topic);
   }
 
   @Override
-  public boolean test(String topic) {
+  public boolean test(ByteString topic) {
     return topic.equals(this.topic);
   }
 
