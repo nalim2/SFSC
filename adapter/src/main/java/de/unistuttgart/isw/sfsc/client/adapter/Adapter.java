@@ -7,7 +7,7 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxManager;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionTracker;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
 import java.util.concurrent.ExecutionException;
 
@@ -44,7 +44,7 @@ public class Adapter implements AutoCloseable {
     inboxManager.removeTopic(topicListener);
   }
 
-  public Publisher publisher() { 
+  public OutputPublisher publisher() {
     return rawAdapter.dataConnection().publisher();
   }
 

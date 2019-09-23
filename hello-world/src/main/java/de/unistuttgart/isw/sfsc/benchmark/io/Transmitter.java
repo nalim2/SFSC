@@ -2,7 +2,7 @@ package de.unistuttgart.isw.sfsc.benchmark.io;
 
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,11 +14,11 @@ class Transmitter implements AutoCloseable {
   private static final Logger logger = LoggerFactory.getLogger(Transmitter.class);
   private final ScheduledExecutorService scheduledExecutorService = Executors
       .newScheduledThreadPool(0, new ExceptionLoggingThreadFactory("BenchmarkTransmitter", logger));
-  private final Publisher publisher;
+  private final OutputPublisher publisher;
   private final byte[] topic;
   private final MessageSupplier messageSupplier;
 
-  Transmitter(Publisher publisher, byte[] topic, int messageSizeBytes) {
+  Transmitter(OutputPublisher publisher, byte[] topic, int messageSizeBytes) {
     this.publisher = publisher;
     this.topic = topic;
     this.messageSupplier = new MessageSupplier(messageSizeBytes);
@@ -28,7 +28,7 @@ class Transmitter implements AutoCloseable {
     scheduledExecutorService.scheduleAtFixedRate(() -> Transmitter.send(publisher, topic, messageSupplier.get()), 0, periodNs, TimeUnit.NANOSECONDS);
   }
 
-  static void send(Publisher publisher, byte[] topic, Message data) {
+  static void send(OutputPublisher publisher, byte[] topic, Message data) {
     publisher.publish(topic, data);
   }
 

@@ -6,7 +6,7 @@ import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol.T
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.core.hazelcast.Registry;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateRequest;
 import de.unistuttgart.isw.sfsc.protocol.registry.CreateResponse;
@@ -26,10 +26,10 @@ class RegistryManager implements TopicListener {
 
   private static final Logger logger = LoggerFactory.getLogger(RegistryManager.class);
 
-  private final Publisher publisher;
+  private final OutputPublisher publisher;
   private final Registry registry;
 
-  RegistryManager(Publisher publisher, Registry registry) {
+  RegistryManager(OutputPublisher publisher, Registry registry) {
     this.publisher = publisher;
     this.registry = registry;
   }

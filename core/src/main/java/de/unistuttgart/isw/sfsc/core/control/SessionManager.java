@@ -3,7 +3,7 @@ package de.unistuttgart.isw.sfsc.core.control;
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor.SubscriptionListener;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.protocol.session.SessionMessage;
@@ -17,10 +17,10 @@ class SessionManager implements SubscriptionListener, TopicListener {
   private final ByteString TOPIC_BYTE_STRING = ByteString.copyFromUtf8(TOPIC);
 
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
-  private final Publisher publisher;
+  private final OutputPublisher publisher;
   private final WelcomeMessage welcome;
 
-  SessionManager(Configuration<CoreOption> configuration, Publisher publisher) {
+  SessionManager(Configuration<CoreOption> configuration, OutputPublisher publisher) {
     welcome = createWelcomeMessage(configuration);
     this.publisher = publisher;
   }
