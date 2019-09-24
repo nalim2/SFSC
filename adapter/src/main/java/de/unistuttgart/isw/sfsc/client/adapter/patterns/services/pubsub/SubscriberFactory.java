@@ -7,7 +7,7 @@ import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessage;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.SfscMessageImpl;
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxManager;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManager;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
 import de.unistuttgart.isw.sfsc.patterns.SfscError;
 import de.unistuttgart.isw.sfsc.protocol.registry.ServiceDescriptor.Tags;
@@ -20,12 +20,12 @@ public class SubscriberFactory {
 
   private final TagCompleter tagCompleter;
   private final RegistryClient registryClient;
-  private final InboxManager inboxManager;
+  private final InboxTopicManager inboxTopicManager;
 
-  public SubscriberFactory(TagCompleter tagCompleter, RegistryClient registryClient, InboxManager inboxManager) {
+  public SubscriberFactory(TagCompleter tagCompleter, RegistryClient registryClient, InboxTopicManager inboxTopicManager) {
     this.tagCompleter = tagCompleter;
     this.registryClient = registryClient;
-    this.inboxManager = inboxManager;
+    this.inboxTopicManager = inboxTopicManager;
   }
 
   public Subscriber subscriber(Map<String, ByteString> tags, Consumer<SfscMessage> consumer, Executor executor) {
@@ -50,9 +50,9 @@ public class SubscriberFactory {
       }
     };
 
-    inboxManager.addTopic(topicListener);
+    inboxTopicManager.addTopicListener(topicListener);
     return new SubscriberImpl(subscriberTags, () -> {
-      inboxManager.removeTopic(topicListener);
+      inboxTopicManager.removeTopicListener(topicListener);
       registryClient.removeService(subscriberTags);
     });
   }
