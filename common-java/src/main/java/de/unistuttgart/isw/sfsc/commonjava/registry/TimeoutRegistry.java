@@ -1,6 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.registry;
 
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,13 +31,13 @@ public class TimeoutRegistry<K, V> implements AutoCloseable {
     map.put(key, new TimeoutContainer<>(scheduledFuture, value));
   }
 
-  public V remove(K key) {
+  public Optional<V> remove(K key) {
     TimeoutContainer<V> container = map.remove(key);
     if (container != null) {
       container.timeoutRunnableFuture.cancel(true);
-      return container.value;
+      return Optional.of(container.value);
     } else {
-      return null;
+      return Optional.empty();
     }
   }
 
