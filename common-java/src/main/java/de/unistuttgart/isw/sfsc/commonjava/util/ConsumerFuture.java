@@ -11,17 +11,16 @@ import java.util.function.Function;
 
 public class ConsumerFuture<T, U> implements Consumer<T>, Future<U> {
 
-  private final AtomicReference<U> output = new AtomicReference<>();
-  private final FutureTask<U> future = new FutureTask<>(output::get);
-  private final Function<T, U> converter;
+  private final AtomicReference<T> reference = new AtomicReference<>();
+  private final FutureTask<U> future;
 
   public ConsumerFuture(Function<T, U> converter) {
-    this.converter = converter;
+    future = new FutureTask<>(()-> converter.apply(reference.get()));
   }
 
   @Override
-  public void accept(T input) {
-    output.set(converter.apply(input));
+  public void accept(T data) {
+    reference.set(data);
     future.run();
   }
 
