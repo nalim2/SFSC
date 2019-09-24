@@ -13,7 +13,7 @@ import de.unistuttgart.isw.sfsc.client.adapter.patterns.services.reqrep.ServerFa
 import de.unistuttgart.isw.sfsc.client.adapter.patterns.tags.TagCompleter;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
 import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxManager;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManagerImpl;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +35,7 @@ public class ServiceFactoryImpl implements ServiceFactory, AutoCloseable {
 
   public ServiceFactoryImpl(RawAdapter rawAdapter) {
     this.rawAdapter = rawAdapter;
-    InboxManager inboxManager = new InboxManager(rawAdapter.dataConnection().subscriptionManager());
+    InboxTopicManagerImpl inboxManager = new InboxTopicManagerImpl(rawAdapter.dataConnection().subscriptionManager());
     reactiveInbox = ReactiveInbox.create(rawAdapter.dataConnection().dataInbox(), inboxManager);
     TagCompleter tagCompleter = new TagCompleter(rawAdapter.adapterId(), rawAdapter.coreId());
     publisherFactory = new PublisherFactory(tagCompleter, rawAdapter.dataConnection().publisher(), rawAdapter.registryClient());

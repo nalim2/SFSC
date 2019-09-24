@@ -5,7 +5,7 @@ import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.AdapterRegis
 import de.unistuttgart.isw.sfsc.client.adapter.raw.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.control.session.SessionManager;
 import de.unistuttgart.isw.sfsc.client.adapter.raw.control.session.SimpleSessionManager;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxManager;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManagerImpl;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
@@ -43,11 +43,11 @@ public class ControlClient implements AutoCloseable {
     SessionManager sessionManager = SimpleSessionManager.create(name);
     AdapterRegistryClient registryClient = AdapterRegistryClient.create(pubSubConnection.publisher(), name);
 
-    InboxManager inboxManager = new InboxManager(pubSubConnection.subscriptionManager());
-    inboxManager.addTopic(sessionManager);
-    inboxManager.addTopic(registryClient);
+    InboxTopicManagerImpl inboxTopicManager = new InboxTopicManagerImpl(pubSubConnection.subscriptionManager());
+    inboxTopicManager.addTopicListener(sessionManager);
+    inboxTopicManager.addTopicListener(registryClient);
 
-    ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), inboxManager);
+    ReactiveInbox reactiveDataInbox = ReactiveInbox.create(pubSubConnection.dataInbox(), inboxTopicManager);
 
     pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
     WelcomeMessage welcomeMessage = sessionManager.getWelcomeMessage().get();//todo log state
