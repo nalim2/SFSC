@@ -34,7 +34,7 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   private static final Logger logger = LoggerFactory.getLogger(AdapterRegistryClient.class);
 
   private final Supplier<Integer> idSupplier = new AtomicInteger()::getAndIncrement;
-  private final Runnable timeoutRunnable = ()-> logger.warn("registry timeout");
+  private final Runnable timeoutRunnable = () -> logger.warn("registry timeout");
   private final TimeoutRegistry<Integer, Consumer<? super Message>> timeoutRegistry = new TimeoutRegistry<>();
   private final OutputPublisher publisher;
   private final ByteString topic;
@@ -124,27 +124,27 @@ public class AdapterRegistryClient implements RegistryClient, TopicListener, Aut
   public void processMessage(byte[][] message) {
     try {
       RegistryMessage reply = PAYLOAD_FRAME.get(message, RegistryMessage.parser());
-      Consumer<? super Message> consumer = timeoutRegistry.remove(reply.getMessageId());
-      if (consumer != null) {
-        switch (reply.getPayloadCase()) {
-          case CREATE_RESPONSE: {
-            consumer.accept(reply.getCreateResponse());
-            break;
+      timeoutRegistry.remove(reply.getMessageId()).ifPresent(consumer -> {
+            switch (reply.getPayloadCase()) {
+              case CREATE_RESPONSE: {
+                consumer.accept(reply.getCreateResponse());
+                break;
+              }
+              case READ_RESPONSE: {
+                consumer.accept(reply.getReadResponse());
+                break;
+              }
+              case DELETE_RESPONSE: {
+                consumer.accept(reply.getDeleteResponse());
+                break;
+              }
+              default: {
+                logger.warn("received registry message with currently unsupported type {}", reply.getPayloadCase());
+                break;
+              }
+            }
           }
-          case READ_RESPONSE: {
-            consumer.accept(reply.getReadResponse());
-            break;
-          }
-          case DELETE_RESPONSE: {
-            consumer.accept(reply.getDeleteResponse());
-            break;
-          }
-          default: {
-            logger.warn("received registry message with currently unsupported type {}", reply.getPayloadCase());
-            break;
-          }
-        }
-      }
+      );
     } catch (InvalidProtocolBufferException e) {
       logger.warn("received malformed message", e);
     }

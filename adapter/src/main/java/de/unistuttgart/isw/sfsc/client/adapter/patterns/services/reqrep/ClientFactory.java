@@ -60,7 +60,9 @@ public class ClientFactory {
     public void accept(SfscMessage sfscMessage) {
       try {
         RequestReplyMessage response = RequestReplyMessage.parseFrom(sfscMessage.getPayload());
-        timeoutRegistry.remove(response.getMessageId()).accept(new SfscMessageImpl(sfscMessage.getError(), response.getPayload()));
+        timeoutRegistry
+            .remove(response.getMessageId())
+            .ifPresent(consumer -> consumer.accept(new SfscMessageImpl(sfscMessage.getError(), response.getPayload())));
       } catch (InvalidProtocolBufferException e) {
         logger.warn("Received malformed message", e);
       }
