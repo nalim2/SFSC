@@ -32,6 +32,11 @@
       <artifactId>plc4j-driver-opcua</artifactId>
       <version>${plc4j-driver-opcua.version}</version>
     </dependency>
+    <dependency>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
+      <artifactId>patterns</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

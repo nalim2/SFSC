@@ -6,20 +6,4 @@ option java_multiple_files = true;
 
 message ServiceDescriptor {
   map<string, bytes> tags = 1;
-
-  enum Tags {
-    TYPE = 0;
-    TOPIC = 1;
-    SERVICE_ID = 2;
-    ADAPTER_ID = 3;
-    CORE_ID = 4;
-  }
-
-  enum ServiceType {
-    PUBLISHER = 0;
-    SUBSCRIBER = 1;
-    SERVER = 2;
-    CLIENT = 3;
-  }
-
 }

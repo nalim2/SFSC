@@ -10,17 +10,21 @@
     <version>${revision}</version>
   </parent>
 
-  <artifactId>adapter</artifactId>
+  <artifactId>patterns</artifactId>
 
   <dependencies>
     <dependency>
       <groupId>de.unistuttgart.isw.sfsc</groupId>
-      <artifactId>common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>de.unistuttgart.isw.sfsc</groupId>
-      <artifactId>common-java</artifactId>
+      <artifactId>adapter</artifactId>
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>
