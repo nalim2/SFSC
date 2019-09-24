@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.patterns;
+
+option java_multiple_files = true;
+
+enum Tags {
+  SERVICE_ID = 0;
+  ADAPTER_ID = 1;
+  CORE_ID = 2;
+  OUTPUT_TOPIC = 3;
+  INPUT_TOPIC = 4;
+}

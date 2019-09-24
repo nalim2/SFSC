@@ -1,11 +1,11 @@
 package de.unistuttgart.isw.sfsc.example;
 
-import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.TYPE_AND_TOPIC_FRAME;
-
-import de.unistuttgart.isw.sfsc.client.adapter.raw.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.client.adapter.raw.RawAdapter;
+import com.google.protobuf.ByteString;
+import de.unistuttgart.isw.sfsc.adapter.Adapter;
+import de.unistuttgart.isw.sfsc.adapter.base.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
+import java.util.Set;
 
 public class HelloWorld {
 
@@ -16,18 +16,15 @@ public class HelloWorld {
     BootstrapConfiguration bootstrapConfiguration2 = new BootstrapConfiguration("127.0.0.1", 1261);
 
     new Thread(() -> {
-      try (RawAdapter adapter1 = RawAdapter.create(bootstrapConfiguration1)) {
+      try (Adapter adapter1 = Adapter.create(bootstrapConfiguration1)) {
 
-        adapter1.dataConnection().subscriptionManager().subscribe("topic1");
-        System.out.println("adapter1 sent subscription");
+        adapter1.inboxTopicManager().addTopicListener(new SimpleTopicListener ("adapter1"));
 
-        System.out.println("adapter1 received subscription " + SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataConnection().subEventInbox().take())));
-        System.out.println("adapter1 received subscription " + SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter1.dataConnection().subEventInbox().take())));
+        while (adapter1.subscriptionTracker().getSubscriptions().size() < 2){
+          Thread.sleep(50);
+        };
 
-        adapter1.dataConnection().publisher().publish("topic1", "messageFromAdapter1".getBytes());
-        System.out.println("adapter1 sent message");
-
-        System.out.println("adapter1 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter1.dataConnection().dataInbox().take())));
+        adapter1.publisher().publish("adapter2", ByteString.copyFromUtf8("hello from adapter 1").toByteArray());
 
         Thread.sleep(2000);
       } catch (Exception e) {
@@ -36,19 +33,14 @@ public class HelloWorld {
     }).start();
 
     new Thread(() -> {
-      try (RawAdapter adapter2 = RawAdapter.create(bootstrapConfiguration2)) {
+      try (Adapter adapter2 = Adapter.create(bootstrapConfiguration2)) {
 
-        adapter2.dataConnection().subscriptionManager().subscribe("topic2");
-        System.out.println("adapter2 sent subscription");
+        adapter2.inboxTopicManager().addTopicListener(new SimpleTopicListener ("adapter2"));
+        while (adapter2.subscriptionTracker().getSubscriptions().size() < 2){
+          Thread.sleep(50);
+        };
 
-        System.out.println("adapter2 received subscription " +  SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataConnection().subEventInbox().take())));
-        System.out.println("adapter2 received subscription " +  SubProtocol.getTopic(TYPE_AND_TOPIC_FRAME.get(adapter2.dataConnection().subEventInbox().take())));
-
-        adapter2.dataConnection().publisher().publish("topic2", "messageFromAdapter2".getBytes());
-        System.out.println("adapter2 sent message");
-
-        System.out.println("adapter2 received message " + new String(DataProtocol.PAYLOAD_FRAME.get(adapter2.dataConnection().dataInbox().take())));
-
+        adapter2.publisher().publish("adapter1", ByteString.copyFromUtf8("hello from adapter 2").toByteArray());
         Thread.sleep(2000);
       } catch (Exception e) {
         e.printStackTrace();
@@ -56,5 +48,37 @@ public class HelloWorld {
     }).start();
   }
 
+
+  private static class SimpleTopicListener implements TopicListener{
+
+    private final ByteString topic ;
+    private final String name;
+
+    SimpleTopicListener(String name) {
+      this.name = name;
+      topic = ByteString.copyFromUtf8(name);
+    }
+
+    @Override
+    public Set<ByteString> getTopics() {
+      return Set.of(topic);
+    }
+
+    @Override
+    public boolean test(ByteString topic) {
+      return this.topic.equals(topic);
+    }
+
+    @Override
+    public void processMessage(byte[][] message) {
+      System.out.println(name
+          + " received message in topic \""
+          + ByteString.copyFrom(DataProtocol.TOPIC_FRAME.get(message)).toStringUtf8()
+          + "\" with content \""
+          + ByteString.copyFrom(DataProtocol.PAYLOAD_FRAME.get(message)).toStringUtf8()
+          + "\""
+      );
+    }
+  }
 
 }

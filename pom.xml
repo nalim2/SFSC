@@ -18,6 +18,7 @@
     <module>docker-core</module>
     <module>adapter</module>
     <module>hello-world</module>
+    <module>patterns</module>
   </modules>
 
   <properties>

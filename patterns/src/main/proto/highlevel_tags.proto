@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.patterns;
+
+option java_multiple_files = true;
+
+enum Advanced_Tags {
+  NAME = 0;
+  REGEX = 1;
+  INPUT_MESSAGE_TYPE = 2;
+  OUTPUT_MESSAGE_TYPE = 3;
+  SFSC_TYPE = 4;
+}
+
+message RegexDefinition {
+  repeated VarRegex regexes = 1;
+
+  message VarRegex {
+    string varName = 1;
+    oneof regex {
+      StringRegex string_regex = 2;
+      NumberRegex number_regex = 3;
+    }
+
+    message StringRegex {
+      string regex = 1;
+    }
+
+    message NumberRegex {
+      sint64 lowerBound = 1;
+      sint64 upperBound = 2;
+    }
+  }
+
+  enum SfscType {
+    PUBLISHER = 0;
+    SUBSCRIBER = 1;
+    SERVER = 2;
+    CLIENT = 3;
+    PUBLISHER_GENERATOR = 4;
+    PUBLISHER_CONSUMER = 5;
+  }
+}
