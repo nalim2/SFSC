@@ -3,7 +3,6 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.buildTypeAndTopicFrame;
 
 import com.google.protobuf.ByteString;
-import com.google.protobuf.StringValue;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.SubscriptionType;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.SubscriptionManager;
