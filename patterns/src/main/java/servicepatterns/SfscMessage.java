@@ -8,6 +8,8 @@ import de.unistuttgart.isw.sfsc.patterns.SfscError;
  */
 public interface SfscMessage {
 
+  boolean hasError();
+
   /**
    * Returns the error field.
    * @return error field

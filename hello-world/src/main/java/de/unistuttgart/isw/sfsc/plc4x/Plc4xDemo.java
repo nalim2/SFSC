@@ -9,7 +9,6 @@ import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
 import de.unistuttgart.isw.sfsc.patterns.RegexDefinition;
 import de.unistuttgart.isw.sfsc.patterns.RegexDefinition.VarRegex;
 import de.unistuttgart.isw.sfsc.patterns.RegexDefinition.VarRegex.StringRegex;
-import de.unistuttgart.isw.sfsc.patterns.SfscError;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -174,8 +173,8 @@ public class Plc4xDemo {
   static Consumer<SfscMessage> readConsumer() {
     return response -> {
       try {
-        if (response.getError() != SfscError.NO_ERROR) {
-          throw new Exception(response.getError().name());
+        if (response.hasError()) {
+          throw new Exception(response.getError().toString());
         }
         Plc4xMessage plc4xMessage = Plc4xMessage.parseFrom(response.getPayload());
         System.out.println("Received read response: \n" + plc4xMessage);
@@ -188,8 +187,8 @@ public class Plc4xDemo {
   static Consumer<SfscMessage> writeConsumer() {
     return response -> {
       try {
-        if (response.getError() != SfscError.NO_ERROR) {
-          throw new Exception(response.getError().name());
+        if (response.hasError()) {
+          throw new Exception(response.getError().toString());
         }
         Plc4xMessage plc4xMessage = Plc4xMessage.parseFrom(response.getPayload());
         System.out.println("Received write response:  \n" + plc4xMessage);
