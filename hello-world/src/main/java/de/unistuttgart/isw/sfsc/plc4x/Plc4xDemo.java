@@ -95,11 +95,11 @@ public class Plc4xDemo {
     PlcSubscriptionResponse byteSubscriptionResponse = plc4XServer.subscribe(topics.get("Byte"));
     PlcSubscriptionResponse int16SubscriptionResponse = plc4XServer.subscribe(topics.get("Int16"));
     PlcSubscriptionResponse stringSubscriptionResponse = plc4XServer.subscribe(topics.get("String"));
-    plc4XServer.register(event -> boolPublisher.publish(event.toString().getBytes()), boolSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> byteStringPublisher.publish(event.toString().getBytes()), byteStringSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> bytePublisher.publish(event.toString().getBytes()), byteSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> int16Publisher.publish(event.toString().getBytes()), int16SubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> stringPublisher.publish(event.toString().getBytes()), stringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> boolPublisher.publish(ByteString.copyFromUtf8(event.toString())), boolSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> byteStringPublisher.publish(ByteString.copyFromUtf8(event.toString())), byteStringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> bytePublisher.publish(ByteString.copyFromUtf8(event.toString())), byteSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> int16Publisher.publish(ByteString.copyFromUtf8(event.toString())), int16SubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> stringPublisher.publish(ByteString.copyFromUtf8(event.toString())), stringSubscriptionResponse.getSubscriptionHandles());
 
     Thread.sleep(1000);
 
@@ -112,7 +112,7 @@ public class Plc4xDemo {
 
     ////////////////////////////////////////////////////////////
 
-    Service server = serverServiceApi.addServer("myServer", "plc4xtype", "plc4xtype",
+    Service server = serverServiceApi.server("myServer", "plc4xtype", "plc4xtype",
 
         RegexDefinition.newBuilder()
             .addRegexes(VarRegex.newBuilder()
@@ -135,8 +135,8 @@ public class Plc4xDemo {
         .filter(FilterFactory.byteStringEqualsFilter("id", uuid)).findAny().orElseThrow();
 
     Client client = clientServiceApi.client();
-    client.send(writeServerTags, writeRequest().toByteArray(), writeConsumer(), 1000);
-    client.send(readServerTags, readRequest().toByteArray(), readConsumer(), 1000);
+    client.send(writeServerTags, writeRequest().toByteString(), writeConsumer(), 1000);
+    client.send(readServerTags, readRequest().toByteString(), readConsumer(), 1000);
 
     ////////////////////////////////
 
@@ -149,7 +149,7 @@ public class Plc4xDemo {
     Map<String, ByteString> publisherTopic = clientServiceApi.requestTopic(client2, genServerTags, 500).get();
     clientServiceApi.subscriber(publisherTopic, sfscMessage -> System.out.println(sfscMessage.getPayload().toStringUtf8()));
     Thread.sleep(1000);
-    topicFactoryService.getPublishers().stream().findAny().orElseThrow().publish("myIndividualMessage".getBytes());
+    topicFactoryService.getPublishers().stream().findAny().orElseThrow().publish(ByteString.copyFromUtf8("myIndividualMessage"));
   }
 
 
@@ -199,7 +199,7 @@ public class Plc4xDemo {
     };
   }
 
-  static Function<SfscMessage, byte[]> plc4xserver(Plc4XServer plc4XServer) {
+  static Function<SfscMessage, ByteString> plc4xserver(Plc4XServer plc4XServer) {
     return sfscMessage -> {
       try {
         Plc4xMessage request = Plc4xMessage.parseFrom(sfscMessage.getPayload());
@@ -210,7 +210,7 @@ public class Plc4xDemo {
                 .setType(Type.READ_RESPONSE)
                 .setValue(response.toString())
                 .build()
-                .toByteArray();
+                .toByteString();
           }
           case WRITE_REQUEST: {
             plc4XServer.write(request.getName(), request.getQuery(), request.getValue());
@@ -218,7 +218,7 @@ public class Plc4xDemo {
                 .setType(Type.WRITE_RESPONSE)
                 .clearValue()
                 .build()
-                .toByteArray();
+                .toByteString();
           }
           default: {
             throw new UnsupportedOperationException();
@@ -226,7 +226,7 @@ public class Plc4xDemo {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        return Plc4xMessage.getDefaultInstance().toByteArray();
+        return Plc4xMessage.getDefaultInstance().toByteString();
       }
     };
   }

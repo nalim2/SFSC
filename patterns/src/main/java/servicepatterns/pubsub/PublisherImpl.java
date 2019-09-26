@@ -18,7 +18,7 @@ class PublisherImpl extends ServiceImpl implements Publisher {
   }
 
   @Override
-  public void publish(byte[] payload) {
-    publisher.publish(topicCache, payload);
+  public void publish(ByteString payload) {
+    publisher.publish(topicCache, payload.toByteArray());
   }
 }

@@ -11,8 +11,8 @@ import servicepatterns.SfscMessage;
 
 public class TopicConsumer implements Function<SfscMessage, Map<String, ByteString>> {
 
-  public Request getMessage(ByteString payload) {
-    return Request.newBuilder().setPayload(payload).build();
+  public ByteString getMessage(ByteString payload) {
+    return Request.newBuilder().setPayload(payload).build().toByteString();
   }
 
   @Override

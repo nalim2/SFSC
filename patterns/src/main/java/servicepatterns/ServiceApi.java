@@ -21,8 +21,8 @@ public interface ServiceApi {
 
   Set<Map<String, ByteString>> getServices(String name, Message message, Collection<String> varPaths);
 
-  Service addServer(String name, String inputMessageType, String outputMessageType, RegexDefinition regexDefinition,
-      Map<String, ByteString> customTags, Function<SfscMessage, byte[]> serverFunction);
+  Service server(String name, String inputMessageType, String outputMessageType, RegexDefinition regexDefinition,
+      Map<String, ByteString> customTags, Function<SfscMessage, ByteString> serverFunction);
 
   Client client();
 
