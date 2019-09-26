@@ -26,7 +26,7 @@ class ServerConsumer implements Consumer<SfscMessage> {
 
   @Override
   public void accept(SfscMessage sfscMessage) {
-    if (sfscMessage.getError() != SfscError.NO_ERROR) {
+    if (sfscMessage.hasError()) {
       logger.warn("Received message with error {}", sfscMessage.getError());
     } else {
       try {

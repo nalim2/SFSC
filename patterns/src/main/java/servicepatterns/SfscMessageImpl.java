@@ -14,6 +14,11 @@ public class SfscMessageImpl implements SfscMessage {
   }
 
   @Override
+  public boolean hasError() {
+    return error != SfscError.NO_ERROR;
+  }
+
+  @Override
   public SfscError getError() {
     return error;
   }

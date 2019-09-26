@@ -3,7 +3,6 @@ package servicepatterns.topicfactoryservice;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.patterns.SfscError;
 import de.unistuttgart.isw.sfsc.patterns.publishergenerator.Reply;
 import de.unistuttgart.isw.sfsc.patterns.publishergenerator.Request;
 import java.util.Collections;
@@ -35,7 +34,7 @@ public class TopicFactory implements Function<SfscMessage, ByteString> {
 
   @Override
   public ByteString apply(SfscMessage sfscMessage) {
-    if (sfscMessage.getError() == SfscError.NO_ERROR) {
+    if (!sfscMessage.hasError()) {
       try {
         Request request = Request.parseFrom(sfscMessage.getPayload());
         Map<String, ByteString> tags = Map.ofEntries(Map.entry("REQUEST", request.toByteString()));
