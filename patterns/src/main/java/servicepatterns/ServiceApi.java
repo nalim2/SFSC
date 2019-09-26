@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import servicepatterns.pubsub.Publisher;
 import servicepatterns.reqrep.Client;
-import servicepatterns.topicfactoryservice.TopicFactoryService;
 
 public interface ServiceApi {
 
@@ -26,11 +25,13 @@ public interface ServiceApi {
 
   Client client();
 
-  Publisher addPublisher(String name, String outputMessageType, Map<String, ByteString> customTags);
+  Publisher publisher(String name, String outputMessageType, Map<String, ByteString> customTags);
+
+  Publisher unregisteredPublisher(String name, String outputMessageType, Map<String, ByteString> customTags);
 
   Service subscriber(Map<String, ByteString> publisherTags, Consumer<SfscMessage> consumer);
 
-  TopicFactoryService addTopicGenerator(String name, Map<String, ByteString> customTags);
+  Service channelGenerator(String name, Map<String, ByteString> customTags, Function<SfscMessage, Publisher> channelFactory);
 
-  Future<Map<String, ByteString>> requestTopic(Client client, Map<String, ByteString> topicGeneratorTags, int timeoutMs);
+  Future<Service> requestChannel(Client client, Map<String, ByteString> channelGeneratorTags, ByteString payload, int timeoutMs, Consumer<SfscMessage> consumer);
 }

@@ -27,19 +27,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import servicepatterns.channelfactory.ChannelConsumer;
+import servicepatterns.channelfactory.ChannelFactoryFunction;
 import servicepatterns.pubsub.PubSubFactory;
 import servicepatterns.pubsub.Publisher;
 import servicepatterns.reqrep.Client;
 import servicepatterns.reqrep.ReqRepFactory;
-import servicepatterns.topicfactoryservice.TopicConsumer;
-import servicepatterns.topicfactoryservice.TopicFactory;
-import servicepatterns.topicfactoryservice.TopicFactoryService;
-import servicepatterns.topicfactoryservice.TopicFactoryServiceImpl;
 
 public class ServiceApiImpl implements ServiceApi {
 
   private static final Logger logger = LoggerFactory.getLogger(ServiceApiImpl.class);
-  private final Adapter adapter;
   private final RegistryClient registryClient;
   private final PubSubFactory pubSubFactory;
   private final ReqRepFactory reqRepFactory;
@@ -49,7 +46,6 @@ public class ServiceApiImpl implements ServiceApi {
   private Set<Map<String, ByteString>> services;
 
   public ServiceApiImpl(Adapter adapter) {
-    this.adapter = adapter;
     registryClient = adapter.registryClient();
     pubSubFactory = new PubSubFactory(adapter);
     reqRepFactory = new ReqRepFactory(adapter);
@@ -104,16 +100,21 @@ public class ServiceApiImpl implements ServiceApi {
   }
 
   @Override
-  public Publisher addPublisher(String name, String outputMessageType, Map<String, ByteString> customTags) {
+  public Publisher publisher(String name, String outputMessageType, Map<String, ByteString> customTags) {
+    Publisher publisher = unregisteredPublisher(name, outputMessageType, customTags);
+    registryClient.addService(publisher.getTags());
+    return publisher;
+  }
+
+  @Override
+  public Publisher unregisteredPublisher(String name, String outputMessageType, Map<String, ByteString> customTags) {
     Map<String, ByteString> tags = new HashMap<>(customTags);
     tags.put(Advanced_Tags.NAME.name(), ByteString.copyFromUtf8(name));
     tags.put(Advanced_Tags.OUTPUT_MESSAGE_TYPE.name(), ByteString.copyFromUtf8(outputMessageType));
     tags.put(Advanced_Tags.SFSC_TYPE.name(), ByteString.copyFromUtf8(SfscType.PUBLISHER.name()));
 
     ByteString topicByteString = ByteString.copyFromUtf8(name);
-    Publisher publisher = pubSubFactory.publisher(topicByteString, tags);
-    registryClient.addService(publisher.getTags());
-    return publisher;
+    return pubSubFactory.publisher(topicByteString, tags);
   }
 
   @Override
@@ -123,22 +124,21 @@ public class ServiceApiImpl implements ServiceApi {
   }
 
   @Override
-  public TopicFactoryService addTopicGenerator(String name, Map<String, ByteString> customTags) {
-    TopicFactory publisherGenerator = new TopicFactory(adapter);
-    Service service = server(name,
-        "de.unistuttgart.isw.sfsc.patterns.publishergenerator.request",
-        "de.unistuttgart.isw.sfsc.patterns.publishergenerator.reply",
+  public Service channelGenerator(String name, Map<String, ByteString> customTags, Function<SfscMessage, Publisher> channelFactory) {
+    ChannelFactoryFunction channelFactoryFunction = new ChannelFactoryFunction(channelFactory);
+    return server(name,
+        "de.unistuttgart.isw.sfsc.patterns.channelfactory.ChannelFactoryRequest",
+        "de.unistuttgart.isw.sfsc.patterns.channelfactory.ChannelFactoryReply",
         RegexDefinition.getDefaultInstance(),
         customTags,
-        publisherGenerator);
-    return new TopicFactoryServiceImpl(publisherGenerator, service);
+        channelFactoryFunction);
   }
 
   @Override
-  public Future<Map<String, ByteString>> requestTopic(Client client, Map<String, ByteString> topicGeneratorTags, int timeoutMs) {
-    TopicConsumer topicConsumer = new TopicConsumer();
-    ConsumerFuture<SfscMessage, Map<String, ByteString>> consumerFuture = new ConsumerFuture<>(topicConsumer);
-    client.send(topicGeneratorTags, topicConsumer.getMessage(ByteString.EMPTY), consumerFuture, timeoutMs);
+  public Future<Service> requestChannel(Client client, Map<String, ByteString> channelGeneratorTags, ByteString payload, int timeoutMs, Consumer<SfscMessage> consumer) {
+    ChannelConsumer channelConsumer = new ChannelConsumer(this, consumer);
+    ConsumerFuture<SfscMessage, Service> consumerFuture = new ConsumerFuture<>(channelConsumer);
+    client.send(channelGeneratorTags, channelConsumer.getMessage(payload), consumerFuture, timeoutMs);
     return consumerFuture;
   }
 }
