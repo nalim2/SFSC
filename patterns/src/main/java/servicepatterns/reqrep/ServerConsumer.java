@@ -16,10 +16,10 @@ class ServerConsumer implements Consumer<SfscMessage> {
 
   private static final Logger logger = LoggerFactory.getLogger(ServerConsumer.class);
 
-  private final Function<SfscMessage, byte[]> server;
+  private final Function<SfscMessage, ByteString> server;
   private final OutputPublisher publisher;
 
-  ServerConsumer(Function<SfscMessage, byte[]> server, OutputPublisher publisher) {
+  ServerConsumer(Function<SfscMessage, ByteString> server, OutputPublisher publisher) {
     this.server = server;
     this.publisher = publisher;
   }
@@ -32,11 +32,11 @@ class ServerConsumer implements Consumer<SfscMessage> {
       try {
         RequestReplyMessage request = RequestReplyMessage.parseFrom(sfscMessage.getPayload());
         SfscMessage processedSfscMessage = new SfscMessageImpl(SfscError.NO_ERROR, request.getPayload());
-        byte[] payload = server.apply(processedSfscMessage);
+        ByteString payload = server.apply(processedSfscMessage);
         publisher.publish(request.getResponseTopic(),
             RequestReplyMessage.newBuilder()
                 .setMessageId(request.getMessageId())
-                .setPayload(ByteString.copyFrom(payload))
+                .setPayload(payload)
                 .clearResponseTopic()
                 .build()
                 .toByteArray()

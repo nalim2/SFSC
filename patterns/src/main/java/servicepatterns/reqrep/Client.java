@@ -16,6 +16,6 @@ public interface Client extends Service {
    * @param consumer executed on receipt of response
    * @param timoutMs how long to wait for response
    */
-  void send(Map<String, ByteString> serverTags, byte[] payload, Consumer<SfscMessage> consumer, int timoutMs);
+  void send(Map<String, ByteString> serverTags, ByteString payload, Consumer<SfscMessage> consumer, int timoutMs);
 
 }

@@ -18,7 +18,7 @@ import servicepatterns.SfscMessage;
 import servicepatterns.pubsub.PubSubFactory;
 import servicepatterns.pubsub.Publisher;
 
-public class TopicFactory implements Function<SfscMessage, byte[]> {
+public class TopicFactory implements Function<SfscMessage, ByteString> {
 
   private static final Logger logger = LoggerFactory.getLogger("Publisher");
   private final Set<Publisher> publishers = new HashSet<>();
@@ -34,7 +34,7 @@ public class TopicFactory implements Function<SfscMessage, byte[]> {
   }
 
   @Override
-  public byte[] apply(SfscMessage sfscMessage) {
+  public ByteString apply(SfscMessage sfscMessage) {
     if (sfscMessage.getError() == SfscError.NO_ERROR) {
       try {
         Request request = Request.parseFrom(sfscMessage.getPayload());
@@ -44,11 +44,11 @@ public class TopicFactory implements Function<SfscMessage, byte[]> {
         Publisher publisher = pubSubFactory.publisher(topicByteString, tags);
 
         publishers.add(publisher);
-        return Reply.newBuilder().putAllTags(publisher.getTags()).build().toByteArray();
+        return Reply.newBuilder().putAllTags(publisher.getTags()).build().toByteString();
       } catch (InvalidProtocolBufferException e) {
         logger.warn("received malformed request", e);
       }
     }
-    return Reply.getDefaultInstance().toByteArray(); //todo
+    return Reply.getDefaultInstance().toByteString(); //todo
   }
 }

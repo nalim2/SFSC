@@ -21,7 +21,7 @@ public class ReqRepFactory {
     this.publisher = adapter.publisher();
   }
 
-  public Service server(ByteString inputTopic, Map<String, ByteString> customTags, Function<SfscMessage, byte[]> serverFunction, Executor executor) {
+  public Service server(ByteString inputTopic, Map<String, ByteString> customTags, Function<SfscMessage, ByteString> serverFunction, Executor executor) {
     Consumer<SfscMessage> consumer = new ServerConsumer(serverFunction, publisher);
     return pubSubFactory.subscriber(inputTopic, customTags, consumer, executor);
   }

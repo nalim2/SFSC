@@ -50,7 +50,7 @@ public class ServiceApiImpl implements ServiceApi {
 
   public ServiceApiImpl(Adapter adapter) {
     this.adapter = adapter;
-    this.registryClient = adapter.registryClient();
+    registryClient = adapter.registryClient();
     pubSubFactory = new PubSubFactory(adapter);
     reqRepFactory = new ReqRepFactory(adapter);
 
@@ -81,8 +81,8 @@ public class ServiceApiImpl implements ServiceApi {
   }
 
   @Override
-  public Service addServer(String name, String inputMessageType, String outputMessageType, RegexDefinition regexDefinition,
-      Map<String, ByteString> customTags, Function<SfscMessage, byte[]> serverFunction) {
+  public Service server(String name, String inputMessageType, String outputMessageType, RegexDefinition regexDefinition,
+      Map<String, ByteString> customTags, Function<SfscMessage, ByteString> serverFunction) {
     Map<String, ByteString> tags = new HashMap<>(customTags);
     tags.put(Advanced_Tags.NAME.name(), ByteString.copyFromUtf8(name));
     tags.put(Advanced_Tags.REGEX.name(), regexDefinition.toByteString());
@@ -125,7 +125,7 @@ public class ServiceApiImpl implements ServiceApi {
   @Override
   public TopicFactoryService addTopicGenerator(String name, Map<String, ByteString> customTags) {
     TopicFactory publisherGenerator = new TopicFactory(adapter);
-    Service service = addServer(name,
+    Service service = server(name,
         "de.unistuttgart.isw.sfsc.patterns.publishergenerator.request",
         "de.unistuttgart.isw.sfsc.patterns.publishergenerator.reply",
         RegexDefinition.getDefaultInstance(),
@@ -138,7 +138,7 @@ public class ServiceApiImpl implements ServiceApi {
   public Future<Map<String, ByteString>> requestTopic(Client client, Map<String, ByteString> topicGeneratorTags, int timeoutMs) {
     TopicConsumer topicConsumer = new TopicConsumer();
     ConsumerFuture<SfscMessage, Map<String, ByteString>> consumerFuture = new ConsumerFuture<>(topicConsumer);
-    client.send(topicGeneratorTags, topicConsumer.getMessage(ByteString.EMPTY).toByteArray(), consumerFuture, timeoutMs);
+    client.send(topicGeneratorTags, topicConsumer.getMessage(ByteString.EMPTY), consumerFuture, timeoutMs);
     return consumerFuture;
   }
 }

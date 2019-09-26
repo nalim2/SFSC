@@ -26,11 +26,11 @@ public class ClientService extends ServiceImpl implements Client {
   }
 
   @Override
-  public void send(Map<String, ByteString> serverTags, byte[] payload, Consumer<SfscMessage> consumer, int timoutMs) {
+  public void send(Map<String, ByteString> serverTags, ByteString payload, Consumer<SfscMessage> consumer, int timoutMs) {
     int id = idGenerator.get();
     RequestReplyMessage requestReplyMessage = RequestReplyMessage.newBuilder()
         .setMessageId(id)
-        .setPayload(ByteString.copyFrom(payload))
+        .setPayload(payload)
         .setResponseTopic(responseTopic)
         .build();
     clientConsumer.addCallback(id, consumer, timoutMs);
