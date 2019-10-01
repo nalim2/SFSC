@@ -6,9 +6,10 @@ import de.unistuttgart.isw.sfsc.adapter.base.control.registry.RegistryClient;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManager;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManagerImpl;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionTracker;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.subscriptiontracker.SubscriptionTracker;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.subscriptiontracker.SubscriptionTrackerImpl;
 import java.util.concurrent.ExecutionException;
 
 public class Adapter implements AutoCloseable {
@@ -17,14 +18,14 @@ public class Adapter implements AutoCloseable {
   private final InboxTopicManagerImpl inboxTopicManager;
   private final ReactiveInbox reactiveDataInbox;
   private final ReactiveInbox reactiveSubInbox;
-  private final SubscriptionTracker subscriptionTracker;
+  private final SubscriptionTrackerImpl subscriptionTracker;
   private final OutputPublisher publisher;
 
   Adapter(RawAdapter rawAdapter) {
     this.rawAdapter = rawAdapter;
     this.inboxTopicManager = new InboxTopicManagerImpl(rawAdapter.dataConnection().subscriptionManager());
     this.reactiveDataInbox = ReactiveInbox.create(rawAdapter.dataConnection().dataInbox(), inboxTopicManager);
-    this.subscriptionTracker = new SubscriptionTracker();
+    this.subscriptionTracker = new SubscriptionTrackerImpl();
     this.reactiveSubInbox = ReactiveInbox.create(rawAdapter.dataConnection().subEventInbox(), new SubscriptionEventProcessor(subscriptionTracker));
     this.publisher = rawAdapter.dataConnection().publisher();
   }
