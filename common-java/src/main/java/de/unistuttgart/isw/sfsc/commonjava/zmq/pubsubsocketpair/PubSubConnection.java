@@ -40,6 +40,12 @@ public interface PubSubConnection {
 
     void publish(String topic, byte[] data);
 
+    void publish(byte[] topic, ByteString data);
+
+    void publish(ByteString topic, ByteString data);
+
+    void publish(String topic, ByteString data);
+
     void publish(byte[] topic, Message data);
 
     void publish(ByteString topic, Message data);

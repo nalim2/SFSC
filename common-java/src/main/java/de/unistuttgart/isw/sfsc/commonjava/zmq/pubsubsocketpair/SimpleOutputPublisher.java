@@ -33,6 +33,21 @@ public class SimpleOutputPublisher implements OutputPublisher {
   }
 
   @Override
+  public void publish(byte[] topic, ByteString data) {
+    publish(topic, data.toByteArray());
+  }
+
+  @Override
+  public void publish(ByteString topic, ByteString data) {
+    publish(topic, data.toByteArray());
+  }
+
+  @Override
+  public void publish(String topic, ByteString data) {
+    publish(topic, data.toByteArray());
+  }
+
+  @Override
   public void publish(byte[] topic, Message data) {
     publish(topic, data.toByteArray());
   }
