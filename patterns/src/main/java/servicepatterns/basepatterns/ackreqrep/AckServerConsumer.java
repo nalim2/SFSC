@@ -22,9 +22,9 @@ final class AckServerConsumer implements Consumer<ByteString> {
   private static final Logger logger = LoggerFactory.getLogger(AckServerConsumer.class);
 
   private final Supplier<Integer> idGenerator = new AtomicInteger()::getAndIncrement;
-  private final CallbackRegistry callbackRegistry = new CallbackRegistry();
 
   private final OutputPublisher publisher;
+  private final CallbackRegistry callbackRegistry;
   private final ScheduledExecutorService scheduledExecutorService;
   private final ByteString serverTopic;
   private final Function<ByteString, AckServerResult> serverFunction;
@@ -32,9 +32,10 @@ final class AckServerConsumer implements Consumer<ByteString> {
   private final int sendRateMs;
   private final int sendMaxTries;
 
-  AckServerConsumer(OutputPublisher publisher, ScheduledExecutorService scheduledExecutorService, Function<ByteString, AckServerResult> serverFunction,
+  AckServerConsumer(OutputPublisher publisher, CallbackRegistry callbackRegistry, ScheduledExecutorService scheduledExecutorService, Function<ByteString, AckServerResult> serverFunction,
       ByteString serverTopic, int timeoutMs, int sendRateMs, int sendMaxTries) {
     this.publisher = publisher;
+    this.callbackRegistry = callbackRegistry;
     this.scheduledExecutorService = scheduledExecutorService;
     this.serverTopic = serverTopic;
     this.serverFunction = serverFunction;
