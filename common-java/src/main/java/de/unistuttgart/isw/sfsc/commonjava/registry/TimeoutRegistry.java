@@ -28,6 +28,8 @@ public class TimeoutRegistry<K, V> implements AutoCloseable {
         },
         timeoutMs,
         TimeUnit.MILLISECONDS);
+    //if timeout is like really really low, we could run in a race condition here, since even is fired before we put the container into the map
+    //although, in this use case the timeout will not be that low so I consider this as safe
     map.put(key, new TimeoutContainer<>(scheduledFuture, value));
   }
 
