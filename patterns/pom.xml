@@ -17,6 +17,10 @@
       <groupId>de.unistuttgart.isw.sfsc</groupId>
       <artifactId>adapter</artifactId>
     </dependency>
+    <dependency>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
+      <artifactId>proto</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

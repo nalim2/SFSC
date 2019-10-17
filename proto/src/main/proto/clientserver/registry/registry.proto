@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.protocol.registry;
 
-import "registry/create.proto";
-import "registry/read.proto";
-import "registry/delete.proto";
+import "clientserver/registry/create.proto";
+import "clientserver/registry/read.proto";
+import "clientserver/registry/delete.proto";
 
 option java_multiple_files = true;
 

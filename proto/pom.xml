@@ -10,7 +10,7 @@
     <version>${revision}</version>
   </parent>
 
-  <artifactId>common</artifactId>
+  <artifactId>proto</artifactId>
 
   <dependencies>
     <dependency>

@@ -31,7 +31,7 @@
     </dependency>
     <dependency>
       <groupId>de.unistuttgart.isw.sfsc</groupId>
-      <artifactId>common</artifactId>
+      <artifactId>proto</artifactId>
     </dependency>
     <dependency>
       <groupId>de.unistuttgart.isw.sfsc</groupId>

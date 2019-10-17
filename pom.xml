@@ -12,7 +12,7 @@
   <description>Shop Floor Service Combiner</description>
 
   <modules>
-    <module>common</module>
+    <module>proto</module>
     <module>common-java</module>
     <module>core</module>
     <module>docker-core</module>
@@ -70,7 +70,7 @@
       </dependency>
       <dependency>
         <groupId>de.unistuttgart.isw.sfsc</groupId>
-        <artifactId>common</artifactId>
+        <artifactId>proto</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
