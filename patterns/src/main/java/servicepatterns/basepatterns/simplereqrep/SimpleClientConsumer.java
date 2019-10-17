@@ -2,11 +2,11 @@ package servicepatterns.basepatterns.simplereqrep;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
 import de.unistuttgart.isw.sfsc.patterns.simplereqrep.Reply;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import servicepatterns.CallbackRegistry;
 
 final class SimpleClientConsumer implements Consumer<ByteString> {
 

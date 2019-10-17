@@ -2,6 +2,7 @@ package servicepatterns.basepatterns.ackreqrep;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.patterns.ackreqrep.Reply;
 import de.unistuttgart.isw.sfsc.patterns.ackreqrep.RequestOrAcknowledge;
@@ -9,7 +10,6 @@ import de.unistuttgart.isw.sfsc.patterns.ackreqrep.RequestOrAcknowledge.Acknowle
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import servicepatterns.CallbackRegistry;
 
 final class AckClientConsumer implements Consumer<ByteString> {
 
