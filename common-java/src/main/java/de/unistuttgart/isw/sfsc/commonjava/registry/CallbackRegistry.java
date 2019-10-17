@@ -1,10 +1,9 @@
-package servicepatterns;
+package de.unistuttgart.isw.sfsc.commonjava.registry;
 
 import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.commonjava.registry.TimeoutRegistry;
 import java.util.function.Consumer;
 
-public class CallbackRegistry implements AutoCloseable { //todo move
+public class CallbackRegistry implements AutoCloseable {
 
   private final TimeoutRegistry<Integer, Consumer<ByteString>> registry = new TimeoutRegistry<>();
 

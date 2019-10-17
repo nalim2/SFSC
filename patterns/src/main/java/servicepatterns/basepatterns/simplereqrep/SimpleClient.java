@@ -1,13 +1,13 @@
 package servicepatterns.basepatterns.simplereqrep;
 
 import com.google.protobuf.ByteString;
+import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
 import de.unistuttgart.isw.sfsc.patterns.simplereqrep.Request;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import servicepatterns.CallbackRegistry;
 import servicepatterns.topiclistener.HandleFactory;
 import servicepatterns.topiclistener.ListenerHandle;
 
