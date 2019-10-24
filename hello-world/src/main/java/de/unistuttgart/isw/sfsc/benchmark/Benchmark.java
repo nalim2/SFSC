@@ -1,6 +1,6 @@
 package de.unistuttgart.isw.sfsc.benchmark;
 
-import de.unistuttgart.isw.sfsc.adapter.base.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.benchmark.evaluation.Evaluator;
 import de.unistuttgart.isw.sfsc.benchmark.io.SfscBenchmark;
 

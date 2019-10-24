@@ -1,61 +1,39 @@
 package de.unistuttgart.isw.sfsc.benchmark.io;
 
+
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import de.unistuttgart.isw.sfsc.adapter.base.RawAdapter;
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleServer;
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
-import java.util.concurrent.ExecutorService;
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Server implements AutoCloseable {
+class Server implements NotThrowingAutoCloseable {
 
   private static final Logger logger = LoggerFactory.getLogger(Server.class);
-  private final ExecutorService executorService = Executors.newCachedThreadPool(new ExceptionLoggingThreadFactory("BenchmarkServer", logger));
-  private final RawAdapter adapter;
-  private final byte[] responseTopic;
+  private final SimpleServer server;
 
-  Server(RawAdapter adapter, byte[] responseTopic) {
-    this.adapter = adapter;
-    this.responseTopic = responseTopic;
+  Server(PubSubConnection pubSubConnection, ByteString topic, int threadNumber) {
+    Executor executor = Executors.newFixedThreadPool(threadNumber, new ExceptionLoggingThreadFactory(getClass().getName(), logger));
+    server = new SimpleServer(pubSubConnection, Server::serverFunction, topic, executor);
   }
 
-  static Server start(RawAdapter adapter, byte[] responseTopic) {
-    Server server = new Server(adapter, responseTopic);
-    server.start();
-    return server;
-  }
-
-  void start() {
-    executorService.execute(() -> {
-      final Inbox inbox = adapter.dataConnection().dataInbox();
-      final OutputPublisher publisher = adapter.dataConnection().publisher();
-      while (!Thread.interrupted()) {
-        try {
-          final byte[][] message = inbox.take();
-          executorService.execute(() -> {
-            try {
-              final BenchmarkMessage request = DataProtocol.PAYLOAD_FRAME.get(message, BenchmarkMessage.parser());
-              final BenchmarkMessage response = BenchmarkMessage.newBuilder(request).setServerTimestamp(System.nanoTime()).build();
-              publisher.publish(responseTopic, response);
-            } catch (InvalidProtocolBufferException e) {
-              e.printStackTrace();
-            }
-          });
-        } catch (InterruptedException | RejectedExecutionException e) {
-          Thread.currentThread().interrupt();
-        }
-      }
-    });
+  static ByteString serverFunction(ByteString bytes) {
+    try {
+      return BenchmarkMessage.newBuilder(BenchmarkMessage.parseFrom(bytes)).setServerTimestamp(System.nanoTime()).build().toByteString();
+    } catch (InvalidProtocolBufferException e) {
+      e.printStackTrace();
+      return ByteString.EMPTY;
+    }
   }
 
   @Override
   public void close() {
-    executorService.shutdownNow();
+    server.close();
   }
 }

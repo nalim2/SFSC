@@ -1,68 +1,62 @@
 package de.unistuttgart.isw.sfsc.adapter;
 
-import de.unistuttgart.isw.sfsc.adapter.base.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.adapter.base.RawAdapter;
-import de.unistuttgart.isw.sfsc.adapter.base.control.registry.RegistryClient;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManager;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.InboxTopicManagerImpl;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.SubscriptionEventProcessor;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection.OutputPublisher;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.subscriptiontracker.SubscriptionTracker;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.subscriptiontracker.SubscriptionTrackerImpl;
+import de.unistuttgart.isw.sfsc.adapter.control.ControlClient;
+import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryApi;
+import de.unistuttgart.isw.sfsc.adapter.control.session.WelcomeInformation;
+import de.unistuttgart.isw.sfsc.adapter.data.DataClient;
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-public class Adapter implements AutoCloseable {
+public class Adapter implements NotThrowingAutoCloseable {
 
-  private final RawAdapter rawAdapter;
-  private final InboxTopicManagerImpl inboxTopicManager;
-  private final ReactiveInbox reactiveDataInbox;
-  private final ReactiveInbox reactiveSubInbox;
-  private final SubscriptionTrackerImpl subscriptionTracker;
-  private final OutputPublisher publisher;
+  private final Reactor reactor;
+  private final ControlClient controlClient;
+  private final DataClient dataClient;
+  private final AdapterInformation adapterInformation;
 
-  Adapter(RawAdapter rawAdapter) {
-    this.rawAdapter = rawAdapter;
-    this.inboxTopicManager = new InboxTopicManagerImpl(rawAdapter.dataConnection().subscriptionManager());
-    this.reactiveDataInbox = ReactiveInbox.create(rawAdapter.dataConnection().dataInbox(), inboxTopicManager);
-    this.subscriptionTracker = new SubscriptionTrackerImpl();
-    this.reactiveSubInbox = ReactiveInbox.create(rawAdapter.dataConnection().subEventInbox(), new SubscriptionEventProcessor(subscriptionTracker));
-    this.publisher = rawAdapter.dataConnection().publisher();
+  Adapter(Reactor reactor, ControlClient controlClient, DataClient dataClient, AdapterInformation adapterInformation) {
+    this.reactor = reactor;
+    this.controlClient = controlClient;
+    this.dataClient = dataClient;
+    this.adapterInformation = adapterInformation;
   }
 
-  public static Adapter create(BootstrapConfiguration bootstrapConfiguration) throws ExecutionException, InterruptedException {
-    RawAdapter rawAdapter = RawAdapter.create(bootstrapConfiguration);
-    return new Adapter(rawAdapter);
+  public static Adapter create(BootstrapConfiguration configuration) throws InterruptedException, ExecutionException, TimeoutException {
+    ContextConfiguration contextConfiguration = context -> {
+      context.setRcvHWM(0);
+      context.setSndHWM(0);
+    };
+    Reactor reactor = Reactor.create(contextConfiguration);
+    ControlClient controlClient = ControlClient.create(reactor, configuration);
+    WelcomeInformation welcomeInformation = controlClient.welcomeInformation();
+    AdapterInformation adapterInformation = new AdapterInformation(welcomeInformation.getCoreId(), welcomeInformation.getAdapterId(),
+        configuration.getCoreHost(), welcomeInformation.getCoreDataPubPort(), welcomeInformation.getCoreDataSubPort(),
+        welcomeInformation.getCoreDataPubPort(), welcomeInformation.getCoreDataSubPort());
+    DataClient dataClient = DataClient.create(reactor, adapterInformation);
+
+    return new Adapter(reactor, controlClient, dataClient, adapterInformation);
   }
 
-  public RegistryClient registryClient() {
-    return rawAdapter.registryClient();
+  public RegistryApi registryClient() {
+    return controlClient.registryClient();
   }
 
-  public InboxTopicManager inboxTopicManager(){
-    return inboxTopicManager;
+  public PubSubConnection dataConnection() {
+    return dataClient.pubSubConnection();
   }
 
-  public OutputPublisher publisher() {
-    return publisher;
-  }
-
-  public SubscriptionTracker subscriptionTracker() {
-    return subscriptionTracker;
-  }
-
-  public String coreId() {
-    return rawAdapter.coreId();
-  }
-
-  public String adapterId() {
-    return rawAdapter.adapterId();
+  public AdapterInformation adapterInformation() {
+    return adapterInformation;
   }
 
   @Override
   public void close() {
-    rawAdapter.close();
-    reactiveDataInbox.close();
-    reactiveSubInbox.close();
+    reactor.close();
+    controlClient.close();
+    dataClient.close();
   }
 }

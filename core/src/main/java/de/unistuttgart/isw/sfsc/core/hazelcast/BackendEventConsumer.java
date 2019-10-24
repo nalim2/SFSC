@@ -1,8 +1,5 @@
 package de.unistuttgart.isw.sfsc.core.hazelcast;
 
-import static de.unistuttgart.isw.sfsc.core.hazelcast.HazelcastNode.GET_HOST;
-import static de.unistuttgart.isw.sfsc.core.hazelcast.HazelcastNode.GET_PORT;
-
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
@@ -21,21 +18,20 @@ class BackendEventConsumer implements MembershipListener {
 
   @Override
   public void memberAdded(MembershipEvent membershipEvent) {
-    String host = GET_HOST.apply(membershipEvent);
-    int port = GET_PORT.apply(membershipEvent);
+    String host = HazelcastNode.getHost(membershipEvent);
+    int port = HazelcastNode.getPort(membershipEvent);
     memberAddedEventConsumer.accept(host, port);
   }
 
   @Override
   public void memberRemoved(MembershipEvent membershipEvent) {
-    String host = GET_HOST.apply(membershipEvent);
-    int port = GET_PORT.apply(membershipEvent);
+    String host = HazelcastNode.getHost(membershipEvent);
+    int port = HazelcastNode.getPort(membershipEvent);
     memberRemovedEventConsumer.accept(host, port);
   }
 
   @Override
-  public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
-  }
+  public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) { }
 
 }
 

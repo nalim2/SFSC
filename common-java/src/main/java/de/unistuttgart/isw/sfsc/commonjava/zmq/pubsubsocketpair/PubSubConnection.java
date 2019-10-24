@@ -1,58 +1,18 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.data.DataMultiplexer;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement.OutputPublisher;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement.SubscriptionManager;
 
 public interface PubSubConnection {
 
   OutputPublisher publisher();
 
-  Inbox dataInbox();
+  DataMultiplexer dataMultiplexer();
 
   SubscriptionManager subscriptionManager();
 
-  Inbox subEventInbox();
+  SubscriptionTracker subscriptionTracker();
 
-  interface SubscriptionManager {
-
-    void subscribe(byte[] topic);
-
-    void subscribe(ByteString topic);
-
-    void subscribe(String topic);
-
-    void unsubscribe(byte[] topic);
-
-    void unsubscribe(ByteString topic);
-
-    void unsubscribe(String topic);
-
-    Outbox outbox();
-  }
-
-  interface OutputPublisher {
-
-    void publish(byte[] topic, byte[] data);
-
-    void publish(ByteString topic, byte[] data);
-
-    void publish(String topic, byte[] data);
-
-    void publish(byte[] topic, ByteString data);
-
-    void publish(ByteString topic, ByteString data);
-
-    void publish(String topic, ByteString data);
-
-    void publish(byte[] topic, Message data);
-
-    void publish(ByteString topic, Message data);
-
-    void publish(String topic, Message data);
-
-    Outbox outbox();
-
-  }
 }

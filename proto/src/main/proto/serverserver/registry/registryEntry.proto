@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.serverserver.registry;
+
+option java_multiple_files = true;
+
+message RegistryEntry {
+  string adapterId = 1;
+  string coreId = 2;
+  bytes data = 3;
+}

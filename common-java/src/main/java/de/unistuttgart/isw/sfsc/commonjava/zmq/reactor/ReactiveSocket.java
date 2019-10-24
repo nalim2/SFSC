@@ -1,12 +1,26 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
-public interface ReactiveSocket extends AutoCloseable {
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+
+public interface ReactiveSocket extends NotThrowingAutoCloseable {
 
   Inbox getInbox();
 
   Outbox getOutbox();
 
   Connector getConnector();
+
+  Settings getSettings();
+
+  interface Inbox {
+
+    byte[][] take() throws InterruptedException;
+  }
+
+  interface Outbox {
+
+    void add(byte[][] output);
+  }
 
   interface Connector {
 
@@ -19,14 +33,9 @@ public interface ReactiveSocket extends AutoCloseable {
     void unbind(int port);
   }
 
-  interface Inbox {
+  interface Settings {
 
-    byte[][] take() throws InterruptedException;
-  }
-
-  interface Outbox {
-
-    void add(byte[][] output);
+    void setXPubVerbose();
   }
 
   @Override

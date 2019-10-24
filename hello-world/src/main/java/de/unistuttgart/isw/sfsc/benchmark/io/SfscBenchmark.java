@@ -2,8 +2,9 @@ package de.unistuttgart.isw.sfsc.benchmark.io;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import de.unistuttgart.isw.sfsc.adapter.base.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.adapter.base.RawAdapter;
+import com.google.protobuf.ByteString;
+import de.unistuttgart.isw.sfsc.adapter.Adapter;
+import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -12,8 +13,10 @@ public class SfscBenchmark {
 
   private static final int BENCHMARK_METADATA_SIZE_BYTES = 36;
   private static final int TOPIC_SIZE_BYTES = 4;
+  private static final int CLIENT_THREAD_POOL_SIZE = 2;
+  private static final int SERVER_THREAD_POOL_SIZE = 2;
 
-  private final int lingerDurationMs = 1000;
+  private static final int lingerDurationMs = 10000;
 
   private final BootstrapConfiguration serverConfiguration;
   private final BootstrapConfiguration clientConfiguration;
@@ -29,26 +32,24 @@ public class SfscBenchmark {
     final long periodNs = SECONDS.toNanos(1) / messagesPerSecond;
     System.out.println("initiating");
 
-    try (final RawAdapter clientAdapter = RawAdapter.create(clientConfiguration);
-        final RawAdapter serverAdapter = RawAdapter.create(serverConfiguration)) {
+    try (final Adapter clientAdapter = Adapter.create(clientConfiguration);
+        final Adapter serverAdapter = Adapter.create(serverConfiguration)) {
 
-      final byte[] requestTopic = pair(clientAdapter, serverAdapter, TOPIC_SIZE_BYTES);
-      final byte[] responseTopic = pair(serverAdapter, clientAdapter, TOPIC_SIZE_BYTES);
+      ByteString serverTopic = createTopic();
 
-      try (final Server server = Server.start(serverAdapter, responseTopic);
-          final Receiver receiver = Receiver.start(clientAdapter.dataConnection().dataInbox(), consumer)) {
-        try (final Transmitter transmitter = new Transmitter(clientAdapter.dataConnection().publisher(), requestTopic, messageSizeBytes)) {
+      try (final Server server = new Server(serverAdapter.dataConnection(), serverTopic, SERVER_THREAD_POOL_SIZE)) {
+        try (final Client client = new Client(clientAdapter.dataConnection(), CLIENT_THREAD_POOL_SIZE, consumer)){
           System.out.println("executing benchmark");
+          client.start(serverTopic, messageSizeBytes, periodNs, 100000);
           Thread.sleep(lingerDurationMs); //some time to warm up
-          transmitter.send(periodNs);
           System.out.println("please wait " + measurementDurationSec + " seconds");
           Thread.sleep(SECONDS.toMillis(measurementDurationSec));
         }
-
+        System.out.println("linger");
         Thread.sleep(lingerDurationMs); //wait for last messages to arrive
       }
+      System.out.println("Benchmark finished");
     }
-    System.out.println("Benchmark finished");
   }
 
   void printParameters(int messagesPerSecond, int messageSizeBytes, int measurementDurationSec) {
@@ -63,11 +64,10 @@ public class SfscBenchmark {
     System.out.println();
   }
 
-  public static byte[] pair(RawAdapter sender, RawAdapter receiver, int topicSizeBytes) throws InterruptedException {
-    byte[] topic = new byte[topicSizeBytes];
-    ThreadLocalRandom.current().nextBytes(topic);
-    receiver.dataConnection().subscriptionManager().subscribe(topic);
-    sender.dataConnection().subEventInbox().take();
-    return topic;
+  static ByteString createTopic() {
+    byte[] topicBytes = new byte[TOPIC_SIZE_BYTES];
+    ThreadLocalRandom.current().nextBytes(topicBytes);
+    return ByteString.copyFrom(topicBytes);
+
   }
 }

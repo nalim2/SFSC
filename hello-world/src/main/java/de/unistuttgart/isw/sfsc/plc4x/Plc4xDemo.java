@@ -4,19 +4,18 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.adapter.base.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
-import de.unistuttgart.isw.sfsc.patterns.tags.RegexDefinition;
-import de.unistuttgart.isw.sfsc.patterns.tags.RegexDefinition.VarRegex;
-import de.unistuttgart.isw.sfsc.patterns.tags.RegexDefinition.VarRegex.StringRegex;
+import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
+import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition.VarRegex;
+import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition.VarRegex.StringRegex;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.plc4x.java.api.exceptions.PlcConnectionException;
@@ -30,7 +29,6 @@ import servicepatterns.api.SfscServiceApiFactory;
 import servicepatterns.api.SfscSubscriber;
 import servicepatterns.api.filters.FilterFactory;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
-import servicepatterns.services.channelfactory.ChannelFactoryResult;
 
 public class Plc4xDemo {
 
@@ -73,7 +71,7 @@ public class Plc4xDemo {
   private static final BootstrapConfiguration bootstrapConfiguration1 = new BootstrapConfiguration("127.0.0.1", 1251);
   private static final BootstrapConfiguration bootstrapConfiguration2 = new BootstrapConfiguration("127.0.0.1", 1261);
 
-  public static void main(String[] args) throws ExecutionException, InterruptedException, PlcConnectionException {
+  public static void main(String[] args) throws ExecutionException, InterruptedException, PlcConnectionException, TimeoutException {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
 
     ByteString uuid = ByteString.copyFromUtf8(UUID.randomUUID().toString());
@@ -181,7 +179,6 @@ public class Plc4xDemo {
         genServerTags,
         ByteString.EMPTY,
         500,
-        () -> System.out.println("timeout"),
         message -> System.out.println("generated subscriber received message: " + message.toStringUtf8())
     ).get();
 
@@ -272,31 +269,23 @@ public class Plc4xDemo {
   }
 
 
-  static class ChannelGenerator implements Function<ByteString, ChannelFactoryResult> {
+  static class ChannelGenerator implements Function<ByteString, SfscPublisher> {
 
     private final SfscServiceApi sfscServiceApi;
-    private final Set<SfscPublisher> publishers = new HashSet<>();
 
     ChannelGenerator(SfscServiceApi sfscServiceApi) {
       this.sfscServiceApi = sfscServiceApi;
     }
 
-    public Set<SfscPublisher> getPublishers() {
-      return Collections.unmodifiableSet(publishers);
-    }
-
     @Override
-    public ChannelFactoryResult apply(ByteString sfscMessage) {
+    public SfscPublisher apply(ByteString sfscMessage) {
       SfscPublisher publisher = sfscServiceApi.unregisteredPublisher(
           "channelName",
           ByteString.copyFromUtf8(UUID.randomUUID().toString()),
           ByteString.copyFromUtf8("String"),
           Collections.emptyMap());
-      publishers.add(publisher);
-      return new ChannelFactoryResult(
-          publisher,
-          () -> getPublishers().stream().findAny().orElseThrow().publish(ByteString.copyFromUtf8("myIndividualMessage"))
-      );
+      publisher.subscriptionFuture(() -> publisher.publish(ByteString.copyFromUtf8("myIndividualMessage")));
+      return publisher;
     }
   }
 
