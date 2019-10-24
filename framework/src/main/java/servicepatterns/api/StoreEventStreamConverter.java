@@ -1,4 +1,4 @@
-package servicepatterns.api.registry;
+package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

@@ -1,4 +1,4 @@
-package servicepatterns.api.registry;
+package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -13,40 +13,39 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import servicepatterns.api.filters.FilterFactory;
+import servicepatterns.api.filtering.Filters;
 
-public final class ApiRegistryManagerImplementation implements NotThrowingAutoCloseable {
+final class ApiRegistryManager implements NotThrowingAutoCloseable {
 
-  private final FilterFactory filterFactory = new FilterFactory();
   private final Set<Map<String, ByteString>> services = ConcurrentHashMap.newKeySet();
 
   private final Handle handle;
   private final RegistryApi registryApi;
 
-  public ApiRegistryManagerImplementation(RegistryApi registryApi) {
+  ApiRegistryManager(RegistryApi registryApi) {
     this.registryApi = registryApi;
     handle = registryApi.addListener(new StoreEventStreamConverter(services));
   }
 
-  public Set<Map<String, ByteString>> getServices() {
+  Set<Map<String, ByteString>> getServices() {
     return Collections.unmodifiableSet(services);
   }
 
-  public Set<Map<String, ByteString>> getServices(String name) {
+  Set<Map<String, ByteString>> getServices(String name) {
     return getServices()
         .stream()
-        .filter(filterFactory.stringEqualsFilter(BaseTags.SFSC_SERVICE_NAME.name(), name))
+        .filter(Filters.stringEqualsFilter(BaseTags.SFSC_SERVICE_NAME.name(), name))
         .collect(Collectors.toUnmodifiableSet());
   }
 
-  public Set<Map<String, ByteString>> getServices(String name, Message message, Collection<String> varPaths) {
+  Set<Map<String, ByteString>> getServices(String name, Message message, Collection<String> varPaths) {
     return getServices(name)
         .stream()
-        .filter(filterFactory.regexFilter(message, varPaths))
+        .filter(Filters.regexFilter(message, varPaths))
         .collect(Collectors.toUnmodifiableSet());
   }
 
-  public Handle registerService(Map<String, ByteString> tags) {
+  Handle registerService(Map<String, ByteString> tags) {
     ByteString serviceDescriptor = ServiceDescriptor.newBuilder().putAllTags(tags).build().toByteString();
     registryApi.create(serviceDescriptor); //todo why returns future?
     return () -> registryApi.remove(serviceDescriptor);

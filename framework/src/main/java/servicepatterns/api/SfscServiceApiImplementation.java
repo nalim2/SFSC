@@ -23,8 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import servicepatterns.api.registry.ApiRegistryManagerImplementation;
-import servicepatterns.api.tagging.Tagger;
 import servicepatterns.basepatterns.ackreqrep.AckClient;
 import servicepatterns.basepatterns.ackreqrep.AckServer;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
@@ -40,12 +38,12 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
   private final Tagger tagger = new Tagger();
 
   private final PubSubConnection pubSubConnection;
-  private final ApiRegistryManagerImplementation apiRegistryManager;
+  private final ApiRegistryManager apiRegistryManager;
   private final String coreId;
   private final String adapterId;
 
   SfscServiceApiImplementation(Adapter adapter) {
-    apiRegistryManager = new ApiRegistryManagerImplementation(adapter.registryClient());
+    apiRegistryManager = new ApiRegistryManager(adapter.registryClient());
     pubSubConnection =  adapter.dataConnection();
     coreId = adapter.adapterInformation().getCoreId();
     adapterId = adapter.adapterInformation().getAdapterId();

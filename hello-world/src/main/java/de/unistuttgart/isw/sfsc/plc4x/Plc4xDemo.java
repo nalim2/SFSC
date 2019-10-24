@@ -27,7 +27,7 @@ import servicepatterns.api.SfscServer;
 import servicepatterns.api.SfscServiceApi;
 import servicepatterns.api.SfscServiceApiFactory;
 import servicepatterns.api.SfscSubscriber;
-import servicepatterns.api.filters.FilterFactory;
+import servicepatterns.api.filtering.Filters;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
 
 public class Plc4xDemo {
@@ -117,7 +117,7 @@ public class Plc4xDemo {
     Thread.sleep(1000);
 
     Map<String, ByteString> pubTags = clientSfscServiceApi.getServices("Bool").stream()
-        .filter(new FilterFactory().byteStringEqualsFilter("id", uuid))
+        .filter(Filters.byteStringEqualsFilter("id", uuid))
         .findAny().orElseThrow();
 
     SfscSubscriber subscriber = clientSfscServiceApi.subscriber(pubTags, bytestring -> System.out.println("Received message on subscriber"));
@@ -149,11 +149,11 @@ public class Plc4xDemo {
 
     Map<String, ByteString> writeServerTags = clientSfscServiceApi.getServices("myServer", writeRequest(), List.of("name", "value"))
         .stream()
-        .filter(new FilterFactory().byteStringEqualsFilter("id", uuid))
+        .filter(Filters.byteStringEqualsFilter("id", uuid))
         .findAny().orElseThrow();
     Map<String, ByteString> readServerTags = clientSfscServiceApi.getServices("myServer")
         .stream()
-        .filter(new FilterFactory().byteStringEqualsFilter("id", uuid))
+        .filter(Filters.byteStringEqualsFilter("id", uuid))
         .findAny().orElseThrow();
 
     SfscClient client = clientSfscServiceApi.client();
@@ -171,7 +171,7 @@ public class Plc4xDemo {
 
     Thread.sleep(1000);
     Map<String, ByteString> genServerTags = clientSfscServiceApi.getServices("myGen").stream()
-        .filter(new FilterFactory().byteStringEqualsFilter("id", uuid))
+        .filter(Filters.byteStringEqualsFilter("id", uuid))
         .findAny().orElseThrow();
     SfscClient client2 = clientSfscServiceApi.client();
     Thread.sleep(1000);
