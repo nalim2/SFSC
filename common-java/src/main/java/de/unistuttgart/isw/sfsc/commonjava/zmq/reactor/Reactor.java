@@ -1,10 +1,11 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import java.util.concurrent.ExecutionException;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 
-public class Reactor implements AutoCloseable {
+public class Reactor implements NotThrowingAutoCloseable {
 
   private final ZMQWorker worker;
 
@@ -21,7 +22,7 @@ public class Reactor implements AutoCloseable {
   public <InboxT extends Enum<InboxT>> ReactiveSocket createReactiveSocket(SocketType type, Class<InboxT> inboxProtocol)
       throws ExecutionException, InterruptedException {
     QueuingHandler queuingHandler = QueuingHandler.forProtocol(inboxProtocol);
-    return worker.createSocket(type, queuingHandler, queuingHandler.getInbox()).get();
+    return worker.createSocket(type, queuingHandler, queuingHandler.getInbox()).get(); //todo wait
   }
 
   @Override

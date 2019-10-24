@@ -39,10 +39,6 @@ public enum SubProtocol implements Frame {
     return ByteString.copyFrom(getRawTopic(typeAndTopicFrame));
   }
 
-  public static String getTopic(byte[] typeAndTopicFrame) {
-    return getTopicMessage(typeAndTopicFrame).toStringUtf8();
-  }
-
   public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, byte[] topic) {
     byte[] data = new byte[1 + topic.length];
     data[0] = subscriptionType.getValue();

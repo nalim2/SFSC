@@ -1,25 +1,23 @@
 package de.unistuttgart.isw.sfsc.core.data;
 
-import de.unistuttgart.isw.sfsc.commonjava.zmq.processors.Forwarder;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactiveinbox.ReactiveInbox;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.forwarder.ForwardingInbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class Data implements AutoCloseable {
+public class Data implements NotThrowingAutoCloseable {
 
   private final PubSubSocketPair frontend;
   private final PubSubSocketPair backend;
   private final Configuration<CoreOption> configuration;
-  private final ReactiveInbox backendDataInbox;
-  private final ReactiveInbox backendSubEventInbox;
-  private final ReactiveInbox frontendDataInbox;
-  private final ReactiveInbox frontendSubEventInbox;
+  private final ForwardingInbox backendDataInbox;
+  private final ForwardingInbox backendSubscriptionInbox;
+  private final ForwardingInbox frontendDataInbox;
+  private final ForwardingInbox frontendSubscriptionInbox;
   private final Reactor reactor;
 
   Data(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
@@ -27,17 +25,23 @@ public class Data implements AutoCloseable {
     reactor = Reactor.create(contextConfiguration);
     frontend = PubSubSocketPair.create(reactor);
     backend = PubSubSocketPair.create(reactor);
-    PubSubConnection frontendConnection = frontend.connection();
-    PubSubConnection backendConnection = backend.connection();
 
-    backendDataInbox = ReactiveInbox.create(backendConnection.dataInbox(),
-        new Forwarder(frontendConnection.publisher().outbox()));
-    backendSubEventInbox = ReactiveInbox.create(backendConnection.subEventInbox(),
-        new Forwarder(frontendConnection.subscriptionManager().outbox()));
-    frontendDataInbox = ReactiveInbox.create(frontendConnection.dataInbox(),
-        new Forwarder(List.of(frontendConnection.publisher().outbox(), backendConnection.publisher().outbox())));
-    frontendSubEventInbox = ReactiveInbox.create(frontendConnection.subEventInbox(),
-        new Forwarder(List.of(frontendConnection.subscriptionManager().outbox(), backendConnection.subscriptionManager().outbox())));
+    backendDataInbox = ForwardingInbox.create(backend.dataInbox());
+    backendSubscriptionInbox = ForwardingInbox.create(backend.subscriptionInbox());
+    frontendDataInbox = ForwardingInbox.create(frontend.dataInbox());
+    frontendSubscriptionInbox = ForwardingInbox.create(frontend.subscriptionInbox());
+
+    backendDataInbox.addListener(frontend.dataOutbox()::add);
+    backendSubscriptionInbox.addListener(frontend.subscriptionOutbox()::add);
+    frontendDataInbox.addListener(backend.dataOutbox()::add);
+    frontendDataInbox.addListener(frontend.dataOutbox()::add);
+    frontendSubscriptionInbox.addListener(backend.subscriptionOutbox()::add);
+    frontendSubscriptionInbox.addListener(frontend.subscriptionOutbox()::add);
+
+    backendDataInbox.start();
+    backendSubscriptionInbox.start();
+    frontendDataInbox.start();
+    frontendSubscriptionInbox.start();
   }
 
   public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration)
@@ -64,9 +68,9 @@ public class Data implements AutoCloseable {
   @Override
   public void close() {
     backendDataInbox.close();
-    backendSubEventInbox.close();
+    backendSubscriptionInbox.close();
     frontendDataInbox.close();
-    frontendSubEventInbox.close();
+    frontendSubscriptionInbox.close();
     reactor.close();
     frontend.close();
     backend.close();

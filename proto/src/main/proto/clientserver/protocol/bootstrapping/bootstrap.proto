@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.clientserver.protocol.bootstrap;
+
+option java_multiple_files = true;
+
+message BootstrapMessage {
+  int32 core_subscription_port = 1;
+}

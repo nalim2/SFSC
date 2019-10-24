@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-class MessageSupplier implements Supplier<BenchmarkMessage> {
+class MessageSupplier implements Supplier<ByteString> {
 
   private final Supplier<Long> idGenerator = new AtomicLong(1)::getAndIncrement;
   private final int messageSizeBytes;
@@ -16,11 +16,11 @@ class MessageSupplier implements Supplier<BenchmarkMessage> {
   }
 
   @Override
-  public BenchmarkMessage get() {
+  public ByteString get() {
     return message(messageSizeBytes);
   }
 
-  BenchmarkMessage message(int messageSizeBytes) {
+  ByteString message(int messageSizeBytes) {
     final byte[] weightBytes = new byte[messageSizeBytes];
     ThreadLocalRandom.current().nextBytes(weightBytes);
     final ByteString weightByteString = ByteString.copyFrom(weightBytes);
@@ -30,7 +30,8 @@ class MessageSupplier implements Supplier<BenchmarkMessage> {
         .setSendTimestamp(System.nanoTime())
         .setServerTimestamp(Long.MAX_VALUE)
         .setReceiveTimestamp(Long.MAX_VALUE)
-        .build();
+        .build()
+        .toByteString();
   }
 
 }

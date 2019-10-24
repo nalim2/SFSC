@@ -4,7 +4,7 @@ import de.unistuttgart.isw.sfsc.commonjava.protocol.Frame;
 
 public enum DataProtocol implements Frame {
   TOPIC_FRAME(0),
-  PAYLOAD_FRAME(1);
+  DATA_FRAME(1);
 
   private static final int LENGTH = values().length; //cache
   private final int position;

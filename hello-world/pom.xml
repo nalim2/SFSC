@@ -23,6 +23,11 @@
       <artifactId>adapter</artifactId>
     </dependency>
     <dependency>
+      <groupId>de.unistuttgart.isw.sfsc</groupId>
+      <artifactId>framework</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <version>${apache-commons-math3.version}</version>
@@ -32,11 +37,7 @@
       <artifactId>plc4j-driver-opcua</artifactId>
       <version>${plc4j-driver-opcua.version}</version>
     </dependency>
-    <dependency>
-      <groupId>de.unistuttgart.isw.sfsc</groupId>
-      <artifactId>patterns</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
   </dependencies>
 
   <build>

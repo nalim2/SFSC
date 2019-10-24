@@ -2,12 +2,19 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.zeromq.SocketType;
 import org.zeromq.ZMQ.Socket;
 
 class ReactiveSocketFunctions {
 
   private static final Logger logger = LoggerFactory.getLogger(ReactiveSocketFunctions.class);
   private static final String WILDCARD_HOST = "*";
+
+  static void setXPubVerbose(Socket socket){
+    if (socket.getSocketType() == SocketType.XPUB) {
+      socket.setXpubVerbose(true);
+    }
+  }
 
   static void connect(Socket socket, String host, int port) {
       String address = createTcpAddress(host, port);

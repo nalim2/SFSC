@@ -1,6 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
 import java.lang.invoke.MethodHandles;
 import java.util.Queue;
@@ -28,7 +29,7 @@ import org.zeromq.ZMQException;
 import zmq.ZError;
 import zmq.ZMQ;
 
-class ZMQWorker implements AutoCloseable {
+class ZMQWorker implements NotThrowingAutoCloseable {
 
   private static final Logger logger = LoggerFactory.getLogger(ZMQWorker.class);
   private static final Supplier<Integer> workerCounter = new AtomicInteger()::getAndIncrement;

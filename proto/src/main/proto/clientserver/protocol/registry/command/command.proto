@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command;
+
+option java_multiple_files = true;
+
+message CommandRequest {
+  string adapterId = 1;
+  oneof create_or_delete{
+    bytes create = 2;
+    bytes delete = 3;
+  }
+}
+
+message CommandReply {
+}
+
+
+
+
+
+

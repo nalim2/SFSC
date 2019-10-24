@@ -24,7 +24,12 @@ class ReactiveSocketImpl implements ReactiveSocket {
 
   @Override
   public Outbox getOutbox() {
-    return output -> executor.execute(() -> ReactiveSocketFunctions.write(socket, output));
+    return new Outbox() {
+      @Override
+      public void add(byte[][] output) {
+        executor.execute(() -> ReactiveSocketFunctions.write(socket, output));
+      }
+    };
   }
 
   @Override
@@ -48,6 +53,17 @@ class ReactiveSocketImpl implements ReactiveSocket {
       @Override
       public void unbind(int port) {
         executor.execute(() -> ReactiveSocketFunctions.unbind(socket, port));
+      }
+    };
+  }
+
+  @Override
+  public Settings getSettings() {
+    return new Settings() {
+
+      @Override
+      public void setXPubVerbose() {
+        executor.execute(() -> ReactiveSocketFunctions.setXPubVerbose(socket));
       }
     };
   }

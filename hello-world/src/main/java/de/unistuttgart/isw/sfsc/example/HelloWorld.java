@@ -2,31 +2,35 @@ package de.unistuttgart.isw.sfsc.example;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.adapter.base.BootstrapConfiguration;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.inboxManager.TopicListener;
-import java.util.Set;
+import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.util.SubscriptionAgent;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
 
 public class HelloWorld {
 
   public static void main(String[] args) {
-    System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+    System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
 
     BootstrapConfiguration bootstrapConfiguration1 = new BootstrapConfiguration("127.0.0.1", 1251);
     BootstrapConfiguration bootstrapConfiguration2 = new BootstrapConfiguration("127.0.0.1", 1261);
 
+    ExecutorService executor = Executors.newCachedThreadPool();
+    CountDownLatch cdl = new CountDownLatch(2);
     new Thread(() -> {
       try (Adapter adapter1 = Adapter.create(bootstrapConfiguration1)) {
+       SubscriptionAgent.create(adapter1.dataConnection()).addSubscriber(ByteString.copyFromUtf8("adapter1"), new PrintingConsumer("adapter1"), executor);
 
-        adapter1.inboxTopicManager().addTopicListener(new SimpleTopicListener ("adapter1"));
-
-        while (adapter1.subscriptionTracker().getSubscriptions().size() < 2){
+        while (adapter1.dataConnection().subscriptionTracker().getSubscriptions().size() < 2){
           Thread.sleep(50);
-        };
+        }
 
-        adapter1.publisher().publish("adapter2", ByteString.copyFromUtf8("hello from adapter 1").toByteArray());
+        adapter1.dataConnection().publisher().publish("adapter2", ByteString.copyFromUtf8("hello from adapter 1"));
 
         Thread.sleep(2000);
+        cdl.countDown();
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -35,47 +39,43 @@ public class HelloWorld {
     new Thread(() -> {
       try (Adapter adapter2 = Adapter.create(bootstrapConfiguration2)) {
 
-        adapter2.inboxTopicManager().addTopicListener(new SimpleTopicListener ("adapter2"));
-        while (adapter2.subscriptionTracker().getSubscriptions().size() < 2){
-          Thread.sleep(50);
-        };
+        SubscriptionAgent.create(adapter2.dataConnection()).addSubscriber(ByteString.copyFromUtf8("adapter2"), new PrintingConsumer("adapter2"), executor);
 
-        adapter2.publisher().publish("adapter1", ByteString.copyFromUtf8("hello from adapter 2").toByteArray());
+        while (adapter2.dataConnection().subscriptionTracker().getSubscriptions().size() < 2){
+          Thread.sleep(50);
+        }
+
+        adapter2.dataConnection().publisher().publish("adapter1", ByteString.copyFromUtf8("hello from adapter 2").toByteArray());
+
         Thread.sleep(2000);
+        cdl.countDown();
       } catch (Exception e) {
         e.printStackTrace();
       }
     }).start();
+
+    try {
+      cdl.await();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+    executor.shutdownNow();
   }
 
 
-  private static class SimpleTopicListener implements TopicListener{
+  private static class PrintingConsumer implements BiConsumer<ByteString, ByteString> {
 
-    private final ByteString topic ;
     private final String name;
 
-    SimpleTopicListener(String name) {
-      this.name = name;
-      topic = ByteString.copyFromUtf8(name);
-    }
+    private PrintingConsumer(String name) {this.name = name;}
 
     @Override
-    public Set<ByteString> getTopics() {
-      return Set.of(topic);
-    }
-
-    @Override
-    public boolean test(ByteString topic) {
-      return this.topic.equals(topic);
-    }
-
-    @Override
-    public void processMessage(byte[][] message) {
+    public void accept(ByteString topic, ByteString data) {
       System.out.println(name
           + " received message in topic \""
-          + ByteString.copyFrom(DataProtocol.TOPIC_FRAME.get(message)).toStringUtf8()
+          + topic.toStringUtf8()
           + "\" with content \""
-          + ByteString.copyFrom(DataProtocol.PAYLOAD_FRAME.get(message)).toStringUtf8()
+          + data.toStringUtf8()
           + "\""
       );
     }

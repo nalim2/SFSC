@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake;
+
+option java_multiple_files = true;
+
+message Hello {
+  string adapter_id = 1;
+}
+
+message Welcome {
+  int32 data_pub_port = 1;
+  int32 data_sub_port = 2;
+  string core_id = 3;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query;
+
+option java_multiple_files = true;
+
+message QueryRequest {
+  int64 event_id = 1;
+}
+
+message QueryReply {
+  int64 event_id = 1;
+  oneof created_or_deleted_or_expired_or_future {
+    bytes created = 2;
+    bytes deleted = 3;
+    Expired expired = 4;
+    Future future = 5;
+  }
+  message Expired {
+  }
+  message Future {
+  }
+}
+
+
+
+
+
+

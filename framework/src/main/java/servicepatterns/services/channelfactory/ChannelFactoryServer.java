@@ -1,0 +1,40 @@
+package servicepatterns.services.channelfactory;
+
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import de.unistuttgart.isw.sfsc.framework.protocol.channelfactory.ChannelFactoryReply;
+import de.unistuttgart.isw.sfsc.framework.protocol.channelfactory.ChannelFactoryRequest;
+import java.util.Map;
+import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import servicepatterns.api.SfscPublisher;
+
+public class ChannelFactoryServer implements Function<ByteString, ByteString> {
+
+  private static final Logger logger = LoggerFactory.getLogger(ChannelFactoryServer.class);
+
+  private final Function<ByteString, SfscPublisher> channelFactory;
+
+  public ChannelFactoryServer(Function<ByteString, SfscPublisher> channelFactory) {
+    this.channelFactory = channelFactory;
+  }
+
+  @Override
+  public ByteString apply(ByteString byteString) {
+    try {
+      ChannelFactoryRequest request = ChannelFactoryRequest.parseFrom(byteString);
+      ByteString payload = request.getPayload();
+      SfscPublisher sfscPublisher = channelFactory.apply(payload);
+      if (sfscPublisher != null) {
+        Map<String, ByteString> tags = sfscPublisher.getTags();
+        return ChannelFactoryReply.newBuilder().putAllTags(tags).build().toByteString();
+      } else {
+        return ChannelFactoryReply.getDefaultInstance().toByteString();
+      }
+    } catch (InvalidProtocolBufferException e) {
+      logger.warn("received malformed message", e);
+      return ChannelFactoryReply.getDefaultInstance().toByteString();
+    }
+  }
+}

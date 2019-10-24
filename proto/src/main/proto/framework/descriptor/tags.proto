@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.framework.descriptor;
+
+option java_multiple_files = true;
+
+enum BaseTags {
+  SFSC_SERVICE_NAME = 0;
+  SFSC_SERVICE_ID = 1;
+  SFSC_ADAPTER_ID = 2;
+  SFSC_CORE_ID = 3;
+  SFSC_SERVICE_TYPE = 4;
+}
+
+enum PublisherTags {
+  SFSC_PUBLISHER_OUTPUT_TOPIC = 0;
+  SFSC_PUBLISHER_OUTPUT_MESSAGE_TYPE = 1;
+}
+
+enum ServerTags {
+  SFSC_SERVER_INPUT_TOPIC = 0;
+  SFSC_SERVER_INPUT_MESSAGE_TYPE = 1;
+  SFSC_SERVER_OUTPUT_MESSAGE_TYPE = 2;
+  SFSC_SERVER_REGEX = 3;
+}
+
+enum ChannelFactoryTags {
+  SFSC_CHANNEL_FACTORY_INPUT_TOPIC = 0;
+  SFSC_CHANNEL_FACTORY_INPUT_MESSAGE_TYPE = 1;
+}
+
+enum SfscServiceType {
+  PUBLISHER = 0;
+  SERVER = 1;
+  CHANNEL_FACTORY = 2;
+}
+
+message RegexDefinition {
+  repeated VarRegex regexes = 1;
+
+  message VarRegex {
+    string varName = 1;
+    oneof regex {
+      StringRegex string_regex = 2;
+      NumberRegex number_regex = 3;
+    }
+
+    message StringRegex {
+      string regex = 1;
+    }
+
+    message NumberRegex {
+      sint64 lowerBound = 1;
+      sint64 upperBound = 2;
+    }
+  }
+
+}
+
+
