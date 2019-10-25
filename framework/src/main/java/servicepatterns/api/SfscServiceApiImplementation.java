@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import servicepatterns.api.tagging.Tagger;
 import servicepatterns.basepatterns.ackreqrep.AckClient;
 import servicepatterns.basepatterns.ackreqrep.AckServer;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
@@ -35,7 +36,6 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
       Executors.newCachedThreadPool(new ExceptionLoggingThreadFactory(getClass().getName(), logger))); //todo all to unconfigurable?
   private final ScheduledExecutorService ackServerScheduledExecutorService = Executors.unconfigurableScheduledExecutorService(
       Executors.newScheduledThreadPool(0, new ExceptionLoggingThreadFactory(getClass().getName(), logger)));
-  private final Tagger tagger = new Tagger();
 
   private final PubSubConnection pubSubConnection;
   private final ApiRegistryManager apiRegistryManager;
@@ -72,7 +72,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     AckServer server = new AckServer(pubSubConnection, ackServerScheduledExecutorService, serverFunction, serverTopic, timeoutMs, sendRateMs,
         sendMaxTries,
         executorService);
-    Map<String, ByteString> tags = tagger
+    Map<String, ByteString> tags = Tagger
         .createServerTags(name, UUID.randomUUID().toString(), adapterId, coreId, serverTopic, inputMessageType, outputMessageType, regexDefinition,
             customTags);
     Handle handle = apiRegistryManager.registerService(tags);
@@ -93,7 +93,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
 
   @Override
   public SfscPublisher publisher(String name, ByteString outputTopic, ByteString outputMessageType, Map<String, ByteString> customTags) {
-    Map<String, ByteString> tags = tagger
+    Map<String, ByteString> tags = Tagger
         .createPublisherTags(name, UUID.randomUUID().toString(), adapterId, coreId, outputTopic, outputMessageType, customTags);
     Handle handle = apiRegistryManager.registerService(tags);
     Publisher publisher = new Publisher(pubSubConnection);
@@ -102,7 +102,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
 
   @Override
   public SfscPublisher unregisteredPublisher(String name, ByteString outputTopic, ByteString outputMessageType, Map<String, ByteString> customTags) {
-    Map<String, ByteString> tags = tagger
+    Map<String, ByteString> tags = Tagger
         .createPublisherTags(name, UUID.randomUUID().toString(), adapterId, coreId, outputTopic, outputMessageType, customTags);
     Publisher publisher = new Publisher(pubSubConnection);
     return new SfscPublisherImplementation(tags, outputTopic, publisher, executorService, () -> {});
@@ -125,7 +125,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
       Function<ByteString, SfscPublisher> channelFactory) {
     ChannelFactoryServer channelFactoryServer = new ChannelFactoryServer(channelFactory);
     SimpleServer simpleServer = new SimpleServer(pubSubConnection, channelFactoryServer, serverTopic, executorService);
-    Map<String, ByteString> tags = tagger
+    Map<String, ByteString> tags = Tagger
         .createChannelFactoryTags(name, UUID.randomUUID().toString(), adapterId, coreId, serverTopic, inputMessageType, customTags);
     Handle handle = apiRegistryManager.registerService(tags);
 
