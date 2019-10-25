@@ -10,6 +10,7 @@ import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEventQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -26,6 +27,10 @@ final class Registry {
   private final AtomicLong idCounter = new AtomicLong();
   private final Set<ByteString> registry = ConcurrentHashMap.newKeySet();
 
+  private final Executor executor;
+
+  Registry(Executor executor) {this.executor = executor;}
+
   void handleQueryReply(ByteString byteString) {
     try {
       QueryReply queryReply = QueryReply.parseFrom(byteString);
@@ -36,10 +41,9 @@ final class Registry {
           case CREATED: //fallthrough
           case DELETED: //fallthrough
           case EXPIRED: {
-            if (idCounter.compareAndSet(queryId, queryId + 1)) {
-              modifyRegistry(queryReply);
-              notificationListeners.forEach(Runnable::run);
-            }
+            idCounter.compareAndSet(queryId, queryId + 1);
+            modifyRegistry(queryReply);
+            executor.execute(() -> notificationListeners.forEach(Runnable::run));
             break;
           }
           case FUTURE: {

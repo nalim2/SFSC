@@ -24,15 +24,14 @@ public class RegistryClient implements RegistryApi {
   private static final String QUERY_SERVER_TOPIC = "REGISTRY_QUERY_SERVER";
   private static final String COMMAND_SERVER_TOPIC = "REGISTRY_COMMAND_SERVER";
   private static final String EVENT_PUBLISHER_TOPIC = "REGISTRY_EVENT_PUBLISHER";
-  private static final int REGISTRY_THREAD_NUMBER = 1;
   private static final int POLLING_RATE_MS = 1000;
   private static final int TIMEOUT_MS = 1000;
 
   private static final Logger logger = LoggerFactory.getLogger(RegistryClient.class);
 
-  private final ScheduledExecutorService registryExecutor = Executors.unconfigurableScheduledExecutorService(
-      Executors.newScheduledThreadPool(REGISTRY_THREAD_NUMBER, new ExceptionLoggingThreadFactory(getClass().getName(), logger)));
-  private final Registry registry = new Registry();
+  private final ScheduledExecutorService registryExecutor = Executors
+      .newSingleThreadScheduledExecutor(new ExceptionLoggingThreadFactory(getClass().getName(), logger));
+  private final Registry registry = new Registry(registryExecutor);
 
   private final CommandClient commandClient;
   private final QueryClient queryClient;

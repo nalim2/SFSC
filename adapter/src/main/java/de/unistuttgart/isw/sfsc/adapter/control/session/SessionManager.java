@@ -18,13 +18,12 @@ import org.slf4j.LoggerFactory;
 public final class SessionManager implements Session {
 
   private static final String CORE_SESSION_TOPIC = "SESSION_SERVER";
-  private static final int SESSION_THREAD_NUMBER = 1;
   private static final int TIMEOUT_MS = 1000;
 
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
-  private final ScheduledExecutorService sessionExecutor = Executors.unconfigurableScheduledExecutorService(
-      Executors.newScheduledThreadPool(SESSION_THREAD_NUMBER, new ExceptionLoggingThreadFactory(getClass().getName(), logger)));
+  private final ScheduledExecutorService sessionExecutor = Executors
+      .newSingleThreadScheduledExecutor(new ExceptionLoggingThreadFactory(getClass().getName(), logger));
   private final String adapterName = UUID.randomUUID().toString();
   private final ByteString serverTopic = ByteString.copyFromUtf8(CORE_SESSION_TOPIC);
   private final ByteString clientTopic = ByteString.copyFromUtf8("SESSION_CLIENT_" + adapterName);

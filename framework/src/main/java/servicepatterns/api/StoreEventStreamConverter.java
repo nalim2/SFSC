@@ -23,7 +23,7 @@ class StoreEventStreamConverter implements Consumer<StoreEvent> {
 
   StoreEventStreamConverter(Set<Map<String, ByteString>> services) {this.services = services;}
 
-  public synchronized void accept(StoreEvent storeEvent) {
+  public void accept(StoreEvent storeEvent) {
     try {
       Map<String, ByteString> service = ServiceDescriptor.parseFrom(storeEvent.getData()).getTagsMap();
       switch (storeEvent.getStoreEventType()) {

@@ -47,39 +47,37 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
   }
 
   public void onStoreEvent(StoreEvent storeEvent) {
-    switch (storeEvent.getStoreEventType()) {
-      case CREATE: {
-        onAdd(storeEvent.getData());
-        break;
-      }
-      case DELETE: {
-        onRemove(storeEvent.getData());
-        break;
-      }
-      default: {
-        logger.warn("Unsupported Store Event!");
-      }
-    }
-  }
-
-  void onAdd(ByteString byteString) {
     long id = idCounter.get();
     executorService.execute(() -> {
+          switch (storeEvent.getStoreEventType()) {
+            case CREATE: {
+              onAdd(id, storeEvent.getData());
+              break;
+            }
+            case DELETE: {
+              onRemove(id, storeEvent.getData());
+              break;
+            }
+            default: {
+              logger.warn("Unsupported Store Event!");
+            }
+          }
+        }
+    );
+  }
+
+  void onAdd(long id, ByteString byteString) {
       QueryReply queryReply = QueryReply.newBuilder().setCreated(byteString).setEventId(id).build();
       staging.put(id, queryReply);
       processStaging();
-    });
   }
 
-  void onRemove(ByteString byteString) {
-    long id = idCounter.get();
-    executorService.execute(() -> {
+  void onRemove(long id, ByteString byteString) {
       QueryReply queryReply = QueryReply.newBuilder().setDeleted(byteString).setEventId(id).build();
       staging.put(id, queryReply);
       processStaging();
       discardCreateEvent(byteString);
       executorService.schedule(() -> eventLog.remove(id), removalRetentionTimeSec, TimeUnit.SECONDS);
-    });
   }
 
   void processStaging() {
