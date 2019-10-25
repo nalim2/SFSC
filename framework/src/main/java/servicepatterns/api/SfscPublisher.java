@@ -1,6 +1,7 @@
 package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
+import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -13,7 +14,7 @@ public interface SfscPublisher extends NotThrowingAutoCloseable {
 
   Future<Void> subscriptionFuture();
 
-  Future<Void> subscriptionFuture(Runnable runnable);
+  Handle onSubscription(Runnable runnable);
 
   @Override
   void close();

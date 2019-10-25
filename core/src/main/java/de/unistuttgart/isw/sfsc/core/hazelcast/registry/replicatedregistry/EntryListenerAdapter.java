@@ -6,10 +6,12 @@ import com.hazelcast.core.MapEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
 
+  private final ReentrantLock lock = new ReentrantLock(true);
   private final Consumer<StoreEvent> registryEventHandler;
 
   EntryListenerAdapter(Consumer<StoreEvent> registryEventHandler) {
@@ -17,13 +19,23 @@ class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
   }
 
   @Override
-  public synchronized void entryRemoved(EntryEvent<RegistryEntry, Boolean> event) {
-    registryEventHandler.accept(new StoreEvent(StoreEventType.DELETE, event.getKey().getData()));
+  public void entryRemoved(EntryEvent<RegistryEntry, Boolean> event) {
+    lock.lock();
+    try {
+      registryEventHandler.accept(new StoreEvent(StoreEventType.DELETE, event.getKey().getData()));
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
-  public synchronized void entryAdded(EntryEvent<RegistryEntry, Boolean> event) {
-    registryEventHandler.accept(new StoreEvent(StoreEventType.CREATE, event.getKey().getData()));
+  public void entryAdded(EntryEvent<RegistryEntry, Boolean> event) {
+    lock.lock();
+    try {
+      registryEventHandler.accept(new StoreEvent(StoreEventType.CREATE, event.getKey().getData()));
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override

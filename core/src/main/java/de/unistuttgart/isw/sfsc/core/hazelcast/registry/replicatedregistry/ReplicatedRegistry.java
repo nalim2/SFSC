@@ -1,10 +1,10 @@
 package de.unistuttgart.isw.sfsc.core.hazelcast.registry.replicatedregistry;
 
+import com.google.protobuf.ByteString;
 import com.hazelcast.core.ReplicatedMap;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
-import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
-import de.unistuttgart.isw.sfsc.commonjava.util.StoreEventQueue;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,11 +24,11 @@ public class ReplicatedRegistry {
   }
 
   public Handle addListener(Consumer<StoreEvent> listener) {
-    StoreEventQueue storeEventQueue = new StoreEventQueue(listener);
-    String handle = replicatedMap.addEntryListener(new EntryListenerAdapter(storeEventQueue));
+    ReplayingListener replayingListener = new ReplayingListener(listener);
+    String handle = replicatedMap.addEntryListener(new EntryListenerAdapter(replayingListener));
 
-    storeEventQueue.prepopulate(createStoreEventSnapshot());
-    storeEventQueue.start();
+    replayingListener.prepend(createStoreEventSnapshot());
+    replayingListener.start();
 
     return () -> replicatedMap.removeEntryListener(handle);
   }
@@ -49,9 +49,9 @@ public class ReplicatedRegistry {
     copy.forEach(replicatedMap::remove);
   }
 
-  Set<StoreEvent> createStoreEventSnapshot() {
+  Set<ByteString> createStoreEventSnapshot() {
     return Set.copyOf(replicatedMap.keySet()).stream()
-        .map(entry -> new StoreEvent(StoreEventType.CREATE, entry.getData()))
+        .map(RegistryEntry::getData)
         .collect(Collectors.toUnmodifiableSet());
   }
 
