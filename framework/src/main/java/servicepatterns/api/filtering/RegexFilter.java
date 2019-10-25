@@ -1,4 +1,4 @@
-package servicepatterns.api.filters;
+package servicepatterns.api.filtering;
 
 
 import com.google.protobuf.ByteString;

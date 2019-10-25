@@ -1,4 +1,4 @@
-package servicepatterns.api.tagging;
+package servicepatterns.api;
 
 
 import com.google.protobuf.ByteString;
@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class Tagger {
+final class Tagger {
 
-  public Map<String, ByteString> createPublisherTags(String name, String serviceId, String adapterId, String coreId,
+  Map<String, ByteString> createPublisherTags(String name, String serviceId, String adapterId, String coreId,
       ByteString outputTopic, ByteString outputMessageType,
       Map<String, ByteString> customTags) {
     Map<String, ByteString> map = new HashMap<>();
@@ -27,7 +27,7 @@ public final class Tagger {
     return Collections.unmodifiableMap(map);
   }
 
-  public Map<String, ByteString> createServerTags(
+  Map<String, ByteString> createServerTags(
       String name, String serviceId, String adapterId, String coreId,
       ByteString inputTopic, ByteString inputMessageType, ByteString outputMessageType, RegexDefinition regexDefinition,
       Map<String, ByteString> customTags) {
@@ -41,7 +41,7 @@ public final class Tagger {
     return Collections.unmodifiableMap(map);
   }
 
-  public Map<String, ByteString> createChannelFactoryTags(String name, String serviceId, String adapterId, String coreId,
+  Map<String, ByteString> createChannelFactoryTags(String name, String serviceId, String adapterId, String coreId,
       ByteString inputTopic, ByteString inputMessageType,
       Map<String, ByteString> customTags) {
     Map<String, ByteString> map = new HashMap<>();
