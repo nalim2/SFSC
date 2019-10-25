@@ -44,7 +44,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
 
   SfscServiceApiImplementation(Adapter adapter) {
     apiRegistryManager = new ApiRegistryManager(adapter.registryClient());
-    pubSubConnection =  adapter.dataConnection();
+    pubSubConnection = adapter.dataConnection();
     coreId = adapter.adapterInformation().getCoreId();
     adapterId = adapter.adapterInformation().getAdapterId();
   }
@@ -69,10 +69,12 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
       RegexDefinition regexDefinition,
       Map<String, ByteString> customTags, Function<ByteString, AckServerResult> serverFunction, int timeoutMs, int sendRateMs, int sendMaxTries) {
 
-    AckServer server = new AckServer(pubSubConnection, ackServerScheduledExecutorService, serverFunction, serverTopic, timeoutMs, sendRateMs, sendMaxTries,
-         executorService);
+    AckServer server = new AckServer(pubSubConnection, ackServerScheduledExecutorService, serverFunction, serverTopic, timeoutMs, sendRateMs,
+        sendMaxTries,
+        executorService);
     Map<String, ByteString> tags = tagger
-        .createServerTags(name, UUID.randomUUID().toString(), adapterId, coreId, serverTopic, inputMessageType, outputMessageType, regexDefinition, customTags);
+        .createServerTags(name, UUID.randomUUID().toString(), adapterId, coreId, serverTopic, inputMessageType, outputMessageType, regexDefinition,
+            customTags);
     Handle handle = apiRegistryManager.registerService(tags);
     return new SfscServerImplementation(tags, () -> {
       handle.close();
@@ -85,8 +87,8 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     ByteString simpleTopic = ByteString.copyFromUtf8(UUID.randomUUID().toString());
     ByteString ackTopic = ByteString.copyFromUtf8(UUID.randomUUID().toString());
     return new SfscClientImplementation(this,
-        new SimpleClient(pubSubConnection, simpleTopic,  executorService),
-        new AckClient(pubSubConnection, ackTopic,  executorService));
+        new SimpleClient(pubSubConnection, simpleTopic, executorService),
+        new AckClient(pubSubConnection, ackTopic, executorService));
   }
 
   @Override
@@ -133,6 +135,13 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     });
   }
 
+  public Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener) {
+    return apiRegistryManager.addServiceAddedListener(listener);
+  }
+
+  public Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener) {
+    return apiRegistryManager.addServiceAddedListener(listener);
+  }
 
   //todo close
 }

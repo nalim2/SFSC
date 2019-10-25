@@ -12,19 +12,21 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import servicepatterns.api.filtering.Filters;
 
 final class ApiRegistryManager implements NotThrowingAutoCloseable {
 
   private final Set<Map<String, ByteString>> services = ConcurrentHashMap.newKeySet();
+  private final StoreEventStreamConverter storeEventStreamConverter = new StoreEventStreamConverter(services);
 
   private final Handle handle;
   private final RegistryApi registryApi;
 
   ApiRegistryManager(RegistryApi registryApi) {
     this.registryApi = registryApi;
-    handle = registryApi.addListener(new StoreEventStreamConverter(services));
+    handle = registryApi.addListener(storeEventStreamConverter);
   }
 
   Set<Map<String, ByteString>> getServices() {
@@ -49,6 +51,14 @@ final class ApiRegistryManager implements NotThrowingAutoCloseable {
     ByteString serviceDescriptor = ServiceDescriptor.newBuilder().putAllTags(tags).build().toByteString();
     registryApi.create(serviceDescriptor); //todo why returns future?
     return () -> registryApi.remove(serviceDescriptor);
+  }
+
+  Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener) {
+    return storeEventStreamConverter.addServiceAddedListener(listener);
+  }
+
+  Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener) {
+    return storeEventStreamConverter.addServiceRemovedListener(listener);
   }
 
   public void close() {

@@ -2,6 +2,7 @@ package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
 import java.util.Collection;
 import java.util.Map;
@@ -34,4 +35,7 @@ public interface SfscServiceApi {
   SfscServer channelGenerator(String name, Map<String, ByteString> customTags,  ByteString serverTopic, ByteString inputMessageType,
       Function<ByteString, SfscPublisher> channelFactory);
 
+  Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener);
+
+  Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener);
 }
