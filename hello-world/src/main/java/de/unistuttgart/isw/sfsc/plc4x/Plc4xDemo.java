@@ -3,7 +3,6 @@ package de.unistuttgart.isw.sfsc.plc4x;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import de.unistuttgart.isw.sfsc.adapter.Adapter;
 import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
@@ -76,11 +75,8 @@ public class Plc4xDemo {
 
     ByteString uuid = ByteString.copyFromUtf8(UUID.randomUUID().toString());
 
-    Adapter serverAdapter = Adapter.create(bootstrapConfiguration1);
-    SfscServiceApi serverSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(serverAdapter);
-
-    Adapter clientAdapter = Adapter.create(bootstrapConfiguration2);
-    SfscServiceApi clientSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(clientAdapter);
+    SfscServiceApi serverSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(bootstrapConfiguration1);
+    SfscServiceApi clientSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(bootstrapConfiguration2);
 
     Plc4XServer plc4XServer = new Plc4XServer(SERVER_URL);
 
@@ -200,7 +196,6 @@ public class Plc4xDemo {
         .setValue("thisIsMyTestValue")
         .build();
   }
-
 
   static Consumer<ByteString> readConsumer() {
     return response -> {
