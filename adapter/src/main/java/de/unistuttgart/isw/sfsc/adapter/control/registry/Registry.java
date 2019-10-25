@@ -21,7 +21,7 @@ final class Registry {
 
   private static final Logger logger = LoggerFactory.getLogger(Registry.class);
 
-  private final Listeners<Consumer<StoreEvent>> entryListeners = new Listeners<>();
+  private final Listeners<Consumer<StoreEvent<ByteString>>> entryListeners = new Listeners<>();
   private final Listeners<Runnable> notificationListeners = new Listeners<>();
 
   private final AtomicLong idCounter = new AtomicLong();
@@ -81,12 +81,12 @@ final class Registry {
   }
 
   void onStoreEvent(StoreEventType type, ByteString data) {
-    StoreEvent storeEvent = new StoreEvent(type, data);
+    StoreEvent<ByteString> storeEvent = new StoreEvent<>(type, data);
     executor.execute(() -> entryListeners.forEach(consumer -> consumer.accept(storeEvent)));
   }
 
-  Handle addEntryListener(Consumer<StoreEvent> listener) {
-    ReplayingListener replayingListener = new ReplayingListener(listener);
+  Handle addEntryListener(Consumer<StoreEvent<ByteString>> listener) {
+    ReplayingListener<ByteString> replayingListener = new ReplayingListener<>(listener);
     Handle handle = entryListeners.add(replayingListener);
 
     replayingListener.prepend(getRegistry());

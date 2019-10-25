@@ -82,7 +82,7 @@ public class RegistryClient implements RegistryApi {
   }
 
   @Override
-  public Handle addListener(Consumer<StoreEvent> listener) {
+  public Handle addListener(Consumer<StoreEvent<ByteString>> listener) {
     return registry.addEntryListener(listener);
   }
 

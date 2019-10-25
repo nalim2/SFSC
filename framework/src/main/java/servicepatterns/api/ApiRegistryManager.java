@@ -5,14 +5,18 @@ import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryApi;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.framework.descriptor.BaseTags;
 import de.unistuttgart.isw.sfsc.framework.descriptor.ServiceDescriptor;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import servicepatterns.api.filtering.Filters;
 
@@ -53,12 +57,12 @@ final class ApiRegistryManager implements NotThrowingAutoCloseable {
     return () -> registryApi.remove(serviceDescriptor);
   }
 
-  Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener) {
-    return storeEventStreamConverter.addServiceAddedListener(listener);
+  Handle addStoreEventListener(Consumer<StoreEvent<Map<String, ByteString>>> listener) {
+    return storeEventStreamConverter.addListener(listener);
   }
 
-  Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener) {
-    return storeEventStreamConverter.addServiceRemovedListener(listener);
+  <V> Future<V> addOneShotStoreEventListener(Predicate<StoreEvent<Map<String, ByteString>>> predicate, Callable<V> callable) {
+    return storeEventStreamConverter.addOneShotListener(predicate, callable);
   }
 
   public void close() {

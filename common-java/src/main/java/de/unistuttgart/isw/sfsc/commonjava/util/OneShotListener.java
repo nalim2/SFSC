@@ -19,11 +19,6 @@ public class OneShotListener<T, U> implements Consumer<T> {
     this.future = new RemovingFuture<>(callable);
   }
 
-  public OneShotListener(Predicate<T> predicate, Runnable runnable, U result) {
-    this.predicate = predicate;
-    this.future = new RemovingFuture<>(() -> {runnable.run(); return result;});
-  }
-
   public Future<U> initialize(Handle handle) {
     future.setHandle(handle);
     ready.set(true);
@@ -42,10 +37,6 @@ public class OneShotListener<T, U> implements Consumer<T> {
 
     RemovingFuture(Callable<V> callable) {
       super(callable);
-    }
-
-    RemovingFuture(Runnable runnable, V result) {
-      super(runnable, result);
     }
 
     void setHandle(Handle handle) {

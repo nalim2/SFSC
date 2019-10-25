@@ -4,37 +4,46 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
+import de.unistuttgart.isw.sfsc.commonjava.util.OneShotListener;
+import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.framework.descriptor.ServiceDescriptor;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class StoreEventStreamConverter implements Consumer<StoreEvent> {
+class StoreEventStreamConverter implements Consumer<StoreEvent<ByteString>> {
 
   private static final Logger logger = LoggerFactory.getLogger(StoreEventStreamConverter.class);
 
-  private final Listeners<Consumer<Map<String, ByteString>>> serviceAddedListeners = new Listeners<>();
-  private final Listeners<Consumer<Map<String, ByteString>>> serviceRemovedListeners = new Listeners<>();
+  private final Listeners<Consumer<StoreEvent<Map<String, ByteString>>>> listeners = new Listeners<>();
 
   private final Set<Map<String, ByteString>> services;
 
   StoreEventStreamConverter(Set<Map<String, ByteString>> services) {this.services = services;}
 
-  public void accept(StoreEvent storeEvent) {
+  @Override
+  public void accept(StoreEvent<ByteString> storeEvent) {
     try {
       Map<String, ByteString> service = ServiceDescriptor.parseFrom(storeEvent.getData()).getTagsMap();
       switch (storeEvent.getStoreEventType()) {
         case CREATE: {
           services.add(service);
-          serviceAddedListeners.forEach(consumer -> consumer.accept(service));
+          StoreEvent<Map<String, ByteString>> convertedStoreEvent = new StoreEvent<>(StoreEventType.CREATE, service);
+          listeners.forEach(consumer -> consumer.accept(convertedStoreEvent));
           break;
         }
         case DELETE: {
           services.remove(service);
-          serviceRemovedListeners.forEach(consumer -> consumer.accept(service));
+          StoreEvent<Map<String, ByteString>> convertedStoreEvent = new StoreEvent<>(StoreEventType.DELETE, service);
+          listeners.forEach(consumer -> consumer.accept(convertedStoreEvent));
           break;
         }
         default: {
@@ -47,11 +56,22 @@ class StoreEventStreamConverter implements Consumer<StoreEvent> {
     }
   }
 
-  Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener) {
-    return serviceAddedListeners.add(listener);
+  Handle addListener(Consumer<StoreEvent<Map<String, ByteString>>> listener) {
+    ReplayingListener<Map<String, ByteString>> replayingListener = new ReplayingListener<>(listener);
+    Handle handle = listeners.add(replayingListener);
+
+    replayingListener.prepend(Collections.unmodifiableSet(services));
+    replayingListener.start();
+
+    return handle;
   }
 
-  Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener) {
-    return serviceRemovedListeners.add(listener);
+  <V> Future<V> addOneShotListener(Predicate<StoreEvent<Map<String, ByteString>>> predicate, Callable<V> callable) {
+    OneShotListener<StoreEvent<Map<String, ByteString>>, V> oneShotListener = new OneShotListener<>(predicate, callable);
+    Handle handle = listeners.add(oneShotListener);
+    Future<V> future = oneShotListener.initialize(handle);
+    Set<StoreEvent<Map<String, ByteString>>> prepopulation = StoreEvent.toStoreEventSet(Collections.unmodifiableSet(services));
+    prepopulation.forEach(oneShotListener);
+    return future;
   }
 }

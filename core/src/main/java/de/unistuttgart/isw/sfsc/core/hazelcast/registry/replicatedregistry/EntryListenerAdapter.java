@@ -1,5 +1,6 @@
 package de.unistuttgart.isw.sfsc.core.hazelcast.registry.replicatedregistry;
 
+import com.google.protobuf.ByteString;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.MapEvent;
@@ -12,9 +13,9 @@ import java.util.function.Consumer;
 class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
 
   private final ReentrantLock lock = new ReentrantLock(true);
-  private final Consumer<StoreEvent> registryEventHandler;
+  private final Consumer<StoreEvent<ByteString>> registryEventHandler;
 
-  EntryListenerAdapter(Consumer<StoreEvent> registryEventHandler) {
+  EntryListenerAdapter(Consumer<StoreEvent<ByteString>> registryEventHandler) {
     this.registryEventHandler = registryEventHandler;
   }
 
@@ -22,7 +23,7 @@ class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
   public void entryRemoved(EntryEvent<RegistryEntry, Boolean> event) {
     lock.lock();
     try {
-      registryEventHandler.accept(new StoreEvent(StoreEventType.DELETE, event.getKey().getData()));
+      registryEventHandler.accept(new StoreEvent<>(StoreEventType.DELETE, event.getKey().getData()));
     } finally {
       lock.unlock();
     }
@@ -32,7 +33,7 @@ class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
   public void entryAdded(EntryEvent<RegistryEntry, Boolean> event) {
     lock.lock();
     try {
-      registryEventHandler.accept(new StoreEvent(StoreEventType.CREATE, event.getKey().getData()));
+      registryEventHandler.accept(new StoreEvent<>(StoreEventType.CREATE, event.getKey().getData()));
     } finally {
       lock.unlock();
     }

@@ -23,8 +23,8 @@ public class ReplicatedRegistry {
     this.replicatedMap = replicatedMap;
   }
 
-  public Handle addListener(Consumer<StoreEvent> listener) {
-    ReplayingListener replayingListener = new ReplayingListener(listener);
+  public Handle addListener(Consumer<StoreEvent<ByteString>> listener) {
+    ReplayingListener<ByteString> replayingListener = new ReplayingListener<>(listener);
     String handle = replicatedMap.addEntryListener(new EntryListenerAdapter(replayingListener));
 
     replayingListener.prepend(createStoreEventSnapshot());
