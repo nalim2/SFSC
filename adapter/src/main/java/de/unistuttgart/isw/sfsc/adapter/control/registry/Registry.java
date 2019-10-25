@@ -5,15 +5,15 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryReply;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
+import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
-import de.unistuttgart.isw.sfsc.commonjava.util.StoreEventQueue;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,15 +82,15 @@ final class Registry {
 
   void onStoreEvent(StoreEventType type, ByteString data) {
     StoreEvent storeEvent = new StoreEvent(type, data);
-    entryListeners.forEach(consumer -> consumer.accept(storeEvent));
+    executor.execute(() -> entryListeners.forEach(consumer -> consumer.accept(storeEvent)));
   }
 
   Handle addEntryListener(Consumer<StoreEvent> listener) {
-    StoreEventQueue storeEventQueue = new StoreEventQueue(listener);
-    Handle handle = entryListeners.add(storeEventQueue);
+    ReplayingListener replayingListener = new ReplayingListener(listener);
+    Handle handle = entryListeners.add(replayingListener);
 
-    storeEventQueue.prepopulate(createStoreEventSnapshot());
-    storeEventQueue.start();
+    replayingListener.prepend(getRegistry());
+    replayingListener.start();
 
     return handle;
   }
@@ -100,17 +100,11 @@ final class Registry {
   }
 
   Set<ByteString> getRegistry() {
-    return registry;
+    return Collections.unmodifiableSet(registry);
   }
 
   long getId() {
     return idCounter.get();
-  }
-
-  Set<StoreEvent> createStoreEventSnapshot() {
-    return Set.copyOf(registry).stream()
-        .map(entry -> new StoreEvent(StoreEventType.CREATE, entry))
-        .collect(Collectors.toUnmodifiableSet());
   }
 }
 

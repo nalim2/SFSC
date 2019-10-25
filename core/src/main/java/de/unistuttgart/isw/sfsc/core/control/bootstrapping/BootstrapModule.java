@@ -5,6 +5,7 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.bootstrap.BootstrapMessage
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Publisher;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
@@ -23,15 +24,16 @@ public final class BootstrapModule implements NotThrowingAutoCloseable {
   BootstrapModule(PubSubConnection pubSubConnection, Configuration<CoreOption> configuration) {
     int port = Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT));
     publisher = new Publisher(pubSubConnection);
-    handle = pubSubConnection.subscriptionTracker().addSubscriptionListener(topic -> {
-      if (this.topic.equals(topic)) {
-        logger.info("received new subscription on bootstrap topic, sending bootstrapMessage");
-        publisher.send(topic, BootstrapMessage.newBuilder().setCoreSubscriptionPort(port).build().toByteString());
-      }
-    });
+    handle = pubSubConnection.subscriptionTracker().addListener(storeEvent -> {
+          if (topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE) {
+            logger.info("received new subscription on bootstrap topic, sending bootstrapMessage");
+            publisher.send(topic, BootstrapMessage.newBuilder().setCoreSubscriptionPort(port).build().toByteString());
+          }
+        }
+    );
   }
 
-  public static BootstrapModule create(PubSubConnection pubSubConnection, Configuration<CoreOption> configuration){
+  public static BootstrapModule create(PubSubConnection pubSubConnection, Configuration<CoreOption> configuration) {
     return new BootstrapModule(pubSubConnection, configuration);
   }
 

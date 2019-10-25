@@ -8,8 +8,14 @@ import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.Subscript
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.OneShotListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.QueueConnector;
+import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -21,22 +27,16 @@ import org.slf4j.LoggerFactory;
 public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowingAutoCloseable {
 
   private static final Logger logger = LoggerFactory.getLogger(SubscriptionTrackingInbox.class);
-  private final Listeners<Consumer<ByteString>> subscriptionListeners = new Listeners<>();
-  private final Listeners<Consumer<ByteString>> unsubscriptionListeners = new Listeners<>();
-  private final SubscriptionOverview subscriptionOverview = new SubscriptionOverview();
+  private final Listeners<Consumer<StoreEvent>> listeners = new Listeners<>();
+  private final Set<ByteString> subscriptions = new HashSet<>();
   private final QueueConnector<byte[][]> queueConnector;
 
-  SubscriptionTrackingInbox(Inbox inbox) {queueConnector = new QueueConnector<>(inbox::take);}
-
-  public static SubscriptionTrackingInbox create(Inbox inbox) {
-    SubscriptionTrackingInbox subscriptionTrackingInbox = new SubscriptionTrackingInbox(inbox);
-    subscriptionTrackingInbox.initialize();
-    return subscriptionTrackingInbox;
+  SubscriptionTrackingInbox(Inbox inbox) {
+    queueConnector = new QueueConnector<>(inbox::take);
   }
 
-  void initialize() {
-    addSubscriptionListener(subscriptionOverview::onSubscription);
-    addUnsubscriptionListener(subscriptionOverview::onUnsubscription);
+  public static SubscriptionTrackingInbox create(Inbox inbox) {
+    return new SubscriptionTrackingInbox(inbox);
   }
 
   public void start() {
@@ -44,53 +44,53 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
   }
 
   @Override
-  public Handle addSubscriptionListener(Consumer<ByteString> onSubscription) {
-    return subscriptionListeners.add(onSubscription);
-  }
-
-  @Override
-  public Handle addUnsubscriptionListener(Consumer<ByteString> onUnsubscription) {
-    return unsubscriptionListeners.add(onUnsubscription);
-  }
-
-  @Override
   public Set<ByteString> getSubscriptions() {
-    return subscriptionOverview.getSubscriptions();
-  }
-
-
-  @Override
-  public <V> Future<V> addSubscriptionListener(Predicate<ByteString> predicate, Callable<V> callable) {
-    return SubscriptionEventListener.addSubscriptionListener(this, predicate, callable);
+    return Collections.unmodifiableSet(subscriptions);
   }
 
   @Override
-  public <V> Future<V> addSubscriptionListener(Predicate<ByteString> predicate, Runnable runnable, V result) {
-    return SubscriptionEventListener.addSubscriptionListener(this, predicate, runnable, result);
+  public Handle addListener(Consumer<StoreEvent> listener) {
+    ReplayingListener replayingListener = new ReplayingListener(listener);
+    Handle handle = listeners.add(replayingListener);
+
+    replayingListener.prepend(getSubscriptions());
+    replayingListener.start();
+
+    return handle;
   }
 
   @Override
-  public <V> Future<V> addUnsubscriptionListener(Predicate<ByteString> predicate, Callable<V> callable) {
-    return SubscriptionEventListener.addUnsubscriptionListener(this, predicate, callable);
+  public <V> Future<V> addOneShotListener(Predicate<StoreEvent> predicate, Callable<V> callable) {
+    OneShotListener<StoreEvent, V> oneShotListener = new OneShotListener<>(predicate, callable);
+    Handle handle = listeners.add(oneShotListener);
+    Future<V> future = oneShotListener.initialize(handle);
+    Set<StoreEvent> prepopulation = StoreEvent.toStoreEventSet(getSubscriptions());
+    prepopulation.forEach(oneShotListener);
+    return future;
   }
 
   @Override
-  public <V> Future<V> addUnsubscriptionListener(Predicate<ByteString> predicate, Runnable runnable, V result) {
-    return SubscriptionEventListener.addUnsubscriptionListener(this, predicate, runnable, result);
+  public <V> Future<V> addOneShotSubscriptionListener(ByteString topic, Callable<V> callable) {
+    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, callable);
   }
 
-  void accept(byte[][] subscriptionMessage) {
+  void accept(byte[][] subscriptionMessage) {  //not thread safe, but we have just one so its okay
     byte[] typeAndTopicFrame = TYPE_AND_TOPIC_FRAME.get(subscriptionMessage);
     SubscriptionType subscriptionType = SubProtocol.getSubscriptionType(typeAndTopicFrame);
+    ByteString topic = SubProtocol.getTopicMessage(typeAndTopicFrame);
     switch (subscriptionType) {
       case SUBSCRIPTION: {
-        ByteString topic = SubProtocol.getTopicMessage(typeAndTopicFrame);
-        subscriptionListeners.forEach(listener -> listener.accept(topic));
+        subscriptions.add(topic);
+        StoreEvent storeEvent = new StoreEvent(StoreEventType.CREATE, topic);
+        logger.debug("Received subscription on topic {}", topic.toStringUtf8());
+        listeners.forEach(listener -> listener.accept(storeEvent));
         break;
       }
       case UNSUBSCRIPTION: {
-        ByteString topic = SubProtocol.getTopicMessage(typeAndTopicFrame);
-        unsubscriptionListeners.forEach(listener -> listener.accept(topic));
+        subscriptions.remove(topic);
+        StoreEvent storeEvent = new StoreEvent(StoreEventType.DELETE, topic);
+        logger.debug("Received unsubscription on topic {}", topic.toStringUtf8());
+        listeners.forEach(listener -> listener.accept(storeEvent));
         break;
       }
       default: {
