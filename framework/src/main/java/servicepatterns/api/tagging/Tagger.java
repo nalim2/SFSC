@@ -92,4 +92,8 @@ public final class Tagger {
         .filter(varRegex -> varRegex.getRegexCase() == RegexCase.STRING_REGEX)
         .forEach(varRegex -> Objects.requireNonNull(varRegex.getStringRegex(), "stringRegEx null"));
   }
+
+  public static String getName(Map<String, ByteString> tags){
+    return tags.get(BaseTags.SFSC_SERVICE_NAME.name()).toStringUtf8();
+  } //todo more getters?
 }

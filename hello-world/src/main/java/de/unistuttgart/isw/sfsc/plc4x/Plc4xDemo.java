@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
 import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -27,6 +29,7 @@ import servicepatterns.api.SfscServiceApi;
 import servicepatterns.api.SfscServiceApiFactory;
 import servicepatterns.api.SfscSubscriber;
 import servicepatterns.api.filtering.Filters;
+import servicepatterns.api.tagging.Tagger;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
 
 public class Plc4xDemo {
@@ -110,8 +113,19 @@ public class Plc4xDemo {
     plc4XServer
         .register(event -> stringPublisher.publish(ByteString.copyFromUtf8(event.toString())), stringSubscriptionResponse.getSubscriptionHandles());
 
-    Thread.sleep(1000);
+    CountDownLatch cdl = new CountDownLatch(1);
+    clientSfscServiceApi.addRegistryStoreEventListener(
+        event -> {
+          if (event.getStoreEventType() == StoreEventType.CREATE
+              && Tagger.getName(event.getData()).equals("Bool")
+              && Filters.byteStringEqualsFilter("id", uuid).test(event.getData())) { //todo not sure yet how is best
+            System.out.println("matching service found");
+            cdl.countDown();
+          }
+        }
+    );
 
+    cdl.await();
     Map<String, ByteString> pubTags = clientSfscServiceApi.getServices("Bool").stream()
         .filter(Filters.byteStringEqualsFilter("id", uuid))
         .findAny().orElseThrow();

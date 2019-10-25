@@ -3,6 +3,7 @@ package servicepatterns.api;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
 import java.util.Collection;
 import java.util.Map;
@@ -32,9 +33,13 @@ public interface SfscServiceApi {
 
   SfscSubscriber subscriber(ByteString publisherTopic, Consumer<ByteString> consumer);
 
-  SfscServer channelGenerator(String name, Map<String, ByteString> customTags,  ByteString serverTopic, ByteString inputMessageType,
+  SfscServer channelGenerator(String name, Map<String, ByteString> customTags, ByteString serverTopic, ByteString inputMessageType,
       Function<ByteString, SfscPublisher> channelFactory);
 
-  Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener);
+  Handle addRegistryStoreEventListener(Consumer<StoreEvent<Map<String, ByteString>>> listener);
+
+//  <V> Future<V> registryStoreEventFuture(String name);
+//
+//  Handle onRegistryStoreEvent(String name, Runnable runnable);
 
 }

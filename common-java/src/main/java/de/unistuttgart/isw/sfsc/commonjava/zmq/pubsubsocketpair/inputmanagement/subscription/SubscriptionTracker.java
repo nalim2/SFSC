@@ -13,9 +13,9 @@ public interface SubscriptionTracker {
 
   Set<ByteString> getSubscriptions();
 
-  Handle addListener(Consumer<StoreEvent> listener);
+  Handle addListener(Consumer<StoreEvent<ByteString>> listener);
 
-  <V> Future<V> addOneShotListener(Predicate<StoreEvent> predicate, Callable<V> callable);
+  <V> Future<V> addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Callable<V> callable);
 
   <V> Future<V> addOneShotSubscriptionListener(ByteString topic, Callable<V> callable);
 

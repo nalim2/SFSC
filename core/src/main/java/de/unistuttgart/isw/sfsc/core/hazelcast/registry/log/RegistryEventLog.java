@@ -46,7 +46,7 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
     return listeners.add(listener);
   }
 
-  public void onStoreEvent(StoreEvent storeEvent) {
+  public void onStoreEvent(StoreEvent<ByteString> storeEvent) {
     long id = idCounter.get();
     executorService.execute(() -> {
           switch (storeEvent.getStoreEventType()) {

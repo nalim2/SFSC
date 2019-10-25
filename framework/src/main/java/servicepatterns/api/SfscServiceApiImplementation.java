@@ -9,6 +9,7 @@ import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleClient;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleServer;
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.framework.descriptor.PublisherTags;
 import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
@@ -135,13 +136,33 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     });
   }
 
-  public Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener) {
-    return apiRegistryManager.addServiceAddedListener(listener);
+  @Override
+  public Handle addRegistryStoreEventListener(Consumer<StoreEvent<Map<String, ByteString>>> listener) {
+    return apiRegistryManager.addStoreEventListener(storeEvent -> executorService.execute(() -> listener.accept(storeEvent)));
   }
 
-  public Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener) {
-    return apiRegistryManager.addServiceAddedListener(listener);
-  }
+//  @Override
+//  public <V> Future<V> registryStoreEventFuture(String name) {
+//    return apiRegistryManager.addOneShotStoreEventListener(
+//        event ->
+//            Tagger.getName(event.getData()).equals(name)
+//                && event.getStoreEventType() == StoreEventType.CREATE,
+//        () -> null);
+//  }
+//
+//  @Override
+//  public Handle onRegistryStoreEvent(String name, Runnable runnable) {
+//    Future<Void> future = apiRegistryManager.addOneShotStoreEventListener(
+//        event ->
+//            Tagger.getName(event.getData()).equals(name)
+//                && event.getStoreEventType() == StoreEventType.CREATE,
+//        () -> {
+//          executorService.execute(runnable);
+//          return null;
+//        }
+//    );
+//    return () -> future.cancel(true);
+//  }
 
   //todo close
 }

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowingAutoCloseable {
 
   private static final Logger logger = LoggerFactory.getLogger(SubscriptionTrackingInbox.class);
-  private final Listeners<Consumer<StoreEvent>> listeners = new Listeners<>();
+  private final Listeners<Consumer<StoreEvent<ByteString>>> listeners = new Listeners<>();
   private final Set<ByteString> subscriptions = new HashSet<>();
   private final QueueConnector<byte[][]> queueConnector;
 
@@ -49,8 +49,8 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
   }
 
   @Override
-  public Handle addListener(Consumer<StoreEvent> listener) {
-    ReplayingListener replayingListener = new ReplayingListener(listener);
+  public Handle addListener(Consumer<StoreEvent<ByteString>> listener) {
+    ReplayingListener<ByteString> replayingListener = new ReplayingListener<>(listener);
     Handle handle = listeners.add(replayingListener);
 
     replayingListener.prepend(getSubscriptions());
@@ -60,11 +60,11 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
   }
 
   @Override
-  public <V> Future<V> addOneShotListener(Predicate<StoreEvent> predicate, Callable<V> callable) {
-    OneShotListener<StoreEvent, V> oneShotListener = new OneShotListener<>(predicate, callable);
+  public <V> Future<V> addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Callable<V> callable) {
+    OneShotListener<StoreEvent<ByteString>, V> oneShotListener = new OneShotListener<>(predicate, callable);
     Handle handle = listeners.add(oneShotListener);
     Future<V> future = oneShotListener.initialize(handle);
-    Set<StoreEvent> prepopulation = StoreEvent.toStoreEventSet(getSubscriptions());
+    Set<StoreEvent<ByteString>> prepopulation = StoreEvent.toStoreEventSet(getSubscriptions());
     prepopulation.forEach(oneShotListener);
     return future;
   }
@@ -81,14 +81,14 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
     switch (subscriptionType) {
       case SUBSCRIPTION: {
         subscriptions.add(topic);
-        StoreEvent storeEvent = new StoreEvent(StoreEventType.CREATE, topic);
+        StoreEvent<ByteString> storeEvent = new StoreEvent<>(StoreEventType.CREATE, topic);
         logger.debug("Received subscription on topic {}", topic.toStringUtf8());
         listeners.forEach(listener -> listener.accept(storeEvent));
         break;
       }
       case UNSUBSCRIPTION: {
         subscriptions.remove(topic);
-        StoreEvent storeEvent = new StoreEvent(StoreEventType.DELETE, topic);
+        StoreEvent<ByteString> storeEvent = new StoreEvent<>(StoreEventType.DELETE, topic);
         logger.debug("Received unsubscription on topic {}", topic.toStringUtf8());
         listeners.forEach(listener -> listener.accept(storeEvent));
         break;

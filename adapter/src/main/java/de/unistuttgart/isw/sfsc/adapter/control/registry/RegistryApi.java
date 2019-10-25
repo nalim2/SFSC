@@ -16,6 +16,6 @@ public interface RegistryApi {
 
   Set<ByteString> getEntries();
 
-  Handle addListener(Consumer<StoreEvent> listener);
+  Handle addListener(Consumer<StoreEvent<ByteString>> listener);
 
 }
