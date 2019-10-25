@@ -18,8 +18,8 @@ public final class StoreEventQueue implements Consumer<StoreEvent> {
   public void prepopulate(Set<StoreEvent> prepopulationSnapshot) {
     Set<StoreEvent> prepopulation = Set.copyOf(prepopulationSnapshot);
     // events happening in the meantime can cause two problems:
-    // 1. add event -> duplicated adds in stream, because its both added from listening and from prepopulation
-    // 1. remove event -> prepopulation does not contain such an element, but later there is an remove element, added from listening
+    // 1. add event -> duplicated adds in stream
+    // 2. remove event -> removing of not existing element
 
     //if we have duplicated adds, we delete them here
     deque.removeAll(prepopulation);
