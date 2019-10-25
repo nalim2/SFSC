@@ -97,7 +97,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
         .createPublisherTags(name, UUID.randomUUID().toString(), adapterId, coreId, outputTopic, outputMessageType, customTags);
     Handle handle = apiRegistryManager.registerService(tags);
     Publisher publisher = new Publisher(pubSubConnection);
-    return new SfscPublisherImplementation(tags, outputTopic, publisher, executorService, handle::close);
+    return new SfscPublisherImplementation(tags, outputTopic, publisher, pubSubConnection.subscriptionTracker(), executorService, handle::close);
   }
 
   @Override
@@ -105,7 +105,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     Map<String, ByteString> tags = Tagger
         .createPublisherTags(name, UUID.randomUUID().toString(), adapterId, coreId, outputTopic, outputMessageType, customTags);
     Publisher publisher = new Publisher(pubSubConnection);
-    return new SfscPublisherImplementation(tags, outputTopic, publisher, executorService, () -> {});
+    return new SfscPublisherImplementation(tags, outputTopic, publisher, pubSubConnection.subscriptionTracker(), executorService, () -> {});
   }
 
   @Override

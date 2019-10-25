@@ -279,7 +279,7 @@ public class Plc4xDemo {
           ByteString.copyFromUtf8(UUID.randomUUID().toString()),
           ByteString.copyFromUtf8("String"),
           Collections.emptyMap());
-      publisher.subscriptionFuture(() -> publisher.publish(ByteString.copyFromUtf8("myIndividualMessage")));
+      publisher.onSubscription(() -> publisher.publish(ByteString.copyFromUtf8("myIndividualMessage")));
       return publisher;
     }
   }

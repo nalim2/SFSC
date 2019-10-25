@@ -2,6 +2,8 @@ package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Publisher;
+import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -11,14 +13,17 @@ final class SfscPublisherImplementation implements SfscPublisher {
 
   private final ByteString topic;
   private final Publisher publisher;
+  private final SubscriptionTracker subscriptionTracker;
   private final Executor executor;
   private final Map<String, ByteString> tags;
   private final Runnable onClose;
 
-  SfscPublisherImplementation(Map<String, ByteString> tags, ByteString topic, Publisher publisher, Executor executor, Runnable onClose) {
+  SfscPublisherImplementation(Map<String, ByteString> tags, ByteString topic, Publisher publisher, SubscriptionTracker subscriptionTracker,
+      Executor executor, Runnable onClose) {
     this.tags = Collections.unmodifiableMap(tags);
     this.topic = topic;
     this.publisher = publisher;
+    this.subscriptionTracker = subscriptionTracker;
     this.executor = executor;
     this.onClose = onClose;
   }
@@ -30,12 +35,13 @@ final class SfscPublisherImplementation implements SfscPublisher {
 
   @Override
   public Future<Void> subscriptionFuture() {
-    return publisher.addSubscriptionListener(topic);
+    return subscriptionTracker.addSubscriptionListener(topic, () -> null);
   }
 
   @Override
-  public Future<Void> subscriptionFuture(Runnable runnable) {
-    return publisher.addSubscriptionListener(topic, () -> executor.execute(runnable));
+  public Handle onSubscription(Runnable runnable) {
+    Future<Void> future = subscriptionTracker.addSubscriptionListener(topic, () -> executor.execute(runnable), null);
+    return () -> future.cancel(true);
   }
 
   @Override

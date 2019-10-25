@@ -37,5 +37,4 @@ public interface SfscServiceApi {
 
   Handle addServiceAddedListener(Consumer<Map<String, ByteString>> listener);
 
-  Handle addServiceRemovedListener(Consumer<Map<String, ByteString>> listener);
 }
