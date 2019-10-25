@@ -36,7 +36,7 @@ public final class SessionManager implements Session {
     try {
       simpleClient = new SimpleClient(pubSubConnection, clientTopic, sessionExecutor);
       sessionClient = new SessionClient(simpleClient, serverTopic, TIMEOUT_MS);
-      pubSubConnection.subscriptionTracker().addSubscriptionListener(serverTopic, () -> null).get(TIMEOUT_MS, TimeUnit.MILLISECONDS);;
+      pubSubConnection.subscriptionTracker().addSubscriptionListener(serverTopic::equals, () -> null).get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
       Welcome welcome = sessionClient.sendHello(adapterName).get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
       welcomeInformation = new WelcomeInformation(welcome.getCoreId(), adapterName, welcome.getDataPubPort(), welcome.getDataSubPort());
     } catch (InterruptedException | ExecutionException | TimeoutException e) {

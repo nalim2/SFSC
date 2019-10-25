@@ -35,12 +35,12 @@ final class SfscPublisherImplementation implements SfscPublisher {
 
   @Override
   public Future<Void> subscriptionFuture() {
-    return subscriptionTracker.addSubscriptionListener(topic, () -> null);
+    return subscriptionTracker.addSubscriptionListener(topic::equals, () -> null);
   }
 
   @Override
   public Handle onSubscription(Runnable runnable) {
-    Future<Void> future = subscriptionTracker.addSubscriptionListener(topic, () -> executor.execute(runnable), null);
+    Future<Void> future = subscriptionTracker.addSubscriptionListener(topic::equals, () -> executor.execute(runnable), null);
     return () -> future.cancel(true);
   }
 

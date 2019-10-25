@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface SubscriptionTracker {
 
@@ -13,13 +14,13 @@ public interface SubscriptionTracker {
 
   Handle addUnsubscriptionListener(Consumer<ByteString> onUnsubscription);
 
-  <V> Future<V> addSubscriptionListener(ByteString topic, Callable<V> callable);
+  <V> Future<V> addSubscriptionListener(Predicate<ByteString> predicate, Callable<V> callable);
 
-  <V> Future<V> addSubscriptionListener(ByteString topic, Runnable runnable, V result);
+  <V> Future<V> addSubscriptionListener(Predicate<ByteString> predicate, Runnable runnable, V result);
 
-  <V> Future<V> addUnsubscriptionListener(ByteString topic, Callable<V> callable);
+  <V> Future<V> addUnsubscriptionListener(Predicate<ByteString> predicate, Callable<V> callable);
 
-  <V> Future<V> addUnsubscriptionListener(ByteString topic, Runnable runnable, V result);
+  <V> Future<V> addUnsubscriptionListener(Predicate<ByteString> predicate, Runnable runnable, V result);
 
   Set<ByteString> getSubscriptions();
 }

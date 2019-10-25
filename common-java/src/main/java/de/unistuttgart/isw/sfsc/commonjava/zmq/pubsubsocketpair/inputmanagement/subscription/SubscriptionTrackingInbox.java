@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,23 +60,23 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
 
 
   @Override
-  public <V> Future<V> addSubscriptionListener(ByteString topic, Callable<V> callable) {
-    return SubscriptionEventListener.addSubscriptionListener(this, topic, callable);
+  public <V> Future<V> addSubscriptionListener(Predicate<ByteString> predicate, Callable<V> callable) {
+    return SubscriptionEventListener.addSubscriptionListener(this, predicate, callable);
   }
 
   @Override
-  public <V> Future<V> addSubscriptionListener(ByteString topic, Runnable runnable, V result) {
-    return SubscriptionEventListener.addSubscriptionListener(this, topic, runnable, result);
+  public <V> Future<V> addSubscriptionListener(Predicate<ByteString> predicate, Runnable runnable, V result) {
+    return SubscriptionEventListener.addSubscriptionListener(this, predicate, runnable, result);
   }
 
   @Override
-  public <V> Future<V> addUnsubscriptionListener(ByteString topic, Callable<V> callable) {
-    return SubscriptionEventListener.addUnsubscriptionListener(this, topic, callable);
+  public <V> Future<V> addUnsubscriptionListener(Predicate<ByteString> predicate, Callable<V> callable) {
+    return SubscriptionEventListener.addUnsubscriptionListener(this, predicate, callable);
   }
 
   @Override
-  public <V> Future<V> addUnsubscriptionListener(ByteString topic, Runnable runnable, V result) {
-    return SubscriptionEventListener.addUnsubscriptionListener(this, topic, runnable, result);
+  public <V> Future<V> addUnsubscriptionListener(Predicate<ByteString> predicate, Runnable runnable, V result) {
+    return SubscriptionEventListener.addUnsubscriptionListener(this, predicate, runnable, result);
   }
 
   void accept(byte[][] subscriptionMessage) {
