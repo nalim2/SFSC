@@ -2,6 +2,7 @@ package servicepatterns.basepatterns.ackreqrep;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.util.MaxTimesRepetition;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement.OutputPublisher;
@@ -56,7 +57,7 @@ final class AckServerConsumer implements BiConsumer<ByteString, ByteString> {
           ByteString requestPayload = request.getRequestPayload();
           AckServerResult ackServerResult = serverFunction.apply(requestPayload);
           int acknowledgeId = idGenerator.get();
-          ByteString wrappedReply = wrapReply(acknowledgeId, serverTopic, replyId, ackServerResult.getResponse());
+          Reply wrappedReply = wrapReply(acknowledgeId, serverTopic, replyId, ackServerResult.getResponse());
 
           MaxTimesRepetition maxTimesRepetition = MaxTimesRepetition.scheduleMaxTimes(
               scheduledExecutorService,
@@ -93,14 +94,13 @@ final class AckServerConsumer implements BiConsumer<ByteString, ByteString> {
     }
   }
 
-  ByteString wrapReply(int acknowledgeId, ByteString acknowledgeTopic, int replyId, ByteString payload) {
+  Reply wrapReply(int acknowledgeId, ByteString acknowledgeTopic, int replyId, Message payload) {
     return Reply
         .newBuilder()
         .setAcknowledgeTopic(acknowledgeTopic)
         .setExpectedAcknowledgeId(acknowledgeId)
         .setReplyId(replyId)
-        .setReplyPayload(payload)
-        .build()
-        .toByteString();
+        .setReplyPayload(payload.toByteString())
+        .build();
   }
 }

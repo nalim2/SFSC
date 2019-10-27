@@ -1,20 +1,20 @@
 package servicepatterns.basepatterns.ackreqrep;
 
-import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 public final class AckServerResult {
 
-  private final ByteString response;
+  private final Message response;
   private final Runnable onDeliverySuccess;
   private final Runnable onDeliveryFail;
 
-  public AckServerResult(ByteString response, Runnable onDeliverySuccess, Runnable onDeliveryFail) {
+  public AckServerResult(Message response, Runnable onDeliverySuccess, Runnable onDeliveryFail) {
     this.response = response;
     this.onDeliverySuccess = onDeliverySuccess;
     this.onDeliveryFail = onDeliveryFail;
   }
 
-  ByteString getResponse() {
+  Message getResponse() {
     return response;
   }
 

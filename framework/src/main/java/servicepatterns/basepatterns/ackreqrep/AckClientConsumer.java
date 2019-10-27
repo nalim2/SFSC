@@ -32,14 +32,14 @@ final class AckClientConsumer implements BiConsumer<ByteString, ByteString> {
       callbackRegistry.performCallback(replyId, replyPayload);
       ByteString acknowledgeTopic = reply.getAcknowledgeTopic();
       int acknowledgeId = reply.getExpectedAcknowledgeId();
-      ByteString acknowledge = wrapAcknowledge(acknowledgeId);
+      RequestOrAcknowledge acknowledge = wrapAcknowledge(acknowledgeId);
       publisher.publish(acknowledgeTopic, acknowledge);
     } catch (InvalidProtocolBufferException e) {
       logger.warn("Received malformed message", e);
     }
   }
 
-  ByteString wrapAcknowledge(int id) {
+  RequestOrAcknowledge wrapAcknowledge(int id) {
     Acknowledge acknowledge = Acknowledge.newBuilder()
         .setAcknowledgeId(id)
         .build();
@@ -47,7 +47,6 @@ final class AckClientConsumer implements BiConsumer<ByteString, ByteString> {
     return RequestOrAcknowledge
         .newBuilder()
         .setAcknowledge(acknowledge)
-        .build()
-        .toByteString();
+        .build();
   }
 }

@@ -1,6 +1,7 @@
 package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Publisher;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
@@ -48,8 +49,8 @@ final class SfscPublisherImplementation implements SfscPublisher {
   }
 
   @Override
-  public void publish(ByteString payload) {
-    publisher.send(topic, payload);
+  public void publish(Message payload) {
+    publisher.publish(topic, payload);
   }
 
   @Override
