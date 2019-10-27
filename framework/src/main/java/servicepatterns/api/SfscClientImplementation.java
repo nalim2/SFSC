@@ -1,6 +1,7 @@
 package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleClient;
 import de.unistuttgart.isw.sfsc.commonjava.util.FutureAdapter;
 import de.unistuttgart.isw.sfsc.framework.descriptor.ChannelFactoryTags;
@@ -24,14 +25,14 @@ final class SfscClientImplementation implements SfscClient {
   }
 
   @Override
-  public void request(Map<String, ByteString> serverTags, ByteString payload, Consumer<ByteString> consumer, int timeoutMs,
+  public void request(Map<String, ByteString> serverTags, Message payload, Consumer<ByteString> consumer, int timeoutMs,
       Runnable timeoutRunnable) {
     ByteString serverTopic = serverTags.get(ServerTags.SFSC_SERVER_INPUT_TOPIC.name());
     request(serverTopic, payload, consumer, timeoutMs, timeoutRunnable);
   }
 
   @Override
-  public void request(ByteString serverTopic, ByteString payload, Consumer<ByteString> consumer, int timeoutMs, Runnable timeoutRunnable) {
+  public void request(ByteString serverTopic, Message payload, Consumer<ByteString> consumer, int timeoutMs, Runnable timeoutRunnable) {
     ackClient.send(serverTopic, payload, consumer, timeoutMs, timeoutRunnable);
   }
 

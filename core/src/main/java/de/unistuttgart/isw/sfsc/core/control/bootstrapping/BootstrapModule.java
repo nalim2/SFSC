@@ -27,7 +27,7 @@ public final class BootstrapModule implements NotThrowingAutoCloseable {
     handle = pubSubConnection.subscriptionTracker().addListener(storeEvent -> {
           if (topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE) {
             logger.info("received new subscription on bootstrap topic, sending bootstrapMessage");
-            publisher.send(topic, BootstrapMessage.newBuilder().setCoreSubscriptionPort(port).build().toByteString());
+            publisher.publish(topic, BootstrapMessage.newBuilder().setCoreSubscriptionPort(port).build());
           }
         }
     );

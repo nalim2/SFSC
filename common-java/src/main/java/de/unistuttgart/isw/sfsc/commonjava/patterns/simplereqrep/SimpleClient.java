@@ -30,18 +30,17 @@ public final class SimpleClient implements NotThrowingAutoCloseable {
 
   public void send(ByteString targetTopic, ByteString payload, Consumer<ByteString> consumer, int timeoutMs, Runnable timeoutRunnable) {
     int id = idGenerator.get();
-    ByteString wrappedRequest = wrapRequest(id, payload);
+    Request wrappedRequest = wrapRequest(id, payload);
     callbackRegistry.addCallback(id, consumer, timeoutMs, timeoutRunnable);
     publisher.publish(targetTopic, wrappedRequest);
   }
 
-  ByteString wrapRequest(int id, ByteString payload) {
+  Request wrapRequest(int id, ByteString payload) {
     return Request.newBuilder()
         .setReplyTopic(replyTopic)
         .setExpectedReplyId(id)
         .setRequestPayload(payload)
-        .build()
-        .toByteString();
+        .build();
   }
 
   @Override

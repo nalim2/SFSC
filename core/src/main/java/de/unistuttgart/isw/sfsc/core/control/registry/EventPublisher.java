@@ -17,7 +17,7 @@ final class EventPublisher implements NotThrowingAutoCloseable {
   }
 
   void send(QueryReply queryReply) {
-    publisher.send(topic, queryReply.toByteString());
+    publisher.publish(topic, queryReply);
   }
 
   @Override

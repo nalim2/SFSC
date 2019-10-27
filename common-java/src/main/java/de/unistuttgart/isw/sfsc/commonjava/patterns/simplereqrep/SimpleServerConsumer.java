@@ -30,20 +30,19 @@ final class SimpleServerConsumer implements BiConsumer<ByteString, ByteString> {
       ByteString requestPayload = request.getRequestPayload();
       ByteString replyTopic = request.getReplyTopic();
       ByteString replyPayload = serverFunction.apply(requestPayload);
-      ByteString wrappedReply = wrapReply(replyId, replyPayload);
+      Reply wrappedReply = wrapReply(replyId, replyPayload);
       publisher.publish(replyTopic, wrappedReply);
     } catch (InvalidProtocolBufferException e) {
       logger.warn("Received malformed message", e);
     }
   }
 
-  ByteString wrapReply(int id, ByteString payload) {
+  Reply wrapReply(int id, ByteString payload) {
     return Reply
         .newBuilder()
         .setReplyId(id)
         .setReplyPayload(payload)
-        .build()
-        .toByteString();
+        .build();
   }
 }
 

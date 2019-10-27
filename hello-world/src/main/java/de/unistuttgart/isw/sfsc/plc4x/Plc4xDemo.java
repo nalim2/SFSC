@@ -3,6 +3,7 @@ package de.unistuttgart.isw.sfsc.plc4x;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
@@ -102,16 +103,11 @@ public class Plc4xDemo {
     PlcSubscriptionResponse int16SubscriptionResponse = plc4XServer.subscribe(topics.get("Int16"));
     PlcSubscriptionResponse stringSubscriptionResponse = plc4XServer.subscribe(topics.get("String"));
 
-    plc4XServer
-        .register(event -> boolPublisher.publish(ByteString.copyFromUtf8(event.toString())), boolSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> byteStringPublisher.publish(ByteString.copyFromUtf8(event.toString())),
-        byteStringSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer
-        .register(event -> bytePublisher.publish(ByteString.copyFromUtf8(event.toString())), byteSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer
-        .register(event -> int16Publisher.publish(ByteString.copyFromUtf8(event.toString())), int16SubscriptionResponse.getSubscriptionHandles());
-    plc4XServer
-        .register(event -> stringPublisher.publish(ByteString.copyFromUtf8(event.toString())), stringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> boolPublisher.publish(StringValue.of(event.toString())), boolSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> byteStringPublisher.publish(StringValue.of(event.toString())), byteStringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> bytePublisher.publish(StringValue.of(event.toString())), byteSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> int16Publisher.publish(StringValue.of(event.toString())), int16SubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> stringPublisher.publish(StringValue.of(event.toString())), stringSubscriptionResponse.getSubscriptionHandles());
 
     CountDownLatch cdl = new CountDownLatch(1);
     clientSfscServiceApi.addRegistryStoreEventListener(
@@ -167,8 +163,8 @@ public class Plc4xDemo {
         .findAny().orElseThrow();
 
     SfscClient client = clientSfscServiceApi.client();
-    client.request(writeServerTags, writeRequest().toByteString(), writeConsumer(), 1000, () -> System.out.println("timeout"));
-    client.request(readServerTags, readRequest().toByteString(), readConsumer(), 1000, () -> System.out.println("timeout"));
+    client.request(writeServerTags, writeRequest(), writeConsumer(), 1000, () -> System.out.println("timeout"));
+    client.request(readServerTags, readRequest(), readConsumer(), 1000, () -> System.out.println("timeout"));
 
     ////////////////////////////////
     ChannelGenerator channelGenerator = new ChannelGenerator(clientSfscServiceApi);
@@ -189,7 +185,13 @@ public class Plc4xDemo {
         genServerTags,
         ByteString.EMPTY,
         500,
-        message -> System.out.println("generated subscriber received message: " + message.toStringUtf8())
+        message -> {
+          try {
+            System.out.println("generated subscriber received message: " + StringValue.parseFrom(message).toString());
+          } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+          }
+        }
     ).get();
 
   }
@@ -245,7 +247,6 @@ public class Plc4xDemo {
                     .setType(Type.READ_RESPONSE)
                     .setValue(readResponse.toString())
                     .build()
-                    .toByteString()
             );
           }
           case WRITE_REQUEST: {
@@ -255,7 +256,6 @@ public class Plc4xDemo {
                     .setType(Type.WRITE_RESPONSE)
                     .clearValue()
                     .build()
-                    .toByteString()
             );
           }
           default: {
@@ -264,12 +264,12 @@ public class Plc4xDemo {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        return serverResult(Plc4xMessage.getDefaultInstance().toByteString());
+        return serverResult(Plc4xMessage.getDefaultInstance());
       }
     };
   }
 
-  static AckServerResult serverResult(ByteString response) {
+  static AckServerResult serverResult(Message response) {
     return new AckServerResult(
         response,
         () -> System.out.println("plc4x server acknowledge succeeded"),
@@ -293,7 +293,7 @@ public class Plc4xDemo {
           ByteString.copyFromUtf8(UUID.randomUUID().toString()),
           ByteString.copyFromUtf8("String"),
           Collections.emptyMap());
-      publisher.onSubscription(() -> publisher.publish(ByteString.copyFromUtf8("myIndividualMessage")));
+      publisher.onSubscription(() -> publisher.publish(StringValue.of("myIndividualMessage")));
       return publisher;
     }
   }

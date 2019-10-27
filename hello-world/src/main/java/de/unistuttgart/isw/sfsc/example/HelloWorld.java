@@ -27,7 +27,7 @@ public class HelloWorld {
           Thread.sleep(50);
         }
 
-        adapter1.dataConnection().publisher().publish("adapter2", ByteString.copyFromUtf8("hello from adapter 1"));
+        adapter1.dataConnection().publisher().publish("adapter2", "hello from adapter 1".getBytes());
 
         Thread.sleep(2000);
         cdl.countDown();

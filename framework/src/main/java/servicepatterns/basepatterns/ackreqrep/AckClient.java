@@ -1,6 +1,7 @@
 package servicepatterns.basepatterns.ackreqrep;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
@@ -29,16 +30,16 @@ public final class AckClient implements NotThrowingAutoCloseable {
     handle = SubscriptionAgent.create(pubSubConnection).addSubscriber(replyTopic, new AckClientConsumer(callbackRegistry, publisher), executor);
   }
 
-  public void send(ByteString targetTopic, ByteString payload, Consumer<ByteString> consumer, int timoutMs, Runnable timeoutRunnable) {
+  public void send(ByteString targetTopic, Message payload, Consumer<ByteString> consumer, int timoutMs, Runnable timeoutRunnable) {
     int id = idGenerator.get();
-    ByteString wrappedRequest = wrapRequest(id, payload);
+    RequestOrAcknowledge wrappedRequest = wrapRequest(id, payload);
     callbackRegistry.addCallback(id, consumer, timoutMs, timeoutRunnable);
     publisher.publish(targetTopic, wrappedRequest);
   }
 
-  ByteString wrapRequest(int id, ByteString payload) {
+  RequestOrAcknowledge wrapRequest(int id, Message payload) {
     Request request = Request.newBuilder()
-        .setRequestPayload(payload)
+        .setRequestPayload(payload.toByteString())
         .setReplyTopic(replyTopic)
         .setExpectedReplyId(id)
         .build();
@@ -46,8 +47,7 @@ public final class AckClient implements NotThrowingAutoCloseable {
     return RequestOrAcknowledge
         .newBuilder()
         .setRequest(request)
-        .build()
-        .toByteString();
+        .build();
   }
 
   @Override
