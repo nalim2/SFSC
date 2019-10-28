@@ -1,5 +1,6 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import org.zeromq.ZMQ.Socket;
 
@@ -26,7 +27,7 @@ class ReactiveSocketImpl implements ReactiveSocket {
   public Outbox getOutbox() {
     return new Outbox() {
       @Override
-      public void add(byte[][] output) {
+      public void add(List<byte[]> output) {
         executor.execute(() -> ReactiveSocketFunctions.write(socket, output));
       }
     };

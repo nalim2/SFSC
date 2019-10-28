@@ -1,65 +1,67 @@
 package de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub;
 
-import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.Frame;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
-public enum SubProtocol implements Frame {
+public enum SubProtocol {
   TYPE_AND_TOPIC_FRAME(0);
-
-  public static final int TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION = 0; //first byte
 
   private static final int LENGTH = values().length; //cache
   private final int position;
-
-  public static byte[][] newEmptyMessage() {
-    return new byte[LENGTH][];
-  }
 
   SubProtocol(int position) {
     this.position = position;
     assert this.position == ordinal();
   }
 
-  public int getFramePosition() {
-    return position;
+  public static List<byte[]> newMessage(SubscriptionType type, byte[] topic) {
+    return List.of(TypeAndTopicFrame.build(type, topic));
   }
 
-  public static SubscriptionType getSubscriptionType(byte[] typeAndTopicFrame) {
-    return SubscriptionType.ofValue(typeAndTopicFrame[TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION]);
+  public static boolean isValid(List<byte[]> message) {
+    return message.size() == LENGTH && TypeAndTopicFrame.isValid(getTypeAndTopicFrame(message));
   }
 
-  public static byte[] getRawTopic(byte[] typeAndTopicFrame) {
-    return Arrays.copyOfRange(typeAndTopicFrame, TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION + 1, typeAndTopicFrame.length);
-  }
-  public static ByteString getTopicMessage(byte[] typeAndTopicFrame) {
-    return ByteString.copyFrom(getRawTopic(typeAndTopicFrame));
+  public static SubscriptionType getSubscriptionType(List<byte[]> message) {
+    return TypeAndTopicFrame.getSubscriptionType(getTypeAndTopicFrame(message));
   }
 
-  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, byte[] topic) {
-    byte[] data = new byte[1 + topic.length];
-    data[0] = subscriptionType.getValue();
-    System.arraycopy(topic, 0, data, 1, topic.length);
-    return data;
+  public static byte[] getTopic(List<byte[]> message) {
+    return TypeAndTopicFrame.getTopic(getTypeAndTopicFrame(message));
   }
 
-  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, ByteString topic) {
-    return buildTypeAndTopicFrame(subscriptionType, topic.toByteArray());
+  static byte[] getTypeAndTopicFrame(List<byte[]> message) {
+    return message.get(TYPE_AND_TOPIC_FRAME.position);
   }
 
-  public static byte[] buildTypeAndTopicFrame(SubscriptionType subscriptionType, String topic) {
-    return buildTypeAndTopicFrame(subscriptionType, ByteString.copyFromUtf8(topic));
+  static final class TypeAndTopicFrame {
+
+    private static final int TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION = 0; //first byte
+
+    static byte[] build(SubscriptionType subscriptionType, byte[] topic) {
+      byte[] data = new byte[1 + topic.length];
+      data[0] = SubscriptionType.toByte(subscriptionType);
+      System.arraycopy(topic, 0, data, 1, topic.length);
+      return data;
+    }
+
+    static boolean isValid(byte[] frame) {
+      return SubscriptionType.isValid(frame[TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION]);
+    }
+
+    static SubscriptionType getSubscriptionType(byte[] frame) {
+      return SubscriptionType.get(frame[TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION]);
+    }
+
+    static byte[] getTopic(byte[] frame) {
+      return Arrays.copyOfRange(frame, TYPE_AND_TOPIC_FRAME_SUBSCRIPTION_TYPE_POSITION + 1, frame.length);
+    }
+
   }
 
   public enum SubscriptionType {
-    UNSUBSCRIPTION((byte) 0), SUBSCRIPTION((byte) 1);
-
-    private static final Map<Byte, SubscriptionType> values = Collections.unmodifiableMap(
-        Arrays.stream(SubscriptionType.values())
-            .collect(Collectors.toMap(SubscriptionType::getValue, type -> type)));
+    UNSUBSCRIPTION((byte) 0),
+    SUBSCRIPTION((byte) 1);
 
     private final byte value;
 
@@ -67,16 +69,16 @@ public enum SubProtocol implements Frame {
       this.value = value;
     }
 
-    public byte getValue() {
-      return value;
+    static byte toByte(SubscriptionType subscriptionType) {
+      return subscriptionType.value;
     }
 
-    public static SubscriptionType ofValue(byte value) {
-      SubscriptionType type = values.get(value);
-      if (type == null) {
-        throw new IllegalArgumentException();
-      }
-      return type;
+    static boolean isValid(byte subscriptionByte) {
+      return subscriptionByte == UNSUBSCRIPTION.value || subscriptionByte == SUBSCRIPTION.value;
+    }
+
+    static SubscriptionType get(byte subscriptionByte) {
+      return subscriptionByte == SUBSCRIPTION.value ? SUBSCRIPTION : UNSUBSCRIPTION;
     }
   }
 }

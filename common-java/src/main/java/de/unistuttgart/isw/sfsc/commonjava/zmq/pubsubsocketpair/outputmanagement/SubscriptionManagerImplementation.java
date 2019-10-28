@@ -1,18 +1,13 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement;
 
-import static de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.buildTypeAndTopicFrame;
-
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.SubscriptionType;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SubscriptionManagerImplementation implements SubscriptionManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(SubscriptionManagerImplementation.class);
   private final Outbox subscriptionOutbox;
 
   public SubscriptionManagerImplementation(Outbox subscriptionOutbox) {
@@ -20,13 +15,14 @@ public class SubscriptionManagerImplementation implements SubscriptionManager {
   }
 
   @Override
-  public Handle subscribe(ByteString topic) {
-    logger.debug("Subscribing to topic {}", topic.toStringUtf8());
+  public Handle subscribe(byte[] topic) {
     sendSubscriptionMessage(SubscriptionType.SUBSCRIPTION, topic);
-    return () -> {
-      logger.debug("Unsubscribing from topic {}", topic.toStringUtf8());
-      sendSubscriptionMessage(SubscriptionType.UNSUBSCRIPTION, topic);
-    };
+    return () -> sendSubscriptionMessage(SubscriptionType.UNSUBSCRIPTION, topic);
+  }
+
+  @Override
+  public Handle subscribe(ByteString topic) {
+    return subscribe(topic.toByteArray());
   }
 
   @Override
@@ -34,14 +30,7 @@ public class SubscriptionManagerImplementation implements SubscriptionManager {
     return subscribe(ByteString.copyFromUtf8(topic));
   }
 
-  @Override
-  public Outbox outbox() {
-    return subscriptionOutbox;
-  }
-
-  void sendSubscriptionMessage(SubscriptionType subscriptionType, ByteString topic) {
-    byte[][] message = SubProtocol.newEmptyMessage();
-    SubProtocol.TYPE_AND_TOPIC_FRAME.put(message, buildTypeAndTopicFrame(subscriptionType, topic));
-    subscriptionOutbox.add(message);
+  void sendSubscriptionMessage(SubscriptionType subscriptionType, byte[] topic) {
+    subscriptionOutbox.add(SubProtocol.newMessage(subscriptionType, topic));
   }
 }

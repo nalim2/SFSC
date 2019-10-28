@@ -1,7 +1,5 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair;
 
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
@@ -23,8 +21,8 @@ public class PubSubSocketPair implements NotThrowingAutoCloseable {
   }
 
   public static PubSubSocketPair create(Reactor reactor) throws ExecutionException, InterruptedException {
-    ReactiveSocket publisher = reactor.createReactiveSocket(SocketType.XPUB, SubProtocol.class);
-    ReactiveSocket subscriber = reactor.createReactiveSocket(SocketType.XSUB, DataProtocol.class);
+    ReactiveSocket publisher = reactor.createReactiveSocket(SocketType.XPUB);
+    ReactiveSocket subscriber = reactor.createReactiveSocket(SocketType.XSUB);
     return new PubSubSocketPair(publisher, subscriber);
   }
 

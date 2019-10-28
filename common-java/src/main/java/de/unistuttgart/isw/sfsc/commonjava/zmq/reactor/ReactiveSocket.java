@@ -1,6 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import java.util.List;
 
 public interface ReactiveSocket extends NotThrowingAutoCloseable {
 
@@ -14,12 +15,12 @@ public interface ReactiveSocket extends NotThrowingAutoCloseable {
 
   interface Inbox {
 
-    byte[][] take() throws InterruptedException;
+    List<byte[]> take() throws InterruptedException;
   }
 
   interface Outbox {
 
-    void add(byte[][] output);
+    void add(List<byte[]> output);
   }
 
   interface Connector {
