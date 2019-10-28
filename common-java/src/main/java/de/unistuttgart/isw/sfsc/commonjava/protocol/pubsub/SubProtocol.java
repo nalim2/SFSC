@@ -14,6 +14,10 @@ public enum SubProtocol {
     assert this.position == ordinal();
   }
 
+  public static int frameCount() {
+    return LENGTH;
+  }
+
   public static List<byte[]> newMessage(SubscriptionType type, byte[] topic) {
     return List.of(TypeAndTopicFrame.build(type, topic));
   }

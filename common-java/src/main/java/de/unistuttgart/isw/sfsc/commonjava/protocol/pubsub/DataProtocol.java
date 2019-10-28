@@ -14,6 +14,10 @@ public enum DataProtocol {
     assert this.position == ordinal();
   }
 
+  public static int frameCount() {
+    return LENGTH;
+  }
+
   public static List<byte[]> newMessage(byte[] topic, byte[] data) {
     return List.of(topic, data);
   }
