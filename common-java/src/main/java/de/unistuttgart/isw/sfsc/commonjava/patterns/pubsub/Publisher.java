@@ -19,7 +19,6 @@ public final class Publisher implements NotThrowingAutoCloseable {
     this.publisher = pubSubConnection.publisher();
   }
 
-
   public void publish(byte[] topic, byte[] data) {
     publisher.publish(topic, data);
   }

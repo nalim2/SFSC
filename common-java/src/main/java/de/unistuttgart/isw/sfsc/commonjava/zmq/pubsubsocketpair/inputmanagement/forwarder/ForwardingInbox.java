@@ -5,12 +5,13 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.QueueConnector;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ForwardingInbox implements Forwarder, NotThrowingAutoCloseable {
 
-  private final Listeners<Consumer<byte[][]>> listeners = new Listeners<>();
-  private final QueueConnector<byte[][]> queueConnector;
+  private final Listeners<Consumer<List<byte[]>>> listeners = new Listeners<>();
+  private final QueueConnector<List<byte[]>> queueConnector;
 
   ForwardingInbox(Inbox inbox) {queueConnector = new QueueConnector<>(inbox::take);}
 
@@ -23,7 +24,7 @@ public class ForwardingInbox implements Forwarder, NotThrowingAutoCloseable {
   }
 
   @Override
-  public Handle addListener(Consumer<byte[][]> listener) {
+  public Handle addListener(Consumer<List<byte[]>> listener) {
     return listeners.add(listener);
   }
 
@@ -32,7 +33,7 @@ public class ForwardingInbox implements Forwarder, NotThrowingAutoCloseable {
     queueConnector.close();
   }
 
-  void accept(byte[][] message) {
+  void accept(List<byte[]> message) {
     listeners.forEach(consumer -> consumer.accept(message));
   }
 

@@ -15,10 +15,7 @@ public class OutputPublisherImplementation implements OutputPublisher {
 
   @Override
   public void publish(byte[] topic, byte[] data) {
-    byte[][] message = DataProtocol.newEmptyMessage();
-    DataProtocol.TOPIC_FRAME.put(message, topic);
-    DataProtocol.DATA_FRAME.put(message, data);
-    outbox.add(message);
+    outbox.add(DataProtocol.newMessage(topic, data));
   }
 
   @Override
@@ -45,10 +42,4 @@ public class OutputPublisherImplementation implements OutputPublisher {
   public void publish(String topic, Message data) {
     publish(topic, data.toByteArray());
   }
-
-  @Override
-  public Outbox outbox() {
-    return outbox;
-  }
-
 }

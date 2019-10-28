@@ -19,9 +19,8 @@ public class Reactor implements NotThrowingAutoCloseable {
     return new Reactor(zContext);
   }
 
-  public <InboxT extends Enum<InboxT>> ReactiveSocket createReactiveSocket(SocketType type, Class<InboxT> inboxProtocol)
-      throws ExecutionException, InterruptedException {
-    QueuingHandler queuingHandler = QueuingHandler.forProtocol(inboxProtocol);
+  public ReactiveSocket createReactiveSocket(SocketType type) throws ExecutionException, InterruptedException {
+    QueuingHandler queuingHandler = new QueuingHandler();
     return worker.createSocket(type, queuingHandler, queuingHandler.getInbox()).get(); //todo wait
   }
 
