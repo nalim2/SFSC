@@ -12,7 +12,6 @@ import de.unistuttgart.isw.sfsc.framework.descriptor.ServiceDescriptor;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -66,10 +65,10 @@ class StoreEventStreamConverter implements Consumer<StoreEvent<ByteString>> {
     return handle;
   }
 
-  <V> Future<V> addOneShotListener(Predicate<StoreEvent<Map<String, ByteString>>> predicate, Callable<V> callable) {
-    OneShotListener<StoreEvent<Map<String, ByteString>>, V> oneShotListener = new OneShotListener<>(predicate, callable);
+  Future<Void> addOneShotListener(Predicate<StoreEvent<Map<String, ByteString>>> predicate, Runnable runnable) {
+    OneShotListener<StoreEvent<Map<String, ByteString>>> oneShotListener = new OneShotListener<>(predicate, runnable);
     Handle handle = listeners.add(oneShotListener);
-    Future<V> future = oneShotListener.initialize(handle);
+    Future<Void> future = oneShotListener.initialize(handle);
     Set<StoreEvent<Map<String, ByteString>>> prepopulation = StoreEvent.toStoreEventSet(Collections.unmodifiableSet(services));
     prepopulation.forEach(oneShotListener);
     return future;

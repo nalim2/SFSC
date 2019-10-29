@@ -2,18 +2,21 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZLoop;
@@ -24,12 +27,14 @@ import org.zeromq.ZMQException;
 import zmq.ZError;
 import zmq.ZMQ;
 
-class ZmqExecutor implements Executor, NotThrowingAutoCloseable {
+class ZmqExecutor implements NotThrowingAutoCloseable {
 
   private static final byte[] NOTIFICATION = {};
 
   private final Queue<Runnable> commandQueue = new ConcurrentLinkedQueue<>();
   private final BlockingQueue<Object> notificationQueue = new LinkedTransferQueue<>();
+  private final Listeners<Runnable> shutdownListeners = new Listeners<>();
+  private final AtomicBoolean closed = new AtomicBoolean();
   private final String address = "inproc://" + UUID.randomUUID();
 
   private final ZContext zContext;
@@ -58,19 +63,31 @@ class ZmqExecutor implements Executor, NotThrowingAutoCloseable {
     return commandExecutor.createReactiveSocket(SocketType.XSUB, DataProtocol.frameCount());
   }
 
-  @Override
-  public void execute(Runnable runnable) {
+  public Handle addShutdownListener(Runnable runnable) {
+    Runnable oneShotRunnable = new OneShotRunnable(runnable);
+    Handle handle = shutdownListeners.add(oneShotRunnable);
+    if (closed.get()) {
+      oneShotRunnable.run();
+      handle.close();
+    }
+    return handle;
+  }
+
+ void execute(Runnable runnable) {
     commandQueue.add(runnable);
     notificationQueue.add(NOTIFICATION); //notify
   }
 
   @Override
   public void close() {
-    new Thread(() -> {
-      notificationInjector.close();
-      commandExecutor.close();
-      zContext.close();
-    }).start();
+    if (closed.compareAndSet(false, true)) {
+      new Thread(() -> {
+        notificationInjector.close();
+        commandExecutor.close();
+        zContext.close();
+        shutdownListeners.forEach(Runnable::run);
+      }).start();
+    }
   }
 
   class CommandExecutor implements NotThrowingAutoCloseable {
@@ -116,7 +133,7 @@ class ZmqExecutor implements Executor, NotThrowingAutoCloseable {
         Socket socket = commandExecutorZContext.createSocket(type);
         PollItem pollItem = new PollItem(socket, ZMQ.ZMQ_POLLIN);
         zLoop.addPoller(pollItem, queuingHandler, null);
-        return new ReactiveSocketImpl(ZmqExecutor.this, socket, queuingHandler.getInbox(), () -> closeSocket(pollItem));
+        return new ReactiveSocketImpl(ZmqExecutor.this::execute , socket, queuingHandler.getInbox(), () -> closeSocket(pollItem));
       });
       ZmqExecutor.this.execute(futureTask);
       return futureTask;

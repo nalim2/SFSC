@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -61,8 +60,8 @@ final class ApiRegistryManager implements NotThrowingAutoCloseable {
     return storeEventStreamConverter.addListener(listener);
   }
 
-  <V> Future<V> addOneShotStoreEventListener(Predicate<StoreEvent<Map<String, ByteString>>> predicate, Callable<V> callable) {
-    return storeEventStreamConverter.addOneShotListener(predicate, callable);
+  Future<Void> addOneShotStoreEventListener(Predicate<StoreEvent<Map<String, ByteString>>> predicate, Runnable runnable) {
+    return storeEventStreamConverter.addOneShotListener(predicate, runnable);
   }
 
   public void close() {

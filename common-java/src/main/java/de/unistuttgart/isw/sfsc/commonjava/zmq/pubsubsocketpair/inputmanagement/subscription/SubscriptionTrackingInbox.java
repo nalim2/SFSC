@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -60,18 +59,18 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
   }
 
   @Override
-  public <V> Future<V> addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Callable<V> callable) {
-    OneShotListener<StoreEvent<ByteString>, V> oneShotListener = new OneShotListener<>(predicate, callable);
+  public Future<Void> addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Runnable runnable) {
+    OneShotListener<StoreEvent<ByteString>> oneShotListener = new OneShotListener<>(predicate, runnable);
     Handle handle = listeners.add(oneShotListener);
-    Future<V> future = oneShotListener.initialize(handle);
+    Future<Void> future = oneShotListener.initialize(handle);
     Set<StoreEvent<ByteString>> prepopulation = StoreEvent.toStoreEventSet(getSubscriptions());
     prepopulation.forEach(oneShotListener);
     return future;
   }
 
   @Override
-  public <V> Future<V> addOneShotSubscriptionListener(ByteString topic, Callable<V> callable) {
-    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, callable);
+  public Future<Void> addOneShotSubscriptionListener(ByteString topic, Runnable runnable) {
+    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, runnable);
   }
 
   void accept(List<byte[]> subscriptionMessage) {  //not thread safe, but we have just one so its okay
