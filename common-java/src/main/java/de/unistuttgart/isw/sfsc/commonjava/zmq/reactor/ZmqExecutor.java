@@ -114,6 +114,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
                 commandQueue.remove().run();
               } catch (ZMQException e) {
                 ZmqExecutor.this.close();
+                Thread.currentThread().interrupt();
               }
               return 0;
             };
@@ -168,6 +169,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
                 Thread.currentThread().interrupt();
               } catch (ZMQException e) {
                 ZmqExecutor.this.close();
+                Thread.currentThread().interrupt();
               }
             }
             notificationInjectorZContext.close();
