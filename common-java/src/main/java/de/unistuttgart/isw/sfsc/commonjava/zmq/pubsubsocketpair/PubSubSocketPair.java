@@ -8,7 +8,6 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Settings;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import java.util.concurrent.ExecutionException;
-import org.zeromq.SocketType;
 
 public class PubSubSocketPair implements NotThrowingAutoCloseable {
 
@@ -21,8 +20,8 @@ public class PubSubSocketPair implements NotThrowingAutoCloseable {
   }
 
   public static PubSubSocketPair create(Reactor reactor) throws ExecutionException, InterruptedException {
-    ReactiveSocket publisher = reactor.createReactiveSocket(SocketType.XPUB);
-    ReactiveSocket subscriber = reactor.createReactiveSocket(SocketType.XSUB);
+    ReactiveSocket publisher = reactor.createPublisher();
+    ReactiveSocket subscriber = reactor.createSubscriber();
     return new PubSubSocketPair(publisher, subscriber);
   }
 

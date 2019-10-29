@@ -13,6 +13,11 @@ import org.zeromq.ZMQ.Socket;
 class QueuingHandler implements IZLoopHandler {
 
   private final BlockingQueue<List<byte[]>> queue = new LinkedBlockingQueue<>();
+  private final int defaultFrameCount;
+
+  QueuingHandler(int defaultFrameCount) {
+    this.defaultFrameCount = defaultFrameCount;
+  }
 
   @Override
   public int handle(ZLoop unused1, PollItem item, Object unused2) {
@@ -22,7 +27,7 @@ class QueuingHandler implements IZLoopHandler {
   }
 
   List<byte[]> read(Socket socket) {
-    List<byte[]> frames = new ArrayList<>();
+    List<byte[]> frames = new ArrayList<>(defaultFrameCount);
     do {
       frames.add(socket.recv());
     }

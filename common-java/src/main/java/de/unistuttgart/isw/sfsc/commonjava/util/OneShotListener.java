@@ -1,6 +1,5 @@
 package de.unistuttgart.isw.sfsc.commonjava.util;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -8,18 +7,18 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class OneShotListener<T, U> implements Consumer<T> {
+public class OneShotListener<T> implements Consumer<T> {
 
   private final AtomicBoolean ready = new AtomicBoolean();
   private final Predicate<T> predicate;
-  private final RemovingFuture<U> future;
+  private final RemovingFuture future;
 
-  public OneShotListener(Predicate<T> predicate, Callable<U> callable) {
+  public OneShotListener(Predicate<T> predicate, Runnable runnable) {
     this.predicate = predicate;
-    this.future = new RemovingFuture<>(callable);
+    this.future = new RemovingFuture(runnable);
   }
 
-  public Future<U> initialize(Handle handle) {
+  public Future<Void> initialize(Handle handle) {
     future.setHandle(handle);
     ready.set(true);
     return future;
@@ -31,12 +30,12 @@ public class OneShotListener<T, U> implements Consumer<T> {
     }
   }
 
-  static class RemovingFuture<V> extends FutureTask<V> {
+  static class RemovingFuture extends FutureTask<Void> {
 
     private final AtomicReference<Handle> handle = new AtomicReference<>();
 
-    RemovingFuture(Callable<V> callable) {
-      super(callable);
+    RemovingFuture(Runnable runnable) {
+      super(runnable, null);
     }
 
     void setHandle(Handle handle) {
