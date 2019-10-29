@@ -24,7 +24,6 @@ import org.zeromq.ZLoop.IZLoopHandler;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQException;
-import zmq.ZError;
 import zmq.ZMQ;
 
 class ZmqExecutor implements NotThrowingAutoCloseable {
@@ -73,7 +72,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
     return handle;
   }
 
- void execute(Runnable runnable) {
+  void execute(Runnable runnable) {
     commandQueue.add(runnable);
     notificationQueue.add(NOTIFICATION); //notify
   }
@@ -114,9 +113,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
                 receiver.recv();
                 commandQueue.remove().run();
               } catch (ZMQException e) {
-                if (e.getErrorCode() != ZError.ETERM) {
-                  ZmqExecutor.this.close();
-                }
+                ZmqExecutor.this.close();
               }
               return 0;
             };
@@ -133,7 +130,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
         Socket socket = commandExecutorZContext.createSocket(type);
         PollItem pollItem = new PollItem(socket, ZMQ.ZMQ_POLLIN);
         zLoop.addPoller(pollItem, queuingHandler, null);
-        return new ReactiveSocketImpl(ZmqExecutor.this::execute , socket, queuingHandler.getInbox(), () -> closeSocket(pollItem));
+        return new ReactiveSocketImpl(ZmqExecutor.this::execute, socket, queuingHandler.getInbox(), () -> closeSocket(pollItem));
       });
       ZmqExecutor.this.execute(futureTask);
       return futureTask;
@@ -170,9 +167,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
               } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
               } catch (ZMQException e) {
-                if (e.getErrorCode() != ZError.ETERM) {
-                  ZmqExecutor.this.close();
-                }
+                ZmqExecutor.this.close();
               }
             }
             notificationInjectorZContext.close();
