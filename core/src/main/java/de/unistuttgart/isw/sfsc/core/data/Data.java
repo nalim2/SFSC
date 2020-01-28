@@ -54,13 +54,13 @@ public class Data implements NotThrowingAutoCloseable {
   }
 
   public void connectBackend(String host, int port) {
-    if (!configuration.get(CoreOption.HOST).equals(host) && !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
+    if (!configuration.get(CoreOption.HOST).equals(host) || !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
       backend.publisherSocketConnector().connect(host, port);
     }
   }
 
   public void disconnectBackend(String host, int port) {
-    if (!configuration.get(CoreOption.HOST).equals(host) && !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
+    if (!configuration.get(CoreOption.HOST).equals(host) || !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
       backend.publisherSocketConnector().disconnect(host, port);
     }
   }
