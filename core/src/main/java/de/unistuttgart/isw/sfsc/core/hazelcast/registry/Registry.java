@@ -1,6 +1,6 @@
 package de.unistuttgart.isw.sfsc.core.hazelcast.registry;
 
-import com.hazelcast.core.ReplicatedMap;
+import com.hazelcast.replicatedmap.ReplicatedMap;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command.CommandReply;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command.CommandRequest;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryReply;
@@ -43,7 +43,7 @@ public class Registry implements NotThrowingAutoCloseable {
         break;
       }
       case DELETE: {
-        replicatedRegistry.add(RegistryEntry.newBuilder().setAdapterId(adapterId).setCoreId(coreId).setData(commandRequest.getDelete()).build());
+        replicatedRegistry.remove(RegistryEntry.newBuilder().setAdapterId(adapterId).setCoreId(coreId).setData(commandRequest.getDelete()).build());
         break;
       }
       default: {

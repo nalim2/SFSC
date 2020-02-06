@@ -1,11 +1,11 @@
 package de.unistuttgart.isw.sfsc.core.hazelcast;
 
+import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ListenerConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MembershipEvent;
-import com.hazelcast.core.ReplicatedMap;
+import com.hazelcast.replicatedmap.ReplicatedMap;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
@@ -29,7 +29,7 @@ public class HazelcastNode implements NotThrowingAutoCloseable {
       Configuration<CoreOption> configuration, String coreId) {
     Config config = new Config();
     config.addListenerConfig(new ListenerConfig(new BackendEventConsumer(memberAddedEventConsumer, memberRemovedEventConsumer)));
-    config.getMemberAttributeConfig().setIntAttribute(BACKEND_PORT_ATTRIBUTE_KEY, Integer.parseInt(configuration.get(CoreOption.BACKEND_PORT)));
+    config.getMemberAttributeConfig().setAttribute(BACKEND_PORT_ATTRIBUTE_KEY, configuration.get(CoreOption.BACKEND_PORT));
     config.getNetworkConfig()
         .setPublicAddress(configuration.get(CoreOption.BACKEND_HOST))
         .setPort(Integer.parseInt(configuration.get(CoreOption.HAZELCAST_PORT)));
@@ -52,6 +52,6 @@ public class HazelcastNode implements NotThrowingAutoCloseable {
   }
 
   static int getPort(MembershipEvent membershipEvent) {
-    return membershipEvent.getMember().getIntAttribute(BACKEND_PORT_ATTRIBUTE_KEY);
+    return Integer.parseInt(membershipEvent.getMember().getAttribute(BACKEND_PORT_ATTRIBUTE_KEY));
   }
 }

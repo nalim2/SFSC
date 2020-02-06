@@ -3,7 +3,7 @@ package de.unistuttgart.isw.sfsc.core.hazelcast.registry.replicatedregistry;
 import com.google.protobuf.ByteString;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
-import com.hazelcast.core.MapEvent;
+import com.hazelcast.map.MapEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
@@ -50,4 +50,7 @@ class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
 
   @Override
   public void mapEvicted(MapEvent event) { }
+
+  @Override
+  public void entryExpired(EntryEvent<RegistryEntry, Boolean> event) { }
 }

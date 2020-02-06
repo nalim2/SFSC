@@ -1,13 +1,14 @@
 package de.unistuttgart.isw.sfsc.core.hazelcast.registry.replicatedregistry;
 
 import com.google.protobuf.ByteString;
-import com.hazelcast.core.ReplicatedMap;
+import com.hazelcast.replicatedmap.ReplicatedMap;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ public class ReplicatedRegistry {
 
   public Handle addListener(Consumer<StoreEvent<ByteString>> listener) {
     ReplayingListener<ByteString> replayingListener = new ReplayingListener<>(listener);
-    String handle = replicatedMap.addEntryListener(new EntryListenerAdapter(replayingListener));
+    UUID handle = replicatedMap.addEntryListener(new EntryListenerAdapter(replayingListener));
 
     replayingListener.prepend(createStoreEventSnapshot());
     replayingListener.start();
