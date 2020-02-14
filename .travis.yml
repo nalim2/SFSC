@@ -3,7 +3,7 @@ language: java
 install:
   - wget https://github.com/protocolbuffers/protobuf/archive/v3.11.3.tar.gz
   - tar -xzvf v3.11.3.tar.gz
-  - pushd protobuf-3.11.3 && ./configure --prefix=/usr && make && sudo make install && popd
+  - pushd protobuf-3.11.3 && ./autogen.sh && ./configure --prefix=/usr && make && sudo make install && popd
   - protoc --version
 
 before_deploy:
