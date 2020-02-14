@@ -1,6 +1,7 @@
 language: java
 
 before_install:
+  - sudo apt update
   - sudo apt install protobuf-compiler
   - protoc --version
 
