@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.unistuttgart.isw.sfsc</groupId>
+  <groupId>com.github.nalim2</groupId>
   <artifactId>sfsc</artifactId>
   <version>${revision}</version>
   <packaging>pom</packaging>
@@ -40,7 +40,6 @@
 
     <maven.compiler.release>${java.version}</maven.compiler.release>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -69,27 +68,28 @@
         <version>${hazelcast.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.unistuttgart.isw.sfsc</groupId>
+        <groupId>com.github.nalim2</groupId>
         <artifactId>proto</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.unistuttgart.isw.sfsc</groupId>
+        <groupId>com.github.nalim2</groupId>
         <artifactId>common-java</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.unistuttgart.isw.sfsc</groupId>
+        <groupId>com.github.nalim2</groupId>
         <artifactId>core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.unistuttgart.isw.sfsc</groupId>
+        <groupId>com.github.nalim2</groupId>
         <artifactId>adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
+
 
   <build>
     <pluginManagement>
