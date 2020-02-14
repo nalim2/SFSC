@@ -35,7 +35,7 @@
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <dockerfile-maven.version>1.4.12</dockerfile-maven.version>
 
-    <java.version>12</java.version>
+    <java.version>11</java.version>
     <encoding>UTF-8</encoding>
 
     <maven.compiler.release>${java.version}</maven.compiler.release>
