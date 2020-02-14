@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.unistuttgart.isw.sfsc</groupId>
+    <groupId>com.github.nalim2</groupId>
     <artifactId>sfsc</artifactId>
     <version>${revision}</version>
   </parent>
@@ -14,7 +14,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>de.unistuttgart.isw.sfsc</groupId>
+      <groupId>com.github.nalim2</groupId>
       <artifactId>core</artifactId>
     </dependency>
   </dependencies>
