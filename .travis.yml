@@ -1,21 +1,19 @@
 language: java
-
 install:
-  - wget https://github.com/protocolbuffers/protobuf/archive/v3.11.3.tar.gz
-  - tar -xzvf v3.11.3.tar.gz
-  - pushd protobuf-3.11.3 && ./autogen.sh && ./configure --prefix=/usr && make && sudo make install && popd
-  - protoc --version
-
+- wget https://github.com/protocolbuffers/protobuf/archive/v3.11.3.tar.gz
+- tar -xzvf v3.11.3.tar.gz
+- pushd protobuf-3.11.3 && ./autogen.sh && ./configure --prefix=/usr && make && sudo
+  make install && popd
+- protoc --version
 before_deploy:
-  - mvn help:evaluate -N -Dexpression=project.version|grep -v '\['
-  - export project_version=$(mvn help:evaluate -N -Dexpression=project.version|grep -v '\[')
-
+- mvn help:evaluate -N -Dexpression=project.version|grep -v '\['
+- export project_version=$(mvn help:evaluate -N -Dexpression=project.version|grep
+  -v '\[')
 deploy:
   provider: releases
   api_key:
-    secure: R9jdCd4NPn+3NZFtKLJcVZTSW6WZqWIyZkCyFf31nbVS0eFUEpaaSGAiKCuzJkkA+AAxb2g4dSN+QJawJg883zfUGcbCKI1EJLKPkEv36hGTOkAUt9GDHjY0++5t3JVg30WZUh3c5nYdeIGQZSDAEasFeEYuwpi0U7efnBcHJPcAuqYOonszJA4qwr9IPuSCe1vW42AVkPoYdSluto4oPvJ64HyrYnvJm9auVrBxC1QxbdmlGFKHlxQQKTDWLb+VgQ8CtcawthSR9k4K+oCEc1mktZcKoQES3+8I9df+VFbDnWVkMAvvrx4aWfAcQQ+SToiVhQdWhiynRdj0CQbJAJsxZRPAOShT4u+2wSuLLUV8HTUyNAYJid0j1DXM9bPBx8NCjFmvmuCob4p/hjzo+MYaibNZyX1hdb5IJ/8+PZQSoxtInkNGO33wuDO/4NbmH6Y7m7twF/QBNBLp7x86C8oiuROiKkz2WD/OjT3K+SXdx37ghPlBFq+OqdcQqKNrn++vLWwkPgmy5XTFVQN1XI3KZw84WqW0DdeMLx6JiJW1Zn8QC7plTlBswP2K3XAVwfggdRxyW5bEbfJe93pFW23h/tWM49uxV/0FxaZoQU/Za7lQ6CFZRSswIBujJexTALFWx1DJqaPiP0LJEWLP7FaiddvqwsTLc+6R290AAp4=
-  file: 
-      -"adapter/target/adapter-$project_version.jar"
+    secure: 0cdnyo5WdTktdrqH1+BjEHIgWcOvSsTgNZQ15vJs65rVj+eow+wjPtAcybel54nFW2jwA618o59EwMnAi00k79CjqaNDAUs7ids2y943GhVLdRgiR+jFWCTO9wemxAIg/NoH6XT/Xtcv7N4JboyHcgKMGsHj0IawgBFF//7+2kUwx2tWbahg9PCovYDyzs1gCcdRUxO+pHeYTkpT40eKBoRG5WUgVrtyISuQ/N6sHNcxqfnE1zyCrUoE09nhU5+n2ZgMyjobLkC+ujD2iUbSZvleB1wAerGZ0kDuv4xxYOvh1VkM45KZa5w6EbmRI8eBzrb4ayhHjY97ib9WuvxEUnxc5/QqDClmvbXj5ulVr5bh8Dg9EW/wBfWO/2cqfUgB0T1YMPRUIcdtUObVe8XeMituG1qy2P7LLcW21HKKEgVR1pP/Nb1ntCnM9X0A1dt3vL6u11ZQz5kSqo+gGq+DeNia+1h9ME1/BeOyzi3olymt80ek3b5L2Y1lyKqgqTp8cw4WmJYl5HnxxFKnm7N4lPTn7Us4gNBAWKuqEiZZ8CrKfJfzR+DHE5ypCEoijhRyQrSoH41xeALAoegKN0rMXfxBtrHq6vmKjeI2srx+lX4HQeFmwu8IPvAOVzkQYs8tgsBXwPay++MBey7n+kRNBSLVCzROMJZv/E+dWAWPeFY=
+  file: adapter/target/adapter-$project_version.jar
   skip_cleanup: true
   on:
     repo: nalim2/SFSC
