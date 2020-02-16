@@ -22,28 +22,28 @@
     <url>https://github.com/nalim2/SFSC</url>
   </scm>
   
-  <distributionmanagement>
+  <distributionManagement>
     <site>
         <id>api.wiki</id>
         <url>https://github.com/nalim2/SFSC/wiki</url>
     </site>
 
-    <snapshotrepository>
+    <snapshotRepository>
         <id>ossrh</id>
         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotrepository>
+    </snapshotRepository>
     <repository>
         <id>ossrh</id>
         <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
 
-</distributionmanagement>
+  </distributionManagement>
   
   <developers>
     <developer>
         <name>Matthias Milan Strljic</name>
         <email>matthias.strljic@isw.uni-stuttgart.de</email>
-        <organizationurl>https://www.isw.uni-stuttgart.de/</organizationurl>
+        <organizationUrl>https://www.isw.uni-stuttgart.de/</organizationUrl>
     </developer>
 </developers>
   
@@ -239,8 +239,8 @@
           <plugins>
               <!-- To release to Maven central -->
               <plugin>
-                  <groupid>org.sonatype.plugins</groupid>
-                  <artifactid>nexus-staging-maven-plugin</artifactid>
+                  <groupId>org.sonatype.plugins</groupId>
+                  <artifactId>nexus-staging-maven-plugin</artifactId>
                   <version>1.6.8</version>
                   <extensions>true</extensions>
                   <configuration>
@@ -251,8 +251,8 @@
               </plugin>
               <!-- To generate javadoc -->
               <plugin>
-                  <groupid>org.apache.maven.plugins</groupid>
-                  <artifactid>maven-source-plugin</artifactid>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-source-plugin</artifactId>
                   <version>3.0.1</version>
                   <executions>
                       <execution>
@@ -264,8 +264,8 @@
                   </executions>
               </plugin>
               <plugin>
-                  <groupid>org.apache.maven.plugins</groupid>
-                  <artifactid>maven-javadoc-plugin</artifactid>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
                   <version>2.10.4</version>
                   <executions>
                       <execution>
@@ -279,8 +279,8 @@
 
               <!-- To sign the artifacts -->
               <plugin>
-                  <groupid>org.apache.maven.plugins</groupid>
-                  <artifactid>maven-gpg-plugin</artifactid>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-gpg-plugin</artifactId>
                   <version>1.6</version>
                   <executions>
                       <execution>
