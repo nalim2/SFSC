@@ -13,7 +13,9 @@ deploy:
   provider: releases
   api_key:
     secure: RIXBkZUnUjiZ7UX5lAi30apKI0NPSzlzyMZQ4TuMrhFwzZ8NND0/MtdQVc+TZOWrD3idPE08krIpHm4AzMStNcccLZ6bPw4n83EENhc7zbOzpzyNspXlDMqTA+f2GstzdaW4T10LbEDMNs6rnbuKg5Dg6QHzbd83uS72qqHpdDPXLP1VITMo+BlSCbFUA2g87BgwYxqBoYbLsK7CziZd5BwXjGTZ8QfQW9X4j7L/kCzGb4ovCrsXwRSG7AEqM45z9A6EJUVYJat1nIJbZxbmDYqIYaSPh9oaQvuQ5ypB1+vq0rwH+zTP3x5QHU8MBmRFk0MiqnPgn+NF6/jO01+u1dhzzpQEtfdGdbddaJLDyjB8a+OlMW/t9zi96Gi/Lj1I1qjLOPbg6uxQDYV/OnYkDCxoa7ba0tvZ5xAJ1XdSQgJY3yyK1RhnhuodWwz2a72IP2d7WY1XAjfhznU5n/BsNVZWdVN//9o5aPumI06LPCqHP8TYcAh/m4n0kvojOJwg6E6WKZO6/4XxUaTTSo75u6PUMM/JUkhJE1J7jQgLx3fRfpljwBDZ30gnUqwcYR1bfsnTQz76p/zN7YtBdo7gMZf1zrrHAsyEC4cPdE6gtAugjxeST1rmnnRnJT0FkZ4p93ZQMhBKvNIttmHQNFXyLaxR/wKXwscjDKgx97RIYSk=
-  file: adapter/target/adapter.jar
+  file: 
+    - adapter/target/adapter.jar
+  
   skip_cleanup: true
   on:
     repo: nalim2/SFSC
