@@ -5,6 +5,9 @@ install:
 - pushd protobuf-3.11.3 && ./autogen.sh && ./configure --prefix=/usr && make && sudo
   make install && popd
 - protoc --version
+skript:
+- mvn clean install
+
 before_deploy:
 - mvn help:evaluate -N -Dexpression=project.version|grep -v '\['
 - export project_version=$(mvn help:evaluate -N -Dexpression=project.version|grep -v '\[')
@@ -30,7 +33,7 @@ deploy:
     - ./hello-world/target/hello-world-$project_version.jar
     - ./hello-world/target/hello-world.jar
     - ./target/sfsc-$project_version.jar
-    - ./taget/(sfsc.jar
+    - ./target/sfsc.jar
   
   skip_cleanup: true
   on:
