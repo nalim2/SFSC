@@ -17,8 +17,20 @@ deploy:
   file: 
     - ./adapter/target/adapter-$project_version.jar
     - ./adapter/target/adapter.jar
+    - ./proto/target/proto-$project_version.jar
+    - ./proto/target/proto.jar
+    - ./common-java/target/common-java-$project_version.jar
+    - ./common-java/target/common-java.jar
+    - ./core/target/core-$project_version.jar
+    - ./core/target/core.jar
+    - ./docker-core/target/docker-core-$project_version.jar
+    - ./docker-core/target/docker-core.jar
+    - ./framework/target/framework-$project_version.jar
+    - ./framework/target/framework.jar
+    - ./hello-world/target/hello-world-$project_version.jar
+    - ./hello-world/target/hello-world.jar
     - ./target/sfsc-$project_version.jar
-    - 
+    - ./taget/(sfsc.jar
   
   skip_cleanup: true
   on:
