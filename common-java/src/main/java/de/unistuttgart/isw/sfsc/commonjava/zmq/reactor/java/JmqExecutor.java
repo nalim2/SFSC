@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
@@ -6,6 +6,7 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -26,7 +27,7 @@ import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQException;
 import zmq.ZMQ;
 
-class ZmqExecutor implements NotThrowingAutoCloseable {
+class JmqExecutor implements NotThrowingAutoCloseable {
 
   private static final byte[] NOTIFICATION = {};
 
@@ -40,18 +41,18 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
   private final NotificationInjector notificationInjector;
   private final CommandExecutor commandExecutor;
 
-  ZmqExecutor(ZContext zContext) {
+  JmqExecutor(ZContext zContext) {
     this.zContext = zContext;
     this.commandExecutor = new CommandExecutor();
     this.notificationInjector = new NotificationInjector();
   }
 
-  static ZmqExecutor create(ZContext zContext) throws InterruptedException {
-    ZmqExecutor zmqExecutor = new ZmqExecutor(zContext);
-    zmqExecutor.commandExecutor.start();
-    zmqExecutor.commandExecutor.awaitBinding();
-    zmqExecutor.notificationInjector.start();
-    return zmqExecutor;
+  static JmqExecutor create(ZContext zContext) throws InterruptedException {
+    JmqExecutor jmqExecutor = new JmqExecutor(zContext);
+    jmqExecutor.commandExecutor.start();
+    jmqExecutor.commandExecutor.awaitBinding();
+    jmqExecutor.notificationInjector.start();
+    return jmqExecutor;
   }
 
   public Future<ReactiveSocket> createPublisher() {
@@ -113,7 +114,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
                 receiver.recv();
                 commandQueue.remove().run();
               } catch (ZMQException e) {
-                ZmqExecutor.this.close();
+                JmqExecutor.this.close();
                 Thread.currentThread().interrupt();
               }
               return 0;
@@ -127,13 +128,13 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
 
     Future<ReactiveSocket> createReactiveSocket(SocketType type, int defaultFrameCount) {
       FutureTask<ReactiveSocket> futureTask = new FutureTask<>(() -> {
-        QueuingHandler queuingHandler = new QueuingHandler(defaultFrameCount);
+        InboxQueue inboxQueue = new InboxQueue(defaultFrameCount);
         Socket socket = commandExecutorZContext.createSocket(type);
         PollItem pollItem = new PollItem(socket, ZMQ.ZMQ_POLLIN);
-        zLoop.addPoller(pollItem, queuingHandler, null);
-        return new ReactiveSocketImpl(ZmqExecutor.this::execute, socket, queuingHandler.getInbox(), () -> closeSocket(pollItem));
+        zLoop.addPoller(pollItem, inboxQueue, null);
+        return new JmqSocketImpl(JmqExecutor.this::execute, socket, inboxQueue.getInbox(), () -> closeSocket(pollItem));
       });
-      ZmqExecutor.this.execute(futureTask);
+      JmqExecutor.this.execute(futureTask);
       return futureTask;
     }
 
@@ -168,7 +169,7 @@ class ZmqExecutor implements NotThrowingAutoCloseable {
               } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
               } catch (ZMQException e) {
-                ZmqExecutor.this.close();
+                JmqExecutor.this.close();
                 Thread.currentThread().interrupt();
               }
             }

@@ -5,6 +5,7 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.core.control.bootstrapping.BootstrapModule;
@@ -27,7 +28,7 @@ public class Control implements NotThrowingAutoCloseable {
       throws ExecutionException, InterruptedException {
     String coreId = UUID.randomUUID().toString();
 
-    reactor = Reactor.create(contextConfiguration);
+    reactor = ReactorFactory.create(contextConfiguration);
     pubSubSocketPair = PubSubSocketPair.create(reactor);
     pubSubSocketPair.publisherSettings().setXPubVerbose();
 

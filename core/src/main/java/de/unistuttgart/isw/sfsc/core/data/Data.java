@@ -5,6 +5,7 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.forwarder.ForwardingInbox;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.concurrent.ExecutionException;
@@ -22,7 +23,7 @@ public class Data implements NotThrowingAutoCloseable {
 
   Data(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
     this.configuration = configuration;
-    reactor = Reactor.create(contextConfiguration);
+    reactor = ReactorFactory.create(contextConfiguration);
     frontend = PubSubSocketPair.create(reactor);
     backend = PubSubSocketPair.create(reactor);
 

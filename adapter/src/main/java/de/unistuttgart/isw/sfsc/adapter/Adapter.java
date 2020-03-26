@@ -8,6 +8,7 @@ import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -30,7 +31,7 @@ public class Adapter implements NotThrowingAutoCloseable {
       context.setRcvHWM(0);
       context.setSndHWM(0);
     };
-    Reactor reactor = Reactor.create(contextConfiguration);
+    Reactor reactor = ReactorFactory.create(contextConfiguration);
     ControlClient controlClient = ControlClient.create(reactor, configuration);
     WelcomeInformation welcomeInformation = controlClient.welcomeInformation();
     AdapterInformation adapterInformation = new AdapterInformation(welcomeInformation.getCoreId(), welcomeInformation.getAdapterId(),
