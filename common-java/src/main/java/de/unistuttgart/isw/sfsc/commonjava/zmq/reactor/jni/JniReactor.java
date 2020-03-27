@@ -20,7 +20,7 @@ public class JniReactor implements Reactor {
   public JniReactor(long nativePointer) {this.nativePointer = nativePointer;}
 
   public static Reactor create() { //todo config
-    long nativePointer = initNative(InboxQueue.class, JniReactiveSocket.class);
+    long nativePointer = JniReactor.initNative(InboxQueue.class, JniReactiveSocket.class);
     return new JniReactor(nativePointer);
   }
 
