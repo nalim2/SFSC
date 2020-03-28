@@ -22,8 +22,7 @@ public class ReactorFactory {
     logger.info("using native lib: " + useNative);
   }
 
-  public static Reactor create(ContextConfiguration contextConfiguration)
-      throws InterruptedException {
+  public static Reactor create(ContextConfiguration contextConfiguration) throws InterruptedException {
     return useNative ? JniReactor.create() : JmqReactor.create(contextConfiguration); //todo use in native
   }
 }

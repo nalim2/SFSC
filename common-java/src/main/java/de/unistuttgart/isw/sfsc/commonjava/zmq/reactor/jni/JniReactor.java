@@ -20,7 +20,8 @@ public class JniReactor implements Reactor {
   public JniReactor(long nativePointer) {this.nativePointer = nativePointer;}
 
   public static Reactor create() { //todo config
-    long nativePointer = JniReactor.initNative(InboxQueue.class, JniReactiveSocket.class);
+    ShutdownHandler shutdownHandler = new ShutdownHandler();
+    long nativePointer = JniReactor.initNative(InboxQueue.class, shutdownHandler);
     return new JniReactor(nativePointer);
   }
 
@@ -52,15 +53,14 @@ public class JniReactor implements Reactor {
   }
 
   //if u refactor method names, you also need to change native part
-  static native long initNative(Class<InboxQueue> consumerClass, Class<JniReactiveSocket> closeClass);
+  static native long initNative(Class<? extends InboxQueue> inboxClass, ShutdownHandler ShutdownHandler);
 
   static native long createSubscriber(long nativePointer, InboxQueue inboxQueue);
 
   static native long createPublisher(long nativePointer, InboxQueue inboxQueue);
 
-  static void nativeException(){ //todo how to clean shutdown //todo callback
-  logger.error("exception in native");
-  }
+  // todo shutdown callback
+  // todo how to clean shutdown
 
   static native void close(long nativePointer); //todo other way round?
 
