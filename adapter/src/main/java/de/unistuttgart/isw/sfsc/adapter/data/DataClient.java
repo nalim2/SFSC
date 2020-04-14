@@ -5,7 +5,9 @@ import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnectionImplementation;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.concurrent.ExecutionException;
 
 public class DataClient implements NotThrowingAutoCloseable {
@@ -22,10 +24,12 @@ public class DataClient implements NotThrowingAutoCloseable {
     PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor);
     PubSubConnectionImplementation pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
     pubSubConnection.start();
-    pubSubSocketPair.subscriberSocketConnector().connect(adapterInformation.getCoreHost(), adapterInformation.getCoreDataPubPort());
-    pubSubSocketPair.publisherSocketConnector().connect(adapterInformation.getCoreHost(), adapterInformation.getCoreDataSubPort());
+    pubSubSocketPair.subscriberSocketConnector()
+        .connect(TransportProtocol.TCP, Connector.createAddress(adapterInformation.getCoreHost(), adapterInformation.getCoreDataPubPort()));
+    pubSubSocketPair.publisherSocketConnector()
+        .connect(TransportProtocol.TCP, Connector.createAddress(adapterInformation.getCoreHost(), adapterInformation.getCoreDataSubPort()));
 
-    return new DataClient(pubSubSocketPair, pubSubConnection );
+    return new DataClient(pubSubSocketPair, pubSubConnection);
   }
 
   public PubSubConnection pubSubConnection() {

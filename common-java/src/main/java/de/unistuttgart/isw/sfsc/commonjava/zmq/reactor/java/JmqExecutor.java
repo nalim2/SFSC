@@ -7,6 +7,8 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -35,7 +37,7 @@ class JmqExecutor implements NotThrowingAutoCloseable {
   private final BlockingQueue<Object> notificationQueue = new LinkedTransferQueue<>();
   private final Listeners<Runnable> shutdownListeners = new Listeners<>();
   private final AtomicBoolean closed = new AtomicBoolean();
-  private final String address = "inproc://" + UUID.randomUUID();
+  private final String address = Connector.createUri(TransportProtocol.INPROC, UUID.randomUUID().toString());
 
   private final ZContext zContext;
   private final NotificationInjector notificationInjector;

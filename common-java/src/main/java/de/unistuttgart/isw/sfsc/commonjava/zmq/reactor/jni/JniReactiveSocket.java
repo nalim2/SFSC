@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.jni;
 
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.AddressFactory;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.List;
 
 class JniReactiveSocket implements ReactiveSocket {
@@ -34,23 +34,23 @@ class JniReactiveSocket implements ReactiveSocket {
   public Connector getConnector() {
     return new Connector() {
       @Override
-      public void connect(String host, int port) {
-        JniReactiveSocket.connect(nativePointer, AddressFactory.createTcpAddress(host, port));
+      public void connect(TransportProtocol protocol, String address) {
+        JniReactiveSocket.connect(nativePointer, Connector.createUri(protocol , address));
       }
 
       @Override
-      public void disconnect(String host, int port) {
-        JniReactiveSocket.disconnect(nativePointer, AddressFactory.createTcpAddress(host, port));
+      public void disconnect(TransportProtocol protocol, String address) {
+        JniReactiveSocket.disconnect(nativePointer, Connector.createUri(protocol , address));
       }
 
       @Override
-      public void bind(int port) {
-        JniReactiveSocket.bind(nativePointer, AddressFactory.createTcpWildcardAddress(port));
+      public void bind(TransportProtocol protocol, String address) {
+        JniReactiveSocket.bind(nativePointer, Connector.createUri(protocol , address));
       }
 
       @Override
-      public void unbind(int port) {
-        JniReactiveSocket.unbind(nativePointer, AddressFactory.createTcpWildcardAddress(port));
+      public void unbind(TransportProtocol protocol, String address) {
+        JniReactiveSocket.unbind(nativePointer, Connector.createUri(protocol , address));
       }
     };
   }

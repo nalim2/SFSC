@@ -27,4 +27,8 @@ public class ReactorFactory {
   public static Reactor create(ContextConfiguration contextConfiguration) throws InterruptedException {
     return useNative ? JniReactor.create() : JmqReactor.create(contextConfiguration); //todo use in native
   }
+
+  public static boolean usesNative() {
+    return useNative;
+  }
 }

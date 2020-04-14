@@ -4,8 +4,10 @@ import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnectionImplementation;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.core.control.bootstrapping.BootstrapModule;
@@ -41,11 +43,13 @@ public class Control implements NotThrowingAutoCloseable {
     pubSubConnection.start();
   }
 
-  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration,Registry registry)
+  public static Control create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration, Registry registry)
       throws ExecutionException, InterruptedException {
     Control control = new Control(contextConfiguration, configuration, registry);
-    control.pubSubSocketPair.publisherSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT)));
-    control.pubSubSocketPair.subscriberSocketConnector().bind(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT)));
+    control.pubSubSocketPair.publisherSocketConnector()
+        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(Integer.parseInt(configuration.get(CoreOption.CONTROL_PUB_PORT))));
+    control.pubSubSocketPair.subscriberSocketConnector()
+        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(Integer.parseInt(configuration.get(CoreOption.CONTROL_SUB_PORT))));
     return control;
   }
 

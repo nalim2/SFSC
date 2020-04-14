@@ -10,7 +10,9 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.bootstrap.BootstrapMessage
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnectionImplementation;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -34,9 +36,11 @@ public class ControlClient implements NotThrowingAutoCloseable {
     PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor);
     PubSubConnectionImplementation pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
     pubSubConnection.start();
-    pubSubSocketPair.subscriberSocketConnector().connect(configuration.getCoreHost(), configuration.getCorePort());
+    pubSubSocketPair.subscriberSocketConnector()
+        .connect(TransportProtocol.TCP, Connector.createAddress(configuration.getCoreHost(), configuration.getCorePort()));
     BootstrapMessage bootstrapMessage = Bootstrapper.getBootstrapMessage(pubSubConnection);
-    pubSubSocketPair.publisherSocketConnector().connect(configuration.getCoreHost(), bootstrapMessage.getCoreSubscriptionPort());
+    pubSubSocketPair.publisherSocketConnector()
+        .connect(TransportProtocol.TCP, Connector.createAddress(configuration.getCoreHost(), bootstrapMessage.getCoreSubscriptionPort()));
 
     SessionManager sessionManager = SessionManager.create(pubSubConnection);
 

@@ -25,13 +25,28 @@ public interface ReactiveSocket extends NotThrowingAutoCloseable {
 
   interface Connector {
 
-    void connect(String host, int port);
+    String DELIMITER = "://";
+    String WILDCARD_HOST = "*";
 
-    void disconnect(String host, int port);
+    static String createAddress(String host, int port) {
+      return host + ":" + port;
+    }
 
-    void bind(int port);
+    static String createWildcardAddress(int port) {
+      return createAddress(WILDCARD_HOST, port);
+    }
 
-    void unbind(int port);
+    static String createUri(TransportProtocol protocol, String address) {
+      return protocol.asString() + DELIMITER + address;
+    }
+
+    void connect(TransportProtocol protocol, String address);
+
+    void disconnect(TransportProtocol protocol, String address);
+
+    void bind(TransportProtocol protocol, String address);
+
+    void unbind(TransportProtocol protocol, String address);
   }
 
   interface Settings {

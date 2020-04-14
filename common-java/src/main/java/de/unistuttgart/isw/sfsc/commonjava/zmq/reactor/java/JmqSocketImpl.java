@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.AddressFactory;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.List;
 import java.util.concurrent.Executor;
 import org.slf4j.Logger;
@@ -49,37 +49,33 @@ class JmqSocketImpl implements ReactiveSocket {
   public Connector getConnector() {
     return new Connector() {
       @Override
-      public void connect(String host, int port) {
+      public void connect(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          String address = AddressFactory.createTcpAddress(host, port);
-          socket.connect(address);
+          socket.connect(Connector.createUri(protocol , address));
           logger.debug("Connected socket {} to {}", socket, address);
         });
       }
 
       @Override
-      public void disconnect(String host, int port) {
+      public void disconnect(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          String address = AddressFactory.createTcpAddress(host, port);
-          socket.disconnect(address);
+          socket.disconnect(Connector.createUri(protocol , address));
           logger.debug("Disconnected socket {} from {}", socket, address);
         });
       }
 
       @Override
-      public void bind(int port) {
+      public void bind(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          String address = AddressFactory.createTcpWildcardAddress(port);
-          socket.bind(address);
+          socket.bind(Connector.createUri(protocol , address));
           logger.debug("Bound socket {} to {}", socket, address);
         });
       }
 
       @Override
-      public void unbind(int port) {
+      public void unbind(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          String address = AddressFactory.createTcpWildcardAddress(port);
-          socket.disconnect(address);
+          socket.disconnect(Connector.createUri(protocol , address));
           logger.debug("Unbound socket {} from {}", socket, address);
         });
       }
