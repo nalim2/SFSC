@@ -13,8 +13,8 @@ public class ReactorFactory {
   static {
     boolean useNativeTemp;
     try {
-      System.loadLibrary("zmqLoopLib");
-      System.loadLibrary("jniZmq");
+      System.loadLibrary("ZmqExecutorLib");
+      System.loadLibrary("JniZmq");
       useNativeTemp = true;
     } catch (UnsatisfiedLinkError e) {
       e.printStackTrace(); //todo
