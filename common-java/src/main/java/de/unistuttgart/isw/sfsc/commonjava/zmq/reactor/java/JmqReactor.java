@@ -31,7 +31,7 @@ public class JmqReactor implements Reactor {
     return executor.createPublisher().get(); //todo wait
   }
 
-//  @Override
+  @Override
   public Handle addShutdownListener(Runnable runnable) {
     return executor.addShutdownListener(runnable);
   }

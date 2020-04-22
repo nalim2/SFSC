@@ -13,15 +13,19 @@ public class JniReactor implements Reactor {
 
   private static final Logger logger = LoggerFactory.getLogger(JniReactor.class);
   final long nativePointer;
+  private final Listeners<Runnable> shutdownListeners;
   private final AtomicBoolean closed = new AtomicBoolean();
-  private final Listeners<Runnable> shutdownListeners = new Listeners<>();
 
-  public JniReactor(long nativePointer) {this.nativePointer = nativePointer;}
+  public JniReactor(long nativePointer, Listeners<Runnable> shutdownListeners) {
+    this.nativePointer = nativePointer;
+    this.shutdownListeners = shutdownListeners;
+  }
 
   public static Reactor create() { //todo config
-    ShutdownCallback shutdownCallback = new ShutdownCallback();
+    Listeners<Runnable> shutdownListeners = new Listeners<>();
+    ShutdownCallback shutdownCallback = () -> shutdownListeners.forEach(Runnable::run);
     long nativePointer = JniReactor.createNative(shutdownCallback);
-    return new JniReactor(nativePointer);
+    return new JniReactor(nativePointer, shutdownListeners);
   }
 
   public ReactiveSocket createSubscriber() {
@@ -42,6 +46,7 @@ public class JniReactor implements Reactor {
     return new JniReactiveSocket(nativeSocketPointer, inboxQueue);
   }
 
+  @Override
   public Handle addShutdownListener(Runnable runnable) {
     Runnable oneShotRunnable = new OneShotRunnable(runnable);
     Handle handle = shutdownListeners.add(oneShotRunnable);
