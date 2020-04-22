@@ -13,7 +13,6 @@ public class JniReactor implements Reactor {
 
   private static final Logger logger = LoggerFactory.getLogger(JniReactor.class);
   final long nativePointer;
-
   private final AtomicBoolean closed = new AtomicBoolean();
   private final Listeners<Runnable> shutdownListeners = new Listeners<>();
 
@@ -27,12 +26,18 @@ public class JniReactor implements Reactor {
 
   public ReactiveSocket createSubscriber() {
     InboxQueue inboxQueue = new InboxQueue();
+    if (closed.get()) {
+      throw new IllegalStateException("already closed");
+    }
     long nativeSocketPointer = JniReactor.createSubscriber(nativePointer, inboxQueue);
     return new JniReactiveSocket(nativeSocketPointer, inboxQueue);
   }
 
   public ReactiveSocket createPublisher() {
     InboxQueue inboxQueue = new InboxQueue();
+    if (closed.get()) {
+      throw new IllegalStateException("already closed");
+    }
     long nativeSocketPointer = JniReactor.createPublisher(nativePointer, inboxQueue);
     return new JniReactiveSocket(nativeSocketPointer, inboxQueue);
   }
@@ -49,6 +54,7 @@ public class JniReactor implements Reactor {
 
   @Override
   public void close() {
+    closed.set(true);
     JniReactor.close(nativePointer);
   }
 
@@ -59,9 +65,6 @@ public class JniReactor implements Reactor {
 
   static native long createPublisher(long nativePointer, InboxQueue inboxQueue);
 
-  // todo shutdown callback
-  // todo how to clean shutdown
-
-  static native void close(long nativePointer); //todo other way round?
+  static native void close(long nativePointer);
 
 }

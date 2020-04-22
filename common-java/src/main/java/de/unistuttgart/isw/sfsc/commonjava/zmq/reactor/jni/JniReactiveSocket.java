@@ -3,12 +3,14 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.jni;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class JniReactiveSocket implements ReactiveSocket {
 
   private static final byte[][] templateArray = {};
   private final long nativePointer;
   private final InboxQueue inboxQueue;
+  private final AtomicBoolean closed = new AtomicBoolean();
 
   JniReactiveSocket(long nativePointer, InboxQueue inboxQueue) {
     this.nativePointer = nativePointer;
@@ -25,7 +27,9 @@ class JniReactiveSocket implements ReactiveSocket {
     return new Outbox() {
       @Override
       public void add(List<byte[]> output) {
-        JniReactiveSocket.add(nativePointer, output.toArray(templateArray)); //todo make outbox take array dierctly to tune?
+        if (!closed.get()) {
+          JniReactiveSocket.add(nativePointer, output.toArray(templateArray)); //todo make outbox take array directly to tune?
+        }
       }
     };
   }
@@ -35,22 +39,30 @@ class JniReactiveSocket implements ReactiveSocket {
     return new Connector() {
       @Override
       public void connect(TransportProtocol protocol, String address) {
-        JniReactiveSocket.connect(nativePointer, Connector.createUri(protocol , address));
+        if (!closed.get()) {
+          JniReactiveSocket.connect(nativePointer, Connector.createUri(protocol, address));
+        }
       }
 
       @Override
       public void disconnect(TransportProtocol protocol, String address) {
-        JniReactiveSocket.disconnect(nativePointer, Connector.createUri(protocol , address));
+        if (!closed.get()) {
+          JniReactiveSocket.disconnect(nativePointer, Connector.createUri(protocol, address));
+        }
       }
 
       @Override
       public void bind(TransportProtocol protocol, String address) {
-        JniReactiveSocket.bind(nativePointer, Connector.createUri(protocol , address));
+        if (!closed.get()) {
+          JniReactiveSocket.bind(nativePointer, Connector.createUri(protocol, address));
+        }
       }
 
       @Override
       public void unbind(TransportProtocol protocol, String address) {
-        JniReactiveSocket.unbind(nativePointer, Connector.createUri(protocol , address));
+        if (!closed.get()) {
+          JniReactiveSocket.unbind(nativePointer, Connector.createUri(protocol, address));
+        }
       }
     };
   }
@@ -61,13 +73,16 @@ class JniReactiveSocket implements ReactiveSocket {
 
       @Override
       public void setXPubVerbose() {
-        JniReactiveSocket.setXPubVerbose(nativePointer);
+        if (!closed.get()) {
+          JniReactiveSocket.setXPubVerbose(nativePointer);
+        }
       }
     };
   }
 
   @Override
   public void close() {
+    closed.set(true);
     JniReactiveSocket.shutdownNative(nativePointer);
   }
 
