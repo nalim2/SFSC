@@ -1,4 +1,4 @@
-FROM openjdk:13-alpine
+FROM openjdk:14-alpine
 WORKDIR /app
 RUN apk add --no-cache tini
 COPY target/docker-core.jar .
