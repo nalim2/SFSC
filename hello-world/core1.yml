@@ -1,7 +1,7 @@
 version: "3"
 services:
   core1:
-    image: "docker-core:local"
+    image: "docker-core:dev"
     ports:
       - "1250:1250"
       - "1251:1251"

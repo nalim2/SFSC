@@ -12,6 +12,7 @@ import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
 import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import de.unistuttgart.isw.sfsc.core.control.bootstrapping.BootstrapModule;
 import de.unistuttgart.isw.sfsc.core.control.registry.RegistryModule;
+import de.unistuttgart.isw.sfsc.core.control.session.SessionConfiguration;
 import de.unistuttgart.isw.sfsc.core.control.session.SessionModule;
 import de.unistuttgart.isw.sfsc.core.hazelcast.registry.Registry;
 import java.util.UUID;
@@ -37,7 +38,13 @@ public class Control implements NotThrowingAutoCloseable {
     pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
 
     registryModule = RegistryModule.create(pubSubConnection, registry);
-    sessionModule = SessionModule.create(pubSubConnection, configuration, coreId);
+    sessionModule = SessionModule.create(pubSubConnection,
+        new SessionConfiguration(
+            coreId,
+            Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT)),
+            Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT))
+        ),
+        registryModule::deleteAdapterEntries);
     bootstrapModule = BootstrapModule.create(pubSubConnection, configuration);
 
     pubSubConnection.start();

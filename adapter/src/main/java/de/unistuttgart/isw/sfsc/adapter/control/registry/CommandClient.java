@@ -14,8 +14,7 @@ final class CommandClient implements NotThrowingAutoCloseable {
   private final SimpleClient simpleClient;
   private final int timeoutMs;
 
-  CommandClient(PubSubConnection pubSubConnection, ByteString serverTopic, ByteString clientTopic, int timeoutMs,
-      Executor executor) {
+  CommandClient(PubSubConnection pubSubConnection, ByteString serverTopic, ByteString clientTopic, int timeoutMs, Executor executor) {
     simpleClient = new SimpleClient(pubSubConnection, clientTopic, executor);
     this.serverTopic = serverTopic;
     this.timeoutMs = timeoutMs;
@@ -26,7 +25,8 @@ final class CommandClient implements NotThrowingAutoCloseable {
     simpleClient.send(serverTopic, command, consumer, timeoutMs, timeoutRunnable);
   }
 
-  void remove(ByteString entry,  String adapterId, Consumer<ByteString> consumer, Runnable timeoutRunnable) { //todo dont consume bytestring but commandreply
+  void remove(ByteString entry, String adapterId, Consumer<ByteString> consumer, Runnable timeoutRunnable) {
+    //todo dont consume bytestring but commandreply
     ByteString command = CommandRequest.newBuilder().setAdapterId(adapterId).setDelete(entry).build().toByteString();
     simpleClient.send(serverTopic, command, consumer, timeoutMs, timeoutRunnable);
   }

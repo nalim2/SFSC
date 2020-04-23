@@ -12,7 +12,7 @@ public interface SubscriptionTracker {
 
   Set<ByteString> getSubscriptions();
 
-  Handle addListener(Consumer<StoreEvent<ByteString>> listener);
+  Handle addListener(Consumer<StoreEvent<ByteString>> listener); //todo executor?
 
   Future<Void> addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Runnable runnable);
 

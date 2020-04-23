@@ -52,7 +52,6 @@ final class SfscPublisherImplementation implements SfscPublisher {
 
   @Override
   public void close() {
-    publisher.close();
     onClose.run();
   }
 }

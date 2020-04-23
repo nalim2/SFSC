@@ -10,26 +10,19 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.concurrent.ExecutionException;
 
-public class DataClient implements NotThrowingAutoCloseable {
+public class DataPlane implements NotThrowingAutoCloseable {
 
   private final PubSubSocketPair pubSubSocketPair;
   private final PubSubConnectionImplementation pubSubConnection;
 
-  DataClient(PubSubSocketPair pubSubSocketPair, PubSubConnectionImplementation pubSubConnection) {
-    this.pubSubSocketPair = pubSubSocketPair;
-    this.pubSubConnection = pubSubConnection;
-  }
-
-  public static DataClient create(Reactor reactor, AdapterInformation adapterInformation) throws ExecutionException, InterruptedException {
-    PubSubSocketPair pubSubSocketPair = PubSubSocketPair.create(reactor);
-    PubSubConnectionImplementation pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
+  public DataPlane(Reactor reactor, AdapterInformation adapterInformation) throws ExecutionException, InterruptedException {
+    pubSubSocketPair = PubSubSocketPair.create(reactor);
+    pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
     pubSubConnection.start();
     pubSubSocketPair.subscriberSocketConnector()
         .connect(TransportProtocol.TCP, Connector.createAddress(adapterInformation.getCoreHost(), adapterInformation.getCoreDataPubPort()));
     pubSubSocketPair.publisherSocketConnector()
         .connect(TransportProtocol.TCP, Connector.createAddress(adapterInformation.getCoreHost(), adapterInformation.getCoreDataSubPort()));
-
-    return new DataClient(pubSubSocketPair, pubSubConnection);
   }
 
   public PubSubConnection pubSubConnection() {

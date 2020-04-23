@@ -168,7 +168,7 @@
             <skipDockerInfo>true</skipDockerInfo>
             <contextDirectory>${project.basedir}</contextDirectory>
             <repository>${project.artifactId}</repository>
-            <tag>local</tag>
+            <tag>dev</tag>
           </configuration>
           <executions>
             <execution>

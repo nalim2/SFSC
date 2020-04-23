@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.adapter.control.registry;
+package de.unistuttgart.isw.sfsc.adapter.control;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command.CommandReply;

@@ -40,6 +40,5 @@ public final class BootstrapModule implements NotThrowingAutoCloseable {
   @Override
   public void close() {
     handle.close();
-    publisher.close();
   }
 }

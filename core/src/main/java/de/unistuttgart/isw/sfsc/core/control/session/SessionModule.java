@@ -1,38 +1,37 @@
 package de.unistuttgart.isw.sfsc.core.control.session;
 
-import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
+import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatModule;
+import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
-import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 
 public class SessionModule implements NotThrowingAutoCloseable {
 
-  private static final String SERVER_TOPIC = "SESSION_SERVER";
-  private static final int SESSION_THREAD_NUMBER = 1;
-
-  private static final Logger logger = LoggerFactory.getLogger(SessionServer.class);
-
-  private final ExecutorService executorService = Executors.unconfigurableExecutorService(
-      Executors.newFixedThreadPool(SESSION_THREAD_NUMBER, new ExceptionLoggingThreadFactory(getClass().getName(), logger)));
-  private final ByteString serverTopic = ByteString.copyFromUtf8(SERVER_TOPIC);
   private final SessionServer sessionServer;
+  private final ScheduledExecutorService executorService;
 
-  SessionModule(PubSubConnection pubSubConnection, Configuration<CoreOption> configuration, String coreId) {
-    sessionServer = new SessionServer(configuration, pubSubConnection, serverTopic, executorService, coreId);
+  SessionModule(SessionConfiguration config, PubSubConnection pubSubConnection, ScheduledExecutorService executorService, Listeners<Consumer<NewSessionEvent>> sessionListeners) {
+    sessionServer = new SessionServer(config, pubSubConnection, executorService, sessionListeners);
+    this.executorService = executorService;
   }
 
-  public static SessionModule create(PubSubConnection pubSubConnection, Configuration<CoreOption> configuration, String coreId) {
-    return new SessionModule(pubSubConnection, configuration, coreId);
+  public static SessionModule create(PubSubConnection pubSubConnection, SessionConfiguration config,
+      Consumer<String> onDead) {
+    ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    HeartbeatConfiguration heartbeatConfiguration = new HeartbeatConfiguration(config.getCoreId());
+    HeartbeatModule heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatConfiguration.toParameter());
+    Listeners<Consumer<NewSessionEvent>> sessionListeners = new Listeners<>();
+    sessionListeners.add(
+        (event) -> heartbeatModule.startSession(event.getAdapterId(), event.getHeartbeatAdapterTopic(), onDead));
+    return new SessionModule(config, pubSubConnection, executorService, sessionListeners);
   }
 
   @Override
   public void close() {
     sessionServer.close();
+    executorService.shutdownNow();
   }
 }

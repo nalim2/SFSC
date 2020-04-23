@@ -5,11 +5,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Hello;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Welcome;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleServer;
+import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
-import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,9 @@ class SessionServer implements NotThrowingAutoCloseable {
 
   private final SimpleServer simpleServer;
 
-  SessionServer(Configuration<CoreOption> configuration, PubSubConnection pubSubConnection, ByteString serverTopic, Executor executor,
-      String coreId) {
-    int dataPubPort = Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT));
-    int dataSubPort = Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT));
-    simpleServer = new SimpleServer(pubSubConnection, new SessionConsumer(dataPubPort, dataSubPort, coreId), serverTopic, executor);
+  SessionServer(SessionConfiguration config, PubSubConnection pubSubConnection, Executor executor,
+      Listeners<Consumer<NewSessionEvent>> sessionListeners) {
+    simpleServer = new SimpleServer(pubSubConnection, new SessionConsumer(sessionListeners, config), config.getSessionTopic(), executor);
   }
 
   @Override
@@ -34,26 +32,26 @@ class SessionServer implements NotThrowingAutoCloseable {
 
   static class SessionConsumer implements Function<ByteString, ByteString> {
 
-    private final int dataPubPort;
-    private final int dataSubPort;
-    private final String coreId;
+    private final Listeners<Consumer<NewSessionEvent>> sessionListeners;
+    private final SessionConfiguration config;
 
-    SessionConsumer(int dataPubPort, int dataSubPort, String coreId) {
-      this.dataPubPort = dataPubPort;
-      this.dataSubPort = dataSubPort;
-      this.coreId = coreId;
+    public SessionConsumer(Listeners<Consumer<NewSessionEvent>> sessionListeners, SessionConfiguration config) {
+      this.sessionListeners = sessionListeners;
+      this.config = config;
     }
-
 
     @Override
     public ByteString apply(ByteString byteString) {
       try {
         Hello hello = Hello.parseFrom(byteString);
+        String adapterId = hello.getAdapterId();
+        ByteString adapterHeartbeatTopic = hello.getHeartbeatTopic();
         logger.info("new session request from {}", hello.getAdapterId());
+        sessionListeners.forEach(consumer -> consumer.accept(new NewSessionEvent(adapterId, adapterHeartbeatTopic)));
         return Welcome.newBuilder()
-            .setDataPubPort(dataPubPort)
-            .setDataSubPort(dataSubPort)
-            .setCoreId(coreId)
+            .setDataPubPort(config.getPublishedDataPubPort())
+            .setDataSubPort(config.getPublishedDataSubPort())
+            .setCoreId(config.getCoreId())
             .build()
             .toByteString();
       } catch (InvalidProtocolBufferException e) {

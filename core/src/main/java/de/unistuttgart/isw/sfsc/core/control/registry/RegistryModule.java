@@ -26,6 +26,8 @@ public class RegistryModule implements NotThrowingAutoCloseable {
   private final ByteString commandServerTopic = ByteString.copyFromUtf8(COMMAND_SERVER_TOPIC);
   private final ByteString eventPublisherTopic = ByteString.copyFromUtf8(EVENT_PUBLISHER_TOPIC);
 
+  private final Registry registry;
+
   private final QueryServer queryServer;
   private final CommandServer commandServer;
   private final EventPublisher eventPublisher;
@@ -35,18 +37,21 @@ public class RegistryModule implements NotThrowingAutoCloseable {
     registry.addEventListener(eventPublisher::send);
     commandServer = new CommandServer(pubSubConnection, commandServerTopic, executorService, registry);
     queryServer = new QueryServer(pubSubConnection, queryServerTopic, executorService, registry);
+    this.registry = registry;
   }
 
-  public static RegistryModule create(PubSubConnection pubSubConnection,  Registry registry) {
+  public static RegistryModule create(PubSubConnection pubSubConnection, Registry registry) {
     return new RegistryModule(pubSubConnection, registry);
   }
 
+  public void deleteAdapterEntries(String adapterId) {
+    registry.deleteEntries(adapterId);
+  }
 
   @Override
   public void close() {
     queryServer.close();
     commandServer.close();
-    eventPublisher.close();
     executorService.shutdownNow();
   }
 }
