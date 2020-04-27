@@ -24,9 +24,10 @@ public class DefaultConfiguration {
   private final static String registryCommandTopic = "REGISTRY_COMMAND";
   private final static String registryPublisherTopic = "REGISTRY_EVENT";
 
+  private final String coreId = UUID.randomUUID().toString();
 
   public String getCoreId() {
-    return UUID.randomUUID().toString();
+    return coreId;
   }
 
   public String getHost() {

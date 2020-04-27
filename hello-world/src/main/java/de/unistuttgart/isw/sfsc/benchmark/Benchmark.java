@@ -1,13 +1,14 @@
 package de.unistuttgart.isw.sfsc.benchmark;
 
-import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
+import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.benchmark.evaluation.Evaluator;
 import de.unistuttgart.isw.sfsc.benchmark.io.SfscBenchmark;
 
 public class Benchmark {
 
-  private static final BootstrapConfiguration clientConfiguration = new BootstrapConfiguration("127.0.0.1", 1251);
-  private static final BootstrapConfiguration serverConfiguration = new BootstrapConfiguration("127.0.0.1", 1261);
+  private static final AdapterParameter clientConfiguration = new AdapterConfiguration().setCorePort(1251).toAdapterParameter();
+  private static final AdapterParameter serverConfiguration = new AdapterConfiguration().setCorePort(1261).toAdapterParameter();
 
   public static void main(String[] args) throws Exception {
 

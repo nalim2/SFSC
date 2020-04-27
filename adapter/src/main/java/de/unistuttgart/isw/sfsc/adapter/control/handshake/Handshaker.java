@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 
 public final class Handshaker {
 
-  public static Welcome handshake(HandshakerParameter params, PubSubConnection pubSubConnection, Executor executor, Hello handshakeMessage)
+  public static Welcome handshake(HandshakerParameter parameter, PubSubConnection pubSubConnection, Executor executor, Hello handshakeMessage)
       throws InterruptedException, ExecutionException, TimeoutException {
 
     FutureAdapter<ByteString, Welcome> future = new FutureAdapter<>(
@@ -21,12 +21,12 @@ public final class Handshaker {
         () -> {throw new TimeoutException();}
     );
 
-    try (SimpleClient simpleClient = new SimpleClient(pubSubConnection, params.getSessionLocalTopic(), executor)) {
-      pubSubConnection.subscriptionTracker().addOneShotSubscriptionListener(params.getSessionRemoteTopic(), () -> {})
-          .get(params.getTimeoutMs(), TimeUnit.MILLISECONDS);
-      simpleClient.send(params.getSessionRemoteTopic(), handshakeMessage.toByteString(), future::handleInput, params.getTimeoutMs(),
+    try (SimpleClient simpleClient = new SimpleClient(pubSubConnection, parameter.getSessionLocalTopic(), executor)) {
+      pubSubConnection.subscriptionTracker().addOneShotSubscriptionListener(parameter.getSessionRemoteTopic(), () -> {})
+          .get(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);
+      simpleClient.send(parameter.getSessionRemoteTopic(), handshakeMessage.toByteString(), future::handleInput, parameter.getTimeoutMs(),
           future::handleError);
-      return future.get(params.getTimeoutMs(), TimeUnit.MILLISECONDS);
+      return future.get(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);
     }
 
   }

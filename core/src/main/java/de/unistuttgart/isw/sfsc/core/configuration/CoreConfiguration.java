@@ -34,42 +34,42 @@ public class CoreConfiguration {
     return this;
   }
 
-  public CoreConfiguration setControlPubPort(int controlPubPort) {
+  public CoreConfiguration setControlPubPort(Integer controlPubPort) {
     this.controlPubPort = controlPubPort;
     return this;
   }
 
-  public CoreConfiguration setControlSubPort(int controlSubPort) {
+  public CoreConfiguration setControlSubPort(Integer controlSubPort) {
     this.controlSubPort = controlSubPort;
     return this;
   }
 
-  public CoreConfiguration setControlBackendPort(int controlBackendPort) {
+  public CoreConfiguration setControlBackendPort(Integer controlBackendPort) {
     this.controlBackendPort = controlBackendPort;
     return this;
   }
 
-  public CoreConfiguration setDataPubPort(int dataPubPort) {
+  public CoreConfiguration setDataPubPort(Integer dataPubPort) {
     this.dataPubPort = dataPubPort;
     return this;
   }
 
-  public CoreConfiguration setDataSubPort(int dataSubPort) {
+  public CoreConfiguration setDataSubPort(Integer dataSubPort) {
     this.dataSubPort = dataSubPort;
     return this;
   }
 
-  public CoreConfiguration setDataBackendPort(int dataBackendPort) {
+  public CoreConfiguration setDataBackendPort(Integer dataBackendPort) {
     this.dataBackendPort = dataBackendPort;
     return this;
   }
 
-  public CoreConfiguration setHeartbeatSendRateMs(int heartbeatSendRateMs) {
+  public CoreConfiguration setHeartbeatSendRateMs(Integer heartbeatSendRateMs) {
     this.heartbeatSendRateMs = heartbeatSendRateMs;
     return this;
   }
 
-  public CoreConfiguration setHeartbeatDeadlineIncomingMs(int heartbeatDeadlineIncomingMs) {
+  public CoreConfiguration setHeartbeatDeadlineIncomingMs(Integer heartbeatDeadlineIncomingMs) {
     this.heartbeatDeadlineIncomingMs = heartbeatDeadlineIncomingMs;
     return this;
   }

@@ -38,7 +38,7 @@ public class RegistryModule implements RegistryApi {
     registry.addNotificationListener(
         () -> queryClient.query(registry::getId, registry::handleQueryReply, () -> logger.warn("registry query timeout"))
     );
-    subscriber = new Subscriber(pubSubConnection, registry::handleQueryReply, parameter.getCoreEventPublisherTopic(), executor);
+    subscriber = new Subscriber(pubSubConnection, registry::handleQueryReply, parameter.getCoreEventTopic(), executor);
     executor.scheduleAtFixedRate(
         () -> queryClient.query(registry::getId, registry::handleQueryReply, () -> logger.warn("registry query timeout")),
         0, parameter.getPollingRateMs(), TimeUnit.MILLISECONDS);

@@ -2,25 +2,25 @@ package de.unistuttgart.isw.sfsc.adapter.control;
 
 import static de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector.createAddress;
 
+import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.adapter.AdapterInformation;
-import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
 import de.unistuttgart.isw.sfsc.adapter.control.bootstrapping.Bootstrapper;
-import de.unistuttgart.isw.sfsc.adapter.control.configuration.BootstrapperConfiguration;
-import de.unistuttgart.isw.sfsc.adapter.control.configuration.HandshakerConfiguration;
-import de.unistuttgart.isw.sfsc.adapter.control.configuration.HeartbeatConfiguration;
-import de.unistuttgart.isw.sfsc.adapter.control.configuration.RegistryConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.control.bootstrapping.BootstrapperParameter;
 import de.unistuttgart.isw.sfsc.adapter.control.handshake.Handshaker;
+import de.unistuttgart.isw.sfsc.adapter.control.handshake.HandshakerParameter;
 import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryModule;
+import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryParameter;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.bootstrap.BootstrapMessage;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Hello;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Welcome;
 import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatModule;
+import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatParameter;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnectionImplementation;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,32 +36,37 @@ public class ControlPlane implements NotThrowingAutoCloseable {
   private final RegistryModule registryModule;
   private final AdapterInformation adapterInformation;
 
-  public ControlPlane(Reactor reactor, BootstrapConfiguration configuration) throws ExecutionException, InterruptedException, TimeoutException {
-    String adapterId = UUID.randomUUID().toString();
-    BootstrapperConfiguration bootstrapperConfiguration = new BootstrapperConfiguration();
-    HandshakerConfiguration handshakerConfiguration = new HandshakerConfiguration(adapterId);
-    HeartbeatConfiguration heartbeatConfiguration = new HeartbeatConfiguration(adapterId);
-    RegistryConfiguration registryConfiguration = new RegistryConfiguration(adapterId);
+  public ControlPlane(Reactor reactor, AdapterParameter parameter) throws ExecutionException, InterruptedException, TimeoutException {
+
+    BootstrapperParameter bootstrapperParameter = new BootstrapperParameter(parameter.getBootstrapCoreTopic(), parameter.getControlTimeoutMs());
+    HandshakerParameter handshakerParameter = new HandshakerParameter(parameter.getHandshakeCoreTopic(), parameter.getHandshakeAdapterTopic(),
+        parameter.getControlTimeoutMs());
+    HeartbeatParameter heartbeatParameter = new HeartbeatParameter(parameter.getAdapterId(), parameter.getHeartbeatSendRateMs(),
+        parameter.getHeartbeatAdapterTopic(), parameter.getHeartbeatDeadlineIncomingMs());
+    RegistryParameter registryParameter = new RegistryParameter(parameter.getAdapterId(), parameter.getRegistryCoreQueryTopic(),
+        parameter.getRegistryCoreCommandTopic(), parameter.getRegistryCoreEventTopic(), parameter.getRegistryAdapterQueryTopic(),
+        parameter.getRegistryAdapterCommandTopic(), parameter.getControlTimeoutMs(), parameter.getRegistryPollingRateMs());
 
     pubSubSocketPair = PubSubSocketPair.create(reactor);
     pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
     pubSubConnection.start();
 
     pubSubSocketPair.subscriberSocketConnector()
-        .connect(TransportProtocol.TCP, createAddress(configuration.getCoreHost(), configuration.getCorePort())); //todo connection type
-    BootstrapMessage bootstrapMessage = Bootstrapper.bootstrap(bootstrapperConfiguration.toParameter(), pubSubConnection, executorService);
+        .connect(TransportProtocol.TCP, createAddress(parameter.getCoreHost(), parameter.getCorePort())); //todo connection type
+    BootstrapMessage bootstrapMessage = Bootstrapper.bootstrap(bootstrapperParameter, pubSubConnection, executorService);
     pubSubSocketPair.publisherSocketConnector()
-        .connect(TransportProtocol.TCP, createAddress(configuration.getCoreHost(), bootstrapMessage.getCoreSubscriptionPort()));//todo connection type
+        .connect(TransportProtocol.TCP, createAddress(parameter.getCoreHost(), bootstrapMessage.getCoreSubscriptionPort()));//todo connection type
 
-    Hello hello = Hello.newBuilder().setAdapterId(adapterId).setHeartbeatTopic(heartbeatConfiguration.getAdapterTopic()).build();
-    Welcome welcome = Handshaker.handshake(handshakerConfiguration.toParameter(), pubSubConnection, executorService, hello);
+    Hello hello = Hello.newBuilder().setAdapterId(heartbeatParameter.getOutgoingId()).setHeartbeatTopic(heartbeatParameter.getExpectedIncomingTopic()).build();
+    Welcome welcome = Handshaker.handshake(handshakerParameter, pubSubConnection, executorService, hello);
 
-    heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatConfiguration.toParameter());
-    heartbeatModule.startSession(welcome.getCoreId(), heartbeatConfiguration.getCoreTopic(), core -> System.out.println("Core died"));//todo
-    registryModule = RegistryModule.create(registryConfiguration.toParameter(), pubSubConnection, executorService);
+    heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatParameter);
+    ByteString heartbeatCoreTopic = ByteString.copyFromUtf8(parameter.getHeartbeatCoreTopic());
+    heartbeatModule.startSession(welcome.getCoreId(), heartbeatCoreTopic, core -> System.out.println("Core died"));//todo
+    registryModule = RegistryModule.create(registryParameter, pubSubConnection, executorService);
 
-    adapterInformation = new AdapterInformation(welcome.getCoreId(), adapterId,
-        configuration.getCoreHost(), configuration.getCorePort(), bootstrapMessage.getCoreSubscriptionPort(),
+    adapterInformation = new AdapterInformation(welcome.getCoreId(), parameter.getAdapterId(),
+        parameter.getCoreHost(), parameter.getCorePort(), bootstrapMessage.getCoreSubscriptionPort(),
         welcome.getDataPubPort(), welcome.getDataSubPort());
   }
 

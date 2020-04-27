@@ -45,8 +45,7 @@ public class Data implements NotThrowingAutoCloseable {
     frontendSubscriptionInbox.start();
   }
 
-  public static Data create(CoreParameter parameter)
-      throws ExecutionException, InterruptedException {
+  public static Data create(CoreParameter parameter) throws ExecutionException, InterruptedException {
     Data data = new Data(parameter);
     data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataPubPort()));
     data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataSubPort()));

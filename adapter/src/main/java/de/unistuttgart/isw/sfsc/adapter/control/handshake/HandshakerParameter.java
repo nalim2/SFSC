@@ -8,9 +8,9 @@ public class HandshakerParameter {
   private final ByteString sessionLocalTopic;
   private final int timeoutMs;
 
-  public HandshakerParameter(ByteString sessionRemoteTopic, ByteString sessionLocalTopic, int timeoutMs) {
-    this.sessionRemoteTopic = sessionRemoteTopic;
-    this.sessionLocalTopic = sessionLocalTopic;
+  public HandshakerParameter(String sessionRemoteTopic, String sessionLocalTopic, int timeoutMs) {
+    this.sessionRemoteTopic = ByteString.copyFromUtf8(sessionRemoteTopic);
+    this.sessionLocalTopic = ByteString.copyFromUtf8(sessionLocalTopic);
     this.timeoutMs = timeoutMs;
   }
 

@@ -4,7 +4,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
+import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
@@ -71,16 +72,16 @@ public class Plc4xDemo {
       Map.entry("UInteger", UINTEGER_IDENTIFIER)
   );
 
-  private static final BootstrapConfiguration bootstrapConfiguration1 = new BootstrapConfiguration("127.0.0.1", 1251);
-  private static final BootstrapConfiguration bootstrapConfiguration2 = new BootstrapConfiguration("127.0.0.1", 1261);
+  private static final AdapterParameter ADAPTER_CONFIGURATION_1 = new AdapterConfiguration().setCorePort(1251).toAdapterParameter();
+  private static final AdapterParameter ADAPTER_CONFIGURATION_2 = new AdapterConfiguration().setCorePort(1261).toAdapterParameter();
 
   public static void main(String[] args) throws ExecutionException, InterruptedException, PlcConnectionException, TimeoutException {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
 
     ByteString uuid = ByteString.copyFromUtf8(UUID.randomUUID().toString());
 
-    SfscServiceApi serverSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(bootstrapConfiguration1);
-    SfscServiceApi clientSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(bootstrapConfiguration2);
+    SfscServiceApi serverSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(ADAPTER_CONFIGURATION_1);
+    SfscServiceApi clientSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(ADAPTER_CONFIGURATION_2);
 
     Plc4XServer plc4XServer = new Plc4XServer(SERVER_URL);
 

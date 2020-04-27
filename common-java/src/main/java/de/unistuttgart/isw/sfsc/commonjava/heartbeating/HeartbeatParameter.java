@@ -9,9 +9,9 @@ public final class HeartbeatParameter {
   private final int sendRateMs;
   private final int heartbeatDeadlineIncomingMs;
 
-  public HeartbeatParameter(String outgoingId, int SendRateMs, ByteString incomingTopic, int heartbeatDeadlineIncomingMs) {
+  public HeartbeatParameter(String outgoingId, int SendRateMs, String incomingTopic, int heartbeatDeadlineIncomingMs) {
     this.outgoingId = outgoingId;
-    this.incomingTopic = incomingTopic;
+    this.incomingTopic = ByteString.copyFromUtf8(incomingTopic);
     this.sendRateMs = SendRateMs;
     this.heartbeatDeadlineIncomingMs = heartbeatDeadlineIncomingMs;
   }

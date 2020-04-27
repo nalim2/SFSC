@@ -4,7 +4,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
 import de.unistuttgart.isw.sfsc.benchmark.BenchmarkMessage;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -18,10 +18,10 @@ public class SfscBenchmark {
 
   private static final int lingerDurationMs = 10000;
 
-  private final BootstrapConfiguration serverConfiguration;
-  private final BootstrapConfiguration clientConfiguration;
+  private final AdapterParameter serverConfiguration;
+  private final AdapterParameter clientConfiguration;
 
-  public SfscBenchmark(BootstrapConfiguration clientConfiguration, BootstrapConfiguration serverConfiguration) {
+  public SfscBenchmark(AdapterParameter clientConfiguration, AdapterParameter serverConfiguration) {
     this.clientConfiguration = clientConfiguration;
     this.serverConfiguration = serverConfiguration;
   }

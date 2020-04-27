@@ -6,8 +6,8 @@ public class BootstrapperParameter {
   private final ByteString remoteTopic;
   private final int timeoutMs;
 
-  public BootstrapperParameter(ByteString remoteTopic, int timeoutMs) {
-    this.remoteTopic = remoteTopic;
+  public BootstrapperParameter(String remoteTopic, int timeoutMs) {
+    this.remoteTopic = ByteString.copyFromUtf8(remoteTopic);
     this.timeoutMs = timeoutMs;
   }
 

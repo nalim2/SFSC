@@ -2,7 +2,8 @@ package de.unistuttgart.isw.sfsc.example;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.adapter.BootstrapConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
+import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.util.SubscriptionAgent;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -14,13 +15,13 @@ public class HelloWorld {
   public static void main(String[] args) {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
 
-    BootstrapConfiguration bootstrapConfiguration1 = new BootstrapConfiguration("127.0.0.1", 1251);
-    BootstrapConfiguration bootstrapConfiguration2 = new BootstrapConfiguration("127.0.0.1", 1261);
+    AdapterParameter adapterParameter1 = new AdapterConfiguration().setCorePort(1251).toAdapterParameter();
+    AdapterParameter adapterParameter2 = new AdapterConfiguration().setCorePort(1261).toAdapterParameter();
 
     ExecutorService executor = Executors.newCachedThreadPool();
     CountDownLatch cdl = new CountDownLatch(2);
     new Thread(() -> {
-      try (Adapter adapter1 = Adapter.create(bootstrapConfiguration1)) {
+      try (Adapter adapter1 = Adapter.create(adapterParameter1)) {
        SubscriptionAgent.create(adapter1.dataConnection()).addSubscriber(ByteString.copyFromUtf8("adapter1"), new PrintingConsumer("adapter1"), executor);
 
         while (adapter1.dataConnection().subscriptionTracker().getSubscriptions().size() < 2){
@@ -37,7 +38,7 @@ public class HelloWorld {
     }).start();
 
     new Thread(() -> {
-      try (Adapter adapter2 = Adapter.create(bootstrapConfiguration2)) {
+      try (Adapter adapter2 = Adapter.create(adapterParameter2)) {
 
         SubscriptionAgent.create(adapter2.dataConnection()).addSubscriber(ByteString.copyFromUtf8("adapter2"), new PrintingConsumer("adapter2"), executor);
 
