@@ -1,7 +1,6 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import java.util.concurrent.ExecutionException;
@@ -11,9 +10,10 @@ public class JmqReactor implements Reactor {
 
   private final JmqExecutor executor;
 
-  public static JmqReactor create(ContextConfiguration contextConfiguration) throws InterruptedException {
+  public static JmqReactor create() throws InterruptedException {
     ZContext zContext = new ZContext();
-    contextConfiguration.configure(zContext);
+    zContext.setRcvHWM(0);
+    zContext.setSndHWM(0);
     return new JmqReactor(zContext);
   }
 

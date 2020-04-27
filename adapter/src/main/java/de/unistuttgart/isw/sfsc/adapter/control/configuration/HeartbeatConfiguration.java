@@ -5,7 +5,7 @@ import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatParameter;
 
 public final class HeartbeatConfiguration {
 
-  private static final String HEARTBEAT_CORE_TOPIC = "HEARTBEAT_SERVER";
+  private static final String HEARTBEAT_CORE_TOPIC = "HEARTBEAT";
   private static final String HEARTBEAT_ADAPTER_TOPIC_PREFIX = "HEARTBEAT_CLIENT_";
   private static final int HEARTBEAT_SEND_RATE_MS = 500;
   private static final int EXPECTED_HEARTBEAT_RATE_MS = 2000;

@@ -11,11 +11,10 @@ services:
       - "5702:5702"
     environment:
       - HOST=127.0.0.1
-      - BACKEND_PORT=1260
+      - BACKEND_HOST=core2
       - CONTROL_PUB_PORT=1261
       - CONTROL_SUB_PORT=1262
+      - CONTROL_BACKEND_PORT=5702
       - DATA_PUB_PORT=1263
       - DATA_SUB_PORT=1264
-
-      - BACKEND_HOST=core2
-      - HAZELCAST_PORT=5702
+      - DATA_BACKEND_PORT=1260

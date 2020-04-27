@@ -24,16 +24,16 @@ public final class HeartbeatManager {
   private final PubSubConnection pubSubConnection;
   private final ScheduledExecutorService scheduledExecutorService;
   private final Map<String, DeadMansSwitch> sessionMap = new ConcurrentHashMap<>();
-  private final HeartbeatParameter heartbeatParameter;
+  private final HeartbeatParameter params;
 
-  HeartbeatManager(PubSubConnection pubSubConnection, ScheduledExecutorService scheduledExecutorService, HeartbeatParameter heartbeatParameter) {
+  HeartbeatManager(PubSubConnection pubSubConnection, ScheduledExecutorService scheduledExecutorService, HeartbeatParameter params) {
     this.pubSubConnection = pubSubConnection;
     this.scheduledExecutorService = scheduledExecutorService;
-    this.heartbeatParameter = heartbeatParameter;
+    this.params = params;
   }
 
   void startSession(String remoteId, ByteString remoteTopic, Consumer<String> onDeceive) {
-    final int expectedHeartbeatRate = heartbeatParameter.getExpectedIncomingRateMs();
+    final int expectedHeartbeatRate = params.getHeartbeatDeadlineIncomingMs();
     DeadMansSwitch deadMansSwitch = DeadMansSwitch.create(scheduledExecutorService, expectedHeartbeatRate);
     Handle heartbeat = startHeartbeat(remoteTopic);
     sessionMap.put(remoteId, deadMansSwitch);
@@ -62,11 +62,11 @@ public final class HeartbeatManager {
   }
 
   Handle startHeartbeat(ByteString remoteTopic) {
-    final String heartbeatId = heartbeatParameter.getOutgoingId();
+    final String heartbeatId = params.getOutgoingId();
     Publisher publisher = new Publisher(pubSubConnection);
     Message message = HeartbeatMessage.newBuilder().setId(heartbeatId).build();
     Future<?> future = scheduledExecutorService.scheduleAtFixedRate(() ->
-        publisher.publish(remoteTopic, message), 0, heartbeatParameter.getSendRateMs(), TimeUnit.MILLISECONDS);
+        publisher.publish(remoteTopic, message), 0, params.getSendRateMs(), TimeUnit.MILLISECONDS);
     return () -> future.cancel(true);
   }
 }

@@ -26,39 +26,39 @@ public class RegistryModule implements RegistryApi {
   private final CommandClient commandClient;
   private final QueryClient queryClient;
   private final Subscriber subscriber;
-  private final RegistryConfiguration config;
+  private final RegistryParameter params;
 
-  RegistryModule(RegistryConfiguration config, PubSubConnection pubSubConnection, ScheduledExecutorService executor) {
-    this.config = config;
+  RegistryModule(RegistryParameter parameter, PubSubConnection pubSubConnection, ScheduledExecutorService executor) {
+    this.params = parameter;
     registry = new Registry(executor);
-    queryClient = new QueryClient(pubSubConnection, config.getRegistryCoreQueryTopic(), config.getRegistryAdapterQueryTopic(), config.getTimeoutMs(),
+    queryClient = new QueryClient(pubSubConnection, parameter.getCoreQueryTopic(), parameter.getAdapterQueryTopic(), parameter.getTimeoutMs(),
         executor);
-    commandClient = new CommandClient(pubSubConnection, config.getRegistryCoreCommandTopic(), config.getRegistryAdapterCommandTopic(),
-        config.getTimeoutMs(), executor);
+    commandClient = new CommandClient(pubSubConnection, parameter.getCoreCommandTopic(), parameter.getAdapterCommandTopic(),
+        parameter.getTimeoutMs(), executor);
     registry.addNotificationListener(
         () -> queryClient.query(registry::getId, registry::handleQueryReply, () -> logger.warn("registry query timeout"))
     );
-    subscriber = new Subscriber(pubSubConnection, registry::handleQueryReply, config.getRegistryCoreEventPublisherTopic(), executor);
+    subscriber = new Subscriber(pubSubConnection, registry::handleQueryReply, parameter.getCoreEventPublisherTopic(), executor);
     executor.scheduleAtFixedRate(
         () -> queryClient.query(registry::getId, registry::handleQueryReply, () -> logger.warn("registry query timeout")),
-        0, config.getPollingRateMs(), TimeUnit.MILLISECONDS);
+        0, parameter.getPollingRateMs(), TimeUnit.MILLISECONDS);
   }
 
-  public static RegistryModule create(RegistryConfiguration config, PubSubConnection pubSubConnection, ScheduledExecutorService executor) {
-    return new RegistryModule(config, pubSubConnection, executor);
+  public static RegistryModule create(RegistryParameter parameter, PubSubConnection pubSubConnection, ScheduledExecutorService executor) {
+    return new RegistryModule(parameter, pubSubConnection, executor);
   }
 
   @Override
   public Future<CommandReply> create(ByteString entry) {
     FutureAdapter<ByteString, CommandReply> future = new FutureAdapter<>(CommandReply::parseFrom, () -> {throw new TimeoutException();});
-    commandClient.create(entry, config.getAdapterId(), future::handleInput, future::handleError);
+    commandClient.create(entry, params.getAdapterId(), future::handleInput, future::handleError);
     return future;
   }
 
   @Override
   public Future<CommandReply> remove(ByteString entry) {
     FutureAdapter<ByteString, CommandReply> future = new FutureAdapter<>(CommandReply::parseFrom, () -> {throw new TimeoutException();});
-    commandClient.remove(entry, config.getAdapterId(), future::handleInput, future::handleError);
+    commandClient.remove(entry, params.getAdapterId(), future::handleInput, future::handleError);
     return future;
   }
 

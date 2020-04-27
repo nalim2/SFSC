@@ -20,9 +20,9 @@ class SessionServer implements NotThrowingAutoCloseable {
 
   private final SimpleServer simpleServer;
 
-  SessionServer(SessionConfiguration config, PubSubConnection pubSubConnection, Executor executor,
+  SessionServer(SessionParameter parameter, PubSubConnection pubSubConnection, Executor executor,
       Listeners<Consumer<NewSessionEvent>> sessionListeners) {
-    simpleServer = new SimpleServer(pubSubConnection, new SessionConsumer(sessionListeners, config), config.getSessionTopic(), executor);
+    simpleServer = new SimpleServer(pubSubConnection, new SessionConsumer(sessionListeners, parameter), parameter.getSessionTopic(), executor);
   }
 
   @Override
@@ -33,11 +33,11 @@ class SessionServer implements NotThrowingAutoCloseable {
   static class SessionConsumer implements Function<ByteString, ByteString> {
 
     private final Listeners<Consumer<NewSessionEvent>> sessionListeners;
-    private final SessionConfiguration config;
+    private final SessionParameter parameter;
 
-    public SessionConsumer(Listeners<Consumer<NewSessionEvent>> sessionListeners, SessionConfiguration config) {
+    public SessionConsumer(Listeners<Consumer<NewSessionEvent>> sessionListeners, SessionParameter parameter) {
       this.sessionListeners = sessionListeners;
-      this.config = config;
+      this.parameter = parameter;
     }
 
     @Override
@@ -49,9 +49,9 @@ class SessionServer implements NotThrowingAutoCloseable {
         logger.info("new session request from {}", hello.getAdapterId());
         sessionListeners.forEach(consumer -> consumer.accept(new NewSessionEvent(adapterId, adapterHeartbeatTopic)));
         return Welcome.newBuilder()
-            .setDataPubPort(config.getPublishedDataPubPort())
-            .setDataSubPort(config.getPublishedDataSubPort())
-            .setCoreId(config.getCoreId())
+            .setDataPubPort(parameter.getDataPubPort())
+            .setDataSubPort(parameter.getDataSubPort())
+            .setCoreId(parameter.getCoreId())
             .build()
             .toByteString();
       } catch (InvalidProtocolBufferException e) {

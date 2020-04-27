@@ -5,7 +5,7 @@ import de.unistuttgart.isw.sfsc.adapter.control.handshake.HandshakerParameter;
 
 public final class HandshakerConfiguration {
 
-  private static final String SESSION_CORE_TOPIC = "SESSION_SERVER";
+  private static final String SESSION_CORE_TOPIC = "SESSION";
   private static final String SESSION_ADAPTER_TOPIC_PREFIX = "SESSION_CLIENT_";
   private static final int TIMEOUT_MS = 1000;
 

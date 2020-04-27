@@ -7,13 +7,13 @@ public final class HeartbeatParameter {
   private final String outgoingId;
   private final ByteString incomingTopic;
   private final int sendRateMs;
-  private final int expectedIncomingRateMs;
+  private final int heartbeatDeadlineIncomingMs;
 
-  public HeartbeatParameter(String outgoingId, int SendRateMs, ByteString incomingTopic, int expectedIncomingRateMs) {
+  public HeartbeatParameter(String outgoingId, int SendRateMs, ByteString incomingTopic, int heartbeatDeadlineIncomingMs) {
     this.outgoingId = outgoingId;
     this.incomingTopic = incomingTopic;
     this.sendRateMs = SendRateMs;
-    this.expectedIncomingRateMs = expectedIncomingRateMs;
+    this.heartbeatDeadlineIncomingMs = heartbeatDeadlineIncomingMs;
   }
 
   public String getOutgoingId() {
@@ -28,7 +28,7 @@ public final class HeartbeatParameter {
     return incomingTopic;
   }
 
-  public int getExpectedIncomingRateMs() {
-    return expectedIncomingRateMs;
+  public int getHeartbeatDeadlineIncomingMs() {
+    return heartbeatDeadlineIncomingMs;
   }
 }

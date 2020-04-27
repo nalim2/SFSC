@@ -1,12 +1,13 @@
-package de.unistuttgart.isw.sfsc.adapter.control.registry;
+package de.unistuttgart.isw.sfsc.adapter.control.configuration;
 
 import com.google.protobuf.ByteString;
+import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryParameter;
 
 public final class RegistryConfiguration {
 
-  private static final String REGISTRY_CORE_QUERY_TOPIC = "REGISTRY_QUERY_SERVER";
-  private static final String REGISTRY_CORE_COMMAND_TOPIC = "REGISTRY_COMMAND_SERVER";
-  private static final String REGISTRY_CORE_EVENT_PUBLISHER_TOPIC = "REGISTRY_EVENT_PUBLISHER";
+  private static final String REGISTRY_CORE_QUERY_TOPIC = "REGISTRY_QUERY";
+  private static final String REGISTRY_CORE_COMMAND_TOPIC = "REGISTRY_COMMAND";
+  private static final String REGISTRY_CORE_EVENT_PUBLISHER_TOPIC = "REGISTRY_EVENT";
   private static final String REGISTRY_ADAPTER_QUERY_TOPIC_PREFIX = "REGISTRY_QUERY_CLIENT_";
   private static final String REGISTRY_ADAPTER_COMMAND_TOPIC_PREFIX = "REGISTRY_SERVER_CLIENT_";
   private static final int POLLING_RATE_MS = 1000;
@@ -62,5 +63,10 @@ public final class RegistryConfiguration {
 
   public int getPollingRateMs() {
     return pollingRateMs;
+  }
+
+  public RegistryParameter toParameter() {
+    return new RegistryParameter(adapterId, registryCoreQueryTopic, registryCoreCommandTopic, registryCoreEventPublisherTopic,
+        registryAdapterQueryTopic, registryAdapterCommandTopic, timeoutMs, pollingRateMs);
   }
 }

@@ -5,7 +5,6 @@ import de.unistuttgart.isw.sfsc.adapter.control.RegistryApi;
 import de.unistuttgart.isw.sfsc.adapter.data.DataPlane;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
 import java.util.concurrent.ExecutionException;
@@ -24,14 +23,9 @@ public class Adapter implements NotThrowingAutoCloseable {
   }
 
   public static Adapter create(BootstrapConfiguration configuration) throws InterruptedException, ExecutionException, TimeoutException {
-    ContextConfiguration contextConfiguration = context -> {
-      context.setRcvHWM(0);
-      context.setSndHWM(0);
-    };
-    Reactor reactor = ReactorFactory.create(contextConfiguration);
+    Reactor reactor = ReactorFactory.create();
     ControlPlane controlPlane = new ControlPlane(reactor, configuration);
     DataPlane dataPlane = new DataPlane(reactor, controlPlane.adapterInformation());
-
     return new Adapter(reactor, controlPlane, dataPlane);
   }
 

@@ -8,8 +8,8 @@ import de.unistuttgart.isw.sfsc.adapter.control.bootstrapping.Bootstrapper;
 import de.unistuttgart.isw.sfsc.adapter.control.configuration.BootstrapperConfiguration;
 import de.unistuttgart.isw.sfsc.adapter.control.configuration.HandshakerConfiguration;
 import de.unistuttgart.isw.sfsc.adapter.control.configuration.HeartbeatConfiguration;
+import de.unistuttgart.isw.sfsc.adapter.control.configuration.RegistryConfiguration;
 import de.unistuttgart.isw.sfsc.adapter.control.handshake.Handshaker;
-import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryConfiguration;
 import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryModule;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.bootstrap.BootstrapMessage;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Hello;
@@ -57,8 +57,8 @@ public class ControlPlane implements NotThrowingAutoCloseable {
     Welcome welcome = Handshaker.handshake(handshakerConfiguration.toParameter(), pubSubConnection, executorService, hello);
 
     heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatConfiguration.toParameter());
-    heartbeatModule.startSession(welcome.getCoreId(), heartbeatConfiguration.getCoreTopic(), (core)-> System.out.println("Core died"));//todo
-    registryModule = RegistryModule.create(registryConfiguration, pubSubConnection, executorService);
+    heartbeatModule.startSession(welcome.getCoreId(), heartbeatConfiguration.getCoreTopic(), core -> System.out.println("Core died"));//todo
+    registryModule = RegistryModule.create(registryConfiguration.toParameter(), pubSubConnection, executorService);
 
     adapterInformation = new AdapterInformation(welcome.getCoreId(), adapterId,
         configuration.getCoreHost(), configuration.getCorePort(), bootstrapMessage.getCoreSubscriptionPort(),

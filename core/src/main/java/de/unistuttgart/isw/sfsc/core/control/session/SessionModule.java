@@ -13,20 +13,20 @@ public class SessionModule implements NotThrowingAutoCloseable {
   private final SessionServer sessionServer;
   private final ScheduledExecutorService executorService;
 
-  SessionModule(SessionConfiguration config, PubSubConnection pubSubConnection, ScheduledExecutorService executorService, Listeners<Consumer<NewSessionEvent>> sessionListeners) {
-    sessionServer = new SessionServer(config, pubSubConnection, executorService, sessionListeners);
+  SessionModule(SessionParameter parameter, PubSubConnection pubSubConnection, ScheduledExecutorService executorService,
+      Listeners<Consumer<NewSessionEvent>> sessionListeners) {
+    sessionServer = new SessionServer(parameter, pubSubConnection, executorService, sessionListeners);
     this.executorService = executorService;
   }
 
-  public static SessionModule create(PubSubConnection pubSubConnection, SessionConfiguration config,
-      Consumer<String> onDead) {
+  public static SessionModule create(PubSubConnection pubSubConnection, SessionParameter parameter, Consumer<String> onDead) {
     ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    HeartbeatConfiguration heartbeatConfiguration = new HeartbeatConfiguration(config.getCoreId());
-    HeartbeatModule heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatConfiguration.toParameter());
+    parameter.heartbeatParameter();
+    HeartbeatModule heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, parameter.heartbeatParameter());
     Listeners<Consumer<NewSessionEvent>> sessionListeners = new Listeners<>();
     sessionListeners.add(
         (event) -> heartbeatModule.startSession(event.getAdapterId(), event.getHeartbeatAdapterTopic(), onDead));
-    return new SessionModule(config, pubSubConnection, executorService, sessionListeners);
+    return new SessionModule(parameter, pubSubConnection, executorService, sessionListeners);
   }
 
   @Override

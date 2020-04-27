@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 public final class Bootstrapper {
 
-  public static BootstrapMessage bootstrap(BootstrapperParameter parameter, PubSubConnection pubSubConnection, Executor executor)
+  public static BootstrapMessage bootstrap(BootstrapperParameter params, PubSubConnection pubSubConnection, Executor executor)
       throws InterruptedException, ExecutionException, TimeoutException {
 
     FutureAdapter<ByteString, BootstrapMessage> futureAdapter = new FutureAdapter<>(
@@ -20,8 +20,8 @@ public final class Bootstrapper {
         () -> {throw new TimeoutException();}
     );
 
-    try (Subscriber ignored = new Subscriber(pubSubConnection, futureAdapter::handleInput, parameter.getRemoteTopic(), executor)) {
-      return futureAdapter.get(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);
+    try (Subscriber ignored = new Subscriber(pubSubConnection, futureAdapter::handleInput, params.getRemoteTopic(), executor)) {
+      return futureAdapter.get(params.getTimeoutMs(), TimeUnit.MILLISECONDS);
     }
   }
 

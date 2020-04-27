@@ -3,29 +3,27 @@ package de.unistuttgart.isw.sfsc.core.data;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.forwarder.ForwardingInbox;
-import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ContextConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
-import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
-import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
+import de.unistuttgart.isw.sfsc.core.CoreParameter;
 import java.util.concurrent.ExecutionException;
 
 public class Data implements NotThrowingAutoCloseable {
 
   private final PubSubSocketPair frontend;
   private final PubSubSocketPair backend;
-  private final Configuration<CoreOption> configuration;
+  private final CoreParameter parameter;
   private final ForwardingInbox backendDataInbox;
   private final ForwardingInbox backendSubscriptionInbox;
   private final ForwardingInbox frontendDataInbox;
   private final ForwardingInbox frontendSubscriptionInbox;
   private final Reactor reactor;
 
-  Data(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration) throws ExecutionException, InterruptedException {
-    this.configuration = configuration;
-    reactor = ReactorFactory.create(contextConfiguration);
+  Data(CoreParameter parameter) throws ExecutionException, InterruptedException {
+    this.parameter = parameter;
+    reactor = ReactorFactory.create();
     frontend = PubSubSocketPair.create(reactor);
     backend = PubSubSocketPair.create(reactor);
 
@@ -47,26 +45,23 @@ public class Data implements NotThrowingAutoCloseable {
     frontendSubscriptionInbox.start();
   }
 
-  public static Data create(ContextConfiguration contextConfiguration, Configuration<CoreOption> configuration)
+  public static Data create(CoreParameter parameter)
       throws ExecutionException, InterruptedException {
-    Data data = new Data(contextConfiguration, configuration);
-    data.frontend.publisherSocketConnector()
-        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(Integer.parseInt(configuration.get(CoreOption.DATA_PUB_PORT))));
-    data.frontend.subscriberSocketConnector()
-        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(Integer.parseInt(configuration.get(CoreOption.DATA_SUB_PORT))));
-    data.backend.subscriberSocketConnector()
-        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(Integer.parseInt(configuration.get(CoreOption.BACKEND_PORT))));
+    Data data = new Data(parameter);
+    data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataPubPort()));
+    data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataSubPort()));
+    data.backend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataBackendPort()));
     return data;
   }
 
   public void connectBackend(String host, int port) {
-    if (!configuration.get(CoreOption.HOST).equals(host) || !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
+    if (!parameter.getBackendHost().equals(host) || parameter.getDataBackendPort() != port) {
       backend.publisherSocketConnector().connect(TransportProtocol.TCP, Connector.createAddress(host, port));
     }
   }
 
   public void disconnectBackend(String host, int port) {
-    if (!configuration.get(CoreOption.HOST).equals(host) || !configuration.get(CoreOption.BACKEND_PORT).equals(String.valueOf(port))) {
+    if (!parameter.getBackendHost().equals(host) || parameter.getDataBackendPort() != port) {
       backend.publisherSocketConnector().disconnect(TransportProtocol.TCP, Connector.createAddress(host, port));
     }
   }
