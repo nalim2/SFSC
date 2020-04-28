@@ -1,14 +1,13 @@
 package de.unistuttgart.isw.sfsc.benchmark;
 
-import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
 import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.benchmark.evaluation.Evaluator;
 import de.unistuttgart.isw.sfsc.benchmark.io.SfscBenchmark;
 
 public class Benchmark {
 
-  private static final AdapterParameter clientConfiguration = new AdapterConfiguration().setCorePort(1251).toAdapterParameter();
-  private static final AdapterParameter serverConfiguration = new AdapterConfiguration().setCorePort(1261).toAdapterParameter();
+  private static final AdapterConfiguration clientConfiguration = new AdapterConfiguration().setCorePort(1251);
+  private static final AdapterConfiguration serverConfiguration = new AdapterConfiguration().setCorePort(1261);
 
   public static void main(String[] args) throws Exception {
 

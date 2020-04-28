@@ -1,5 +1,6 @@
 package de.unistuttgart.isw.sfsc.adapter;
 
+import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.adapter.control.ControlPlane;
 import de.unistuttgart.isw.sfsc.adapter.control.RegistryApi;
 import de.unistuttgart.isw.sfsc.adapter.data.DataPlane;
@@ -22,7 +23,12 @@ public class Adapter implements NotThrowingAutoCloseable {
     this.dataPlane = dataPlane;
   }
 
-  public static Adapter create(AdapterParameter parameter) throws InterruptedException, ExecutionException, TimeoutException {
+  public static Adapter create() throws InterruptedException, ExecutionException, TimeoutException {
+    return create(new AdapterConfiguration());
+  }
+
+  public static Adapter create(AdapterConfiguration configuration) throws InterruptedException, ExecutionException, TimeoutException {
+    AdapterParameter parameter = configuration.toAdapterParameter();
     Reactor reactor = ReactorFactory.create();
     ControlPlane controlPlane = new ControlPlane(reactor, parameter);
     DataPlane dataPlane = new DataPlane(reactor, controlPlane.adapterInformation());
