@@ -28,7 +28,10 @@ public class Adapter implements NotThrowingAutoCloseable {
   }
 
   public static Adapter create(AdapterConfiguration configuration) throws InterruptedException, ExecutionException, TimeoutException {
-    AdapterParameter parameter = configuration.toAdapterParameter();
+    return create(configuration.toAdapterParameter());
+  }
+
+  static Adapter create(AdapterParameter parameter) throws InterruptedException, ExecutionException, TimeoutException {
     Reactor reactor = ReactorFactory.create();
     ControlPlane controlPlane = new ControlPlane(reactor, parameter);
     DataPlane dataPlane = new DataPlane(reactor, controlPlane.adapterInformation());

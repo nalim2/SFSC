@@ -25,7 +25,10 @@ public class Core implements NotThrowingAutoCloseable {
   }
 
   public static Core start(CoreConfiguration configuration) throws ExecutionException, InterruptedException {
-    CoreParameter parameter = configuration.createCoreParameter();
+    return start(configuration.createCoreParameter());
+  }
+
+  static Core start(CoreParameter parameter) throws ExecutionException, InterruptedException {
     Data data = Data.create(parameter);
     HazelcastNode hazelcastNode = HazelcastNode.create(data::connectBackend, data::disconnectBackend, parameter);
     Registry registry = new Registry(hazelcastNode.getReplicatedMap(), parameter.getCoreId());
