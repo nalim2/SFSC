@@ -21,3 +21,6 @@ out/
 
 # Target Folder
 target/
+
+# Tmp Folder
+tmp/
