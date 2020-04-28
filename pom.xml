@@ -87,6 +87,11 @@
         <artifactId>adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.github.nalim2</groupId>
+        <artifactId>framework</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
