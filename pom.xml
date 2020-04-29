@@ -52,6 +52,7 @@
   <description>Shop Floor Service Combiner</description>
   <url>https://www.isw.uni-stuttgart.de/forschung/steuerungsarchitekturen/SFSC/</url>
 
+
   <modules>
     <module>proto</module>
     <module>common-java</module>
