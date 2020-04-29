@@ -4,6 +4,7 @@ jdk:
 ## export GPG details
 
 before_install:
+      if: branch = master
     - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
     - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
     - echo testtestset
