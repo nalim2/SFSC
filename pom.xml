@@ -9,7 +9,7 @@
   <version>${revision}</version>
   <packaging>pom</packaging>
 
-  <description>Shop Floor Service Combiner</description>
+  <description>Shop Floor Service Connector</description>
 
   <modules>
     <module>proto</module>

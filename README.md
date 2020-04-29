@@ -1,1 +1,1 @@
-# Smart Service Framework
+# Shop Floor Service Connector
