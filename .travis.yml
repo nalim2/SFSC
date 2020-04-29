@@ -2,11 +2,14 @@ language: java
 jdk:
 - openjdk12
 ## export GPG details
-
+stages:
+  - compile
+  - test
+  - name: deploy
+    if: branch = master
+    
 before_install:
-    - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-    - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
-    - echo testtestset
+    
 
 install:
   - wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protobuf-all-3.11.4.tar.gz
@@ -15,7 +18,19 @@ install:
   - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
   
   
-## Build and release to maven central
-script:
-##    - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
+
+
+jobs:
+  include:
+    - script:
+    ## Build and release to maven central
+    - stage: deploy
+       -script:
+          - skip
+          - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+          - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+          - echo testtestset1
+          - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
+
+
 
