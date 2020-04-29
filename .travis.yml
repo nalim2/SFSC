@@ -1,4 +1,6 @@
 language: java
+jdk:
+- openjdk12
 install:
   - wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protobuf-all-3.11.4.tar.gz
   - tar -xzvf protobuf-all-3.11.4.tar.gz
