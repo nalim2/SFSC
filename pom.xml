@@ -9,7 +9,48 @@
   <version>${revision}</version>
   <packaging>pom</packaging>
 
-  <description>Shop Floor Service Connector</description>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/nalim2/SFSC.git</connection>
+    <url>https://github.com/nalim2/SFSC</url>
+    <tag>v0.1.3</tag>
+  </scm>
+
+  <distributionManagement>
+    <site>
+      <id>api.wiki</id>
+      <url>https://github.com/nalim2/SFSC/wiki</url>
+    </site>
+
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+
+  </distributionManagement>
+
+  <developers>
+    <developer>
+      <name>Matthias Milan Strljic</name>
+      <email>matthias.strljic@isw.uni-stuttgart.de</email>
+      <organizationUrl>https://www.isw.uni-stuttgart.de/</organizationUrl>
+    </developer>
+  </developers>
+
+  <name>SFSC:${project.artifactId}</name>
+  <description>Shop Floor Service Combiner</description>
+  <url>https://www.isw.uni-stuttgart.de/forschung/steuerungsarchitekturen/SFSC/</url>
 
   <modules>
     <module>proto</module>
@@ -22,7 +63,7 @@
   </modules>
 
   <properties>
-    <revision>0.1.0-SNAPSHOT</revision>
+    <revision>0.1.1-SNAPSHOT</revision>
 
     <slf4j.version>1.7.30</slf4j.version>
     <protobuf.version>3.11.0</protobuf.version>
@@ -194,7 +235,82 @@
         <artifactId>flatten-maven-plugin</artifactId>
       </plugin>
     </plugins>
-
   </build>
+
+  <profiles>
+    <!-- Activate using the release property: mvn clean install -Prelease -->
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
+
+      <build>
+        <plugins>
+          <!-- To release to Maven central -->
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.8</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose >
+            </configuration>
+          </plugin>
+          <!-- To generate javadoc -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- To sign the artifacts -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+
+      </build>
+    </profile>
+  </profiles>
 
 </project>
