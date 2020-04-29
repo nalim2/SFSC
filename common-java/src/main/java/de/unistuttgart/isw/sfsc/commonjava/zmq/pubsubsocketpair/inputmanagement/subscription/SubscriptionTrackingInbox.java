@@ -73,6 +73,11 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
     return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, runnable);
   }
 
+  @Override
+  public Future<Void> addOneShotUnsubscriptionListener(ByteString topic, Runnable runnable) {
+    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.DELETE, runnable);
+  }
+
   void accept(List<byte[]> subscriptionMessage) {  //not thread safe, but we have just one so its okay
     if (!SubProtocol.isValid(subscriptionMessage)) {
       logger.warn("Received invalid subscription message");

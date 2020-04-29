@@ -18,4 +18,5 @@ public interface SubscriptionTracker {
 
   Future<Void> addOneShotSubscriptionListener(ByteString topic, Runnable runnable);
 
+  Future<Void> addOneShotUnsubscriptionListener(ByteString topic, Runnable runnable);
 }
