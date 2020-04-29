@@ -11,7 +11,7 @@ install:
 jobs:
   include:
     - stage: test
-      script: mvn install
+      script: mvn verify
     - stage: deploy
       if: branch = master
       script:
