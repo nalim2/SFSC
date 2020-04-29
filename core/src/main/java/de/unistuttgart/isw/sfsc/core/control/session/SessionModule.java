@@ -21,8 +21,8 @@ public class SessionModule implements NotThrowingAutoCloseable {
 
   public static SessionModule create(PubSubConnection pubSubConnection, SessionParameter parameter, Consumer<String> onDead) {
     ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    parameter.heartbeatParameter();
-    HeartbeatModule heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, parameter.heartbeatParameter());
+    parameter.getHeartbeatParameter();
+    HeartbeatModule heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, parameter.getHeartbeatParameter());
     Listeners<Consumer<NewSessionEvent>> sessionListeners = new Listeners<>();
     sessionListeners.add(
         (event) -> heartbeatModule.startSession(event.getAdapterId(), event.getHeartbeatAdapterTopic(), onDead));

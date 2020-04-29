@@ -15,6 +15,7 @@ public class EnvironmentReader {
   private static final String dataBackendPortEnvVar = System.getenv("DATA_BACKEND_PORT");
   private static final String heartbeatSendRateMsEnvVar = System.getenv("HEARTBEAT_SEND_RATE_MS");
   private static final String heartbeatDeadlineIncomingMs = System.getenv("HEARTBEAT_DEADLINE_INCOMING_MS");
+  private static final String ipcFolderLocation = System.getenv("IPC_FOLDER_LOCATION");
 
   public Optional<String> getCoreId() {
     return Optional.ofNullable(coreIdEnvVar);
@@ -58,5 +59,9 @@ public class EnvironmentReader {
 
   public Optional<Integer> getHeartbeatDeadlineIncomingMs() {
     return Optional.ofNullable(heartbeatDeadlineIncomingMs).map(Integer::parseInt);
+  }
+
+  public Optional<String> getIpcFolderLocation() {
+    return Optional.ofNullable(ipcFolderLocation);
   }
 }

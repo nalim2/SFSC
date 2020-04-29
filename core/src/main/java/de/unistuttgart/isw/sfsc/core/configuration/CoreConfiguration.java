@@ -9,15 +9,17 @@ public class CoreConfiguration {
   private String host;
   private String backendHost;
 
-  private Integer controlPubPort;
-  private Integer controlSubPort;
-  private Integer controlBackendPort;
-  private Integer dataPubPort;
-  private Integer dataSubPort;
-  private Integer dataBackendPort;
+  private Integer controlPubTcpPort;
+  private Integer controlSubTcpPort;
+  private Integer controlBackendTcpPort;
+  private Integer dataPubTcpPort;
+  private Integer dataSubTcpPort;
+  private Integer dataBackendTcpPort;
 
   private Integer heartbeatSendRateMs;
   private Integer heartbeatDeadlineIncomingMs;
+
+  private String ipcFolderLocation;
 
   public CoreConfiguration setCoreId(String coreId) {
     this.coreId = coreId;
@@ -34,33 +36,33 @@ public class CoreConfiguration {
     return this;
   }
 
-  public CoreConfiguration setControlPubPort(Integer controlPubPort) {
-    this.controlPubPort = controlPubPort;
+  public CoreConfiguration setControlPubTcpPort(Integer controlPubTcpPort) {
+    this.controlPubTcpPort = controlPubTcpPort;
     return this;
   }
 
-  public CoreConfiguration setControlSubPort(Integer controlSubPort) {
-    this.controlSubPort = controlSubPort;
+  public CoreConfiguration setControlSubTcpPort(Integer controlSubTcpPort) {
+    this.controlSubTcpPort = controlSubTcpPort;
     return this;
   }
 
-  public CoreConfiguration setControlBackendPort(Integer controlBackendPort) {
-    this.controlBackendPort = controlBackendPort;
+  public CoreConfiguration setControlBackendTcpPort(Integer controlBackendTcpPort) {
+    this.controlBackendTcpPort = controlBackendTcpPort;
     return this;
   }
 
-  public CoreConfiguration setDataPubPort(Integer dataPubPort) {
-    this.dataPubPort = dataPubPort;
+  public CoreConfiguration setDataPubTcpPort(Integer dataPubTcpPort) {
+    this.dataPubTcpPort = dataPubTcpPort;
     return this;
   }
 
-  public CoreConfiguration setDataSubPort(Integer dataSubPort) {
-    this.dataSubPort = dataSubPort;
+  public CoreConfiguration setDataSubTcpPort(Integer dataSubTcpPort) {
+    this.dataSubTcpPort = dataSubTcpPort;
     return this;
   }
 
-  public CoreConfiguration setDataBackendPort(Integer dataBackendPort) {
-    this.dataBackendPort = dataBackendPort;
+  public CoreConfiguration setDataBackendTcpPort(Integer dataBackendTcpPort) {
+    this.dataBackendTcpPort = dataBackendTcpPort;
     return this;
   }
 
@@ -74,6 +76,11 @@ public class CoreConfiguration {
     return this;
   }
 
+  public CoreConfiguration setIpcFolderLocation(String ipcFolderLocation) {
+    this.ipcFolderLocation = ipcFolderLocation;
+    return this;
+  }
+
   public CoreParameter createCoreParameter() {
     EnvironmentReader environmentReader = new EnvironmentReader();
     DefaultConfiguration defaultConfiguration = new DefaultConfiguration();
@@ -84,23 +91,29 @@ public class CoreConfiguration {
         .orElse(defaultConfiguration.getHost());
     String backendHost = Optional.ofNullable(this.backendHost).or(environmentReader::getBackendHost)
         .orElse(defaultConfiguration.getBackendHost());
-    int controlSubPort = Optional.ofNullable(this.controlSubPort).or(environmentReader::getControlSubPort)
-        .orElse(defaultConfiguration.getControlSubPort());
-    int controlPubPort = Optional.ofNullable(this.controlPubPort).or(environmentReader::getControlPubPort)
-        .orElse(defaultConfiguration.getControlPubPort());
-    int controlBackendPort = Optional.ofNullable(this.controlBackendPort).or(environmentReader::getControlBackendPort)
-        .orElse(defaultConfiguration.getControlBackendPort());
-    int dataPubPort = Optional.ofNullable(this.dataPubPort).or(environmentReader::getDataPubPort)
-        .orElse(defaultConfiguration.getDataPubPort());
-    int dataSubPort = Optional.ofNullable(this.dataSubPort).or(environmentReader::getDataSubPort)
-        .orElse(defaultConfiguration.getDataSubPort());
-    int dataBackendPort = Optional.ofNullable(this.dataBackendPort).or(environmentReader::getDataBackendPort)
-        .orElse(defaultConfiguration.getDataBackendPort());
+    int controlSubTcpPort = Optional.ofNullable(this.controlSubTcpPort).or(environmentReader::getControlSubPort)
+        .orElse(defaultConfiguration.getControlSubTcpPort());
+    int controlPubTcpPort = Optional.ofNullable(this.controlPubTcpPort).or(environmentReader::getControlPubPort)
+        .orElse(defaultConfiguration.getControlPubTcpPort());
+    int controlBackendTcpPort = Optional.ofNullable(this.controlBackendTcpPort).or(environmentReader::getControlBackendPort)
+        .orElse(defaultConfiguration.getControlBackendTcpPort());
+    int dataPubTcpPort = Optional.ofNullable(this.dataPubTcpPort).or(environmentReader::getDataPubPort)
+        .orElse(defaultConfiguration.getDataPubTcpPort());
+    int dataSubTcpPort = Optional.ofNullable(this.dataSubTcpPort).or(environmentReader::getDataSubPort)
+        .orElse(defaultConfiguration.getDataSubTcpPort());
+    int dataBackendTcpPort = Optional.ofNullable(this.dataBackendTcpPort).or(environmentReader::getDataBackendPort)
+        .orElse(defaultConfiguration.getDataBackendTcpPort());
     int heartbeatSendRateMs = Optional.ofNullable(this.heartbeatSendRateMs).or(environmentReader::getHeartbeatSendRateMs)
         .orElse(defaultConfiguration.getHeartbeatSendRateMs());
     int heartbeatDeadlineIncomingMs = Optional.ofNullable(this.heartbeatDeadlineIncomingMs).or(environmentReader::getHeartbeatDeadlineIncomingMs)
         .orElse(defaultConfiguration.getHeartbeatDeadlineIncomingMs());
+    String ipcFolderLocation = Optional.ofNullable(this.ipcFolderLocation).or(environmentReader::getIpcFolderLocation)
+        .orElse(defaultConfiguration.getIpcFolderLocation());
 
+    String controlPubIpcFile = defaultConfiguration.getControlPubIpcFile();
+    String controlSubIpcFile = defaultConfiguration.getControlSubIpcFile();
+    String dataPubIpcFile = defaultConfiguration.getDataPubIpcFile();
+    String dataSubIpcFile = defaultConfiguration.getDataSubIpcFile();
     String bootstrapTopic = defaultConfiguration.getBootstrapTopic();
     String sessionTopic = defaultConfiguration.getSessionTopic();
     String heartbeatTopic = defaultConfiguration.getHeartbeatTopic();
@@ -108,8 +121,9 @@ public class CoreConfiguration {
     String registryCommandTopic = defaultConfiguration.getRegistryCommandTopic();
     String registryPublisherTopic = defaultConfiguration.getRegistryPublisherTopic();
 
-    return new CoreParameter(coreId, frontendHost, backendHost, controlPubPort, controlSubPort, controlBackendPort, dataPubPort, dataSubPort,
-        dataBackendPort, heartbeatSendRateMs, heartbeatDeadlineIncomingMs, bootstrapTopic, sessionTopic, heartbeatTopic, registryQueryTopic,
-        registryCommandTopic, registryPublisherTopic);
+    return new CoreParameter(coreId, frontendHost, backendHost, controlPubTcpPort, controlSubTcpPort, controlBackendTcpPort, dataPubTcpPort,
+        dataSubTcpPort, dataBackendTcpPort, heartbeatSendRateMs, heartbeatDeadlineIncomingMs, ipcFolderLocation, controlPubIpcFile, controlSubIpcFile,
+        dataPubIpcFile, dataSubIpcFile, bootstrapTopic, sessionTopic, heartbeatTopic, registryQueryTopic, registryCommandTopic,
+        registryPublisherTopic);
   }
 }

@@ -1,12 +1,17 @@
 package de.unistuttgart.isw.sfsc.adapter;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.Objects;
 
 public class AdapterParameter {
+
   private final String adapterId;
 
+  private final TransportProtocol transportProtocol;
   private final String coreHost;
-  private final int corePort;
+  private final int corePubTcpPort;
+  private final String coreIpcLocation;
+  private final String corePubIpcFile;
 
   private final int controlTimeoutMs;
   private final int heartbeatSendRateMs;
@@ -24,14 +29,17 @@ public class AdapterParameter {
   private final String registryAdapterQueryTopic;
   private final String registryAdapterCommandTopic;
 
-  public AdapterParameter(String adapterId, String coreHost, int corePort, int controlTimeoutMs, int heartbeatSendRateMs,
-      int heartbeatDeadlineIncomingMs, int registryPollingRateMs, String bootstrapCoreTopic, String handshakeCoreTopic,
-      String handshakeAdapterTopic, String heartbeatCoreTopic, String heartbeatAdapterTopic, String registryCoreQueryTopic,
-      String registryCoreCommandTopic, String registryCoreEventTopic, String registryAdapterQueryTopic,
+  public AdapterParameter(String adapterId, TransportProtocol transportProtocol, String coreHost, int corePubTcpPort, String coreIpcLocation,
+      String corePubIpcFile, int controlTimeoutMs, int heartbeatSendRateMs, int heartbeatDeadlineIncomingMs, int registryPollingRateMs,
+      String bootstrapCoreTopic, String handshakeCoreTopic, String handshakeAdapterTopic, String heartbeatCoreTopic, String heartbeatAdapterTopic,
+      String registryCoreQueryTopic, String registryCoreCommandTopic, String registryCoreEventTopic, String registryAdapterQueryTopic,
       String registryAdapterCommandTopic) {
     Objects.requireNonNull(this.adapterId = adapterId);
+    Objects.requireNonNull(this.transportProtocol = transportProtocol);
     Objects.requireNonNull(this.coreHost = coreHost);
-    this.corePort = corePort;
+    this.corePubTcpPort = corePubTcpPort;
+    Objects.requireNonNull(this.coreIpcLocation = coreIpcLocation);
+    Objects.requireNonNull(this.corePubIpcFile = corePubIpcFile);
     this.controlTimeoutMs = controlTimeoutMs;
     this.heartbeatSendRateMs = heartbeatSendRateMs;
     this.heartbeatDeadlineIncomingMs = heartbeatDeadlineIncomingMs;
@@ -48,16 +56,28 @@ public class AdapterParameter {
     Objects.requireNonNull(this.registryAdapterCommandTopic = registryAdapterCommandTopic);
   }
 
+  public String getAdapterId() {
+    return adapterId;
+  }
+
+  public TransportProtocol getTransportProtocol() {
+    return transportProtocol;
+  }
+
   public String getCoreHost() {
     return coreHost;
   }
 
-  public int getCorePort() {
-    return corePort;
+  public int getCorePubTcpPort() {
+    return corePubTcpPort;
   }
 
-  public String getAdapterId() {
-    return adapterId;
+  public String getCoreIpcLocation() {
+    return coreIpcLocation;
+  }
+
+  public String getCorePubIpcFile() {
+    return corePubIpcFile;
   }
 
   public int getControlTimeoutMs() {

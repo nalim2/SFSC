@@ -1,11 +1,15 @@
 package de.unistuttgart.isw.sfsc.adapter.configuration;
 
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.UUID;
 
 public class DefaultConfiguration {
 
+  private final static TransportProtocol transportProtocol = TransportProtocol.TCP;
   private final static String coreHost = "127.0.0.1";
-  private final static int corePort = 1251;
+  private final static int corePubTcpPort = 1251;
+  private final static String coreIpcLocation = ".tmp/sfsc/ipc";
+  private final static String corePubIpcFile = "controlPub";
 
   private final static int controlTimeoutMs = 500;
   private final static int heartbeatSendRateMs = 500;
@@ -29,12 +33,24 @@ public class DefaultConfiguration {
     return adapterId;
   }
 
+  public TransportProtocol getTransportProtocol() {
+    return transportProtocol;
+  }
+
   public String getCoreHost() {
     return coreHost;
   }
 
-  public int getCorePort() {
-    return corePort;
+  public int getCorePubTcpPort() {
+    return corePubTcpPort;
+  }
+
+  public String getCoreIpcLocation() {
+    return coreIpcLocation;
+  }
+
+  public String getCorePubIpcFile() {
+    return corePubIpcFile;
   }
 
   public int getControlTimeoutMs() {

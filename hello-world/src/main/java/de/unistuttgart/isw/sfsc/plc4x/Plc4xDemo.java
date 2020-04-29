@@ -71,8 +71,8 @@ public class Plc4xDemo {
       Map.entry("UInteger", UINTEGER_IDENTIFIER)
   );
 
-  private static final AdapterConfiguration ADAPTER_CONFIGURATION_1 = new AdapterConfiguration().setCorePort(1251);
-  private static final AdapterConfiguration ADAPTER_CONFIGURATION_2 = new AdapterConfiguration().setCorePort(1261);
+  private static final AdapterConfiguration ADAPTER_CONFIGURATION_1 = new AdapterConfiguration().setCorePubTcpPort(1251);
+  private static final AdapterConfiguration ADAPTER_CONFIGURATION_2 = new AdapterConfiguration().setCorePubTcpPort(1261);
 
   public static void main(String[] args) throws ExecutionException, InterruptedException, PlcConnectionException, TimeoutException {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
