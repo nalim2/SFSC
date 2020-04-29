@@ -2,12 +2,9 @@ language: java
 jdk:
 - openjdk12
 ## export GPG details
+
 before_install:
-    - if branch = master; then
-          echo "HHAAALLLLLOOO Chris das ist eine Nachricht nur für dich!";
-      fi
-    - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-    - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+
 install:
   - wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protobuf-all-3.11.4.tar.gz
   - tar -xzvf protobuf-all-3.11.4.tar.gz
@@ -19,3 +16,8 @@ install:
 script:
 ##    - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
    
+if: branch = master
+before_install:
+    - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+    - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+    - echo testtestset
