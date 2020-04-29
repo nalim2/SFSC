@@ -3,7 +3,7 @@ jdk:
 - openjdk12
 ## export GPG details
 before_install:
-    - if [ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]; then
+    - if branch = master; then
           echo "HHAAALLLLLOOO Chris das ist eine Nachricht nur für dich!";
       fi
     - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
