@@ -18,6 +18,3 @@ jobs:
       - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
       - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
       - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
-
-
-
