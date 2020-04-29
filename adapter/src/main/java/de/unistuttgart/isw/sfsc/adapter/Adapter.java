@@ -34,7 +34,7 @@ public class Adapter implements NotThrowingAutoCloseable {
   static Adapter create(AdapterParameter parameter) throws InterruptedException, ExecutionException, TimeoutException {
     Reactor reactor = ReactorFactory.create();
     ControlPlane controlPlane = new ControlPlane(reactor, parameter);
-    DataPlane dataPlane = new DataPlane(reactor, controlPlane.adapterInformation());
+    DataPlane dataPlane = new DataPlane(reactor, controlPlane.dataParameter());
     return new Adapter(reactor, controlPlane, dataPlane);
   }
 

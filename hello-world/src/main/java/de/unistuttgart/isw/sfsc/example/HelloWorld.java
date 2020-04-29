@@ -14,8 +14,8 @@ public class HelloWorld {
   public static void main(String[] args) {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
 
-    AdapterConfiguration adapterConfiguration1 = new AdapterConfiguration().setCorePort(1251);
-    AdapterConfiguration adapterConfiguration2 = new AdapterConfiguration().setCorePort(1261);
+    AdapterConfiguration adapterConfiguration1 = new AdapterConfiguration().setCorePubTcpPort(1251);
+    AdapterConfiguration adapterConfiguration2 = new AdapterConfiguration().setCorePubTcpPort(1261);
 
     ExecutorService executor = Executors.newCachedThreadPool();
     CountDownLatch cdl = new CountDownLatch(2);

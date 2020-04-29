@@ -10,19 +10,14 @@ public class SessionParameter {
   HeartbeatParameter heartbeatParameter;
 
   private final ByteString sessionTopic;
-  private final int dataPubPort;
-  private final int dataSubPort;
 
-  public SessionParameter(String coreId, int heartbeatSendRateMs, String heartbeatCoreTopic, int heartbeatDeadlineIncomingMs, String sessionTopic,
-      int dataPubPort, int dataSubPort) {
+  public SessionParameter(String coreId, int heartbeatSendRateMs, String heartbeatCoreTopic, int heartbeatDeadlineIncomingMs, String sessionTopic) {
     this.coreId = coreId;
     this.heartbeatParameter = new HeartbeatParameter(coreId, heartbeatSendRateMs, heartbeatCoreTopic, heartbeatDeadlineIncomingMs);
     this.sessionTopic = ByteString.copyFromUtf8(sessionTopic);
-    this.dataPubPort = dataPubPort;
-    this.dataSubPort = dataSubPort;
   }
 
-  HeartbeatParameter heartbeatParameter() {
+  HeartbeatParameter getHeartbeatParameter() {
     return heartbeatParameter;
   }
 
@@ -32,13 +27,5 @@ public class SessionParameter {
 
   public ByteString getSessionTopic() {
     return sessionTopic;
-  }
-
-  public int getDataPubPort() {
-    return dataPubPort;
-  }
-
-  public int getDataSubPort() {
-    return dataSubPort;
   }
 }

@@ -48,12 +48,7 @@ class SessionServer implements NotThrowingAutoCloseable {
         ByteString adapterHeartbeatTopic = hello.getHeartbeatTopic();
         logger.info("new session request from {}", hello.getAdapterId());
         sessionListeners.forEach(consumer -> consumer.accept(new NewSessionEvent(adapterId, adapterHeartbeatTopic)));
-        return Welcome.newBuilder()
-            .setDataPubPort(parameter.getDataPubPort())
-            .setDataSubPort(parameter.getDataSubPort())
-            .setCoreId(parameter.getCoreId())
-            .build()
-            .toByteString();
+        return Welcome.newBuilder().setCoreId(parameter.getCoreId()).build().toByteString();
       } catch (InvalidProtocolBufferException e) {
         logger.warn("received malformed message", e);
         return ByteString.EMPTY;

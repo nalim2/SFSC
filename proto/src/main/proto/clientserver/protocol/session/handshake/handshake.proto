@@ -10,7 +10,5 @@ message Hello {
 }
 
 message Welcome {
-  int32 data_pub_port = 1;
-  int32 data_sub_port = 2;
-  string core_id = 3;
+  string core_id = 1;
 }

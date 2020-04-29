@@ -5,5 +5,12 @@ package de.unistuttgart.isw.sfsc.clientserver.protocol.bootstrap;
 option java_multiple_files = true;
 
 message BootstrapMessage {
-  int32 core_subscription_port = 1;
+  int32 core_control_pub_tcp_port = 1;
+  int32 core_control_sub_tcp_port = 2;
+  int32 core_data_pub_tcp_port = 3;
+  int32 core_data_sub_tcp_port = 4;
+  string core_control_pub_ipc_file = 5;
+  string core_control_sub_ipc_file = 6;
+  string core_data_pub_ipc_file = 7;
+  string core_data_sub_ipc_file = 8;
 }

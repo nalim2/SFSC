@@ -28,10 +28,10 @@ public class HazelcastNode implements NotThrowingAutoCloseable {
       CoreParameter parameter) {
     Config config = new Config();
     config.addListenerConfig(new ListenerConfig(new BackendEventConsumer(memberAddedEventConsumer, memberRemovedEventConsumer)));
-    config.getMemberAttributeConfig().setAttribute(BACKEND_PORT_ATTRIBUTE_KEY, Integer.toString(parameter.getDataBackendPort()));
+    config.getMemberAttributeConfig().setAttribute(BACKEND_PORT_ATTRIBUTE_KEY, Integer.toString(parameter.getDataBackendTcpPort()));
     config.getNetworkConfig()
         .setPublicAddress(parameter.getBackendHost())
-        .setPort(parameter.getControlBackendPort());
+        .setPort(parameter.getControlBackendTcpPort());
     HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
 
     return new HazelcastNode(hazelcastInstance);

@@ -1,14 +1,17 @@
 package de.unistuttgart.isw.sfsc.adapter.configuration;
 
 import de.unistuttgart.isw.sfsc.adapter.AdapterParameter;
+import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.util.Optional;
 
 public class AdapterConfiguration {
 
   private String adapterId;
 
+  private TransportProtocol transportProtocol;
   private String coreHost;
-  private Integer corePort;
+  private Integer corePubTcpPort;
+  private String coreIpcLocation;
 
   private Integer controlTimeoutMs;
   private Integer heartbeatSendRateMs;
@@ -20,13 +23,23 @@ public class AdapterConfiguration {
     return this;
   }
 
+  public AdapterConfiguration setTransportProtocol(TransportProtocol transportProtocol) {
+    this.transportProtocol = transportProtocol;
+    return this;
+  }
+
   public AdapterConfiguration setCoreHost(String coreHost) {
     this.coreHost = coreHost;
     return this;
   }
 
-  public AdapterConfiguration setCorePort(Integer corePort) {
-    this.corePort = corePort;
+  public AdapterConfiguration setCorePubTcpPort(Integer corePubTcpPort) {
+    this.corePubTcpPort = corePubTcpPort;
+    return this;
+  }
+
+  public AdapterConfiguration setCoreIpcLocation(String coreIpcLocation) {
+    this.coreIpcLocation = coreIpcLocation;
     return this;
   }
 
@@ -55,10 +68,14 @@ public class AdapterConfiguration {
 
     String adapterId = Optional.ofNullable(this.adapterId)
         .orElse(defaultConfiguration.getAdapterId());
+    TransportProtocol transportProtocol = Optional.ofNullable(this.transportProtocol)
+        .orElse(defaultConfiguration.getTransportProtocol());
     String coreHost = Optional.ofNullable(this.coreHost)
         .orElse(defaultConfiguration.getCoreHost());
-    int corePort = Optional.ofNullable(this.corePort)
-        .orElse(defaultConfiguration.getCorePort());
+    int corePubTcpPort = Optional.ofNullable(this.corePubTcpPort)
+        .orElse(defaultConfiguration.getCorePubTcpPort());
+    String coreIpcLocation = Optional.ofNullable(this.coreIpcLocation)
+        .orElse(defaultConfiguration.getCoreIpcLocation());
     int controlTimeoutMs = Optional.ofNullable(this.controlTimeoutMs)
         .orElse(defaultConfiguration.getControlTimeoutMs());
     int heartbeatSendRateMs = Optional.ofNullable(this.heartbeatSendRateMs)
@@ -68,6 +85,7 @@ public class AdapterConfiguration {
     int registryPollingRateMs = Optional.ofNullable(this.registryPollingRateMs)
         .orElse(defaultConfiguration.getRegistryPollingRateMs());
 
+    String corePubIpcFile = defaultConfiguration.getCorePubIpcFile();
     String bootstrapCoreTopic = defaultConfiguration.getBootstrapCoreTopic();
     String handshakeCoreTopic = defaultConfiguration.getHandshakeCoreTopic();
     String handshakeAdapterTopic = defaultConfiguration.getHandshakeAdapterTopic();
@@ -79,8 +97,9 @@ public class AdapterConfiguration {
     String registryAdapterQueryTopic = defaultConfiguration.getRegistryAdapterQueryTopic();
     String registryAdapterCommandTopic = defaultConfiguration.getRegistryAdapterCommandTopic();
 
-    return new AdapterParameter(adapterId, coreHost, corePort, controlTimeoutMs, heartbeatSendRateMs, heartbeatDeadlineIncomingMs,
-        registryPollingRateMs, bootstrapCoreTopic, handshakeCoreTopic, handshakeAdapterTopic, heartbeatCoreTopic, heartbeatAdapterTopic,
-        registryCoreQueryTopic, registryCoreCommandTopic, registryCoreEventTopic, registryAdapterQueryTopic, registryAdapterCommandTopic);
+    return new AdapterParameter(adapterId, transportProtocol, coreHost, corePubTcpPort, coreIpcLocation, corePubIpcFile, controlTimeoutMs,
+        heartbeatSendRateMs, heartbeatDeadlineIncomingMs, registryPollingRateMs, bootstrapCoreTopic, handshakeCoreTopic, handshakeAdapterTopic,
+        heartbeatCoreTopic, heartbeatAdapterTopic, registryCoreQueryTopic, registryCoreCommandTopic, registryCoreEventTopic,
+        registryAdapterQueryTopic, registryAdapterCommandTopic);
   }
 }

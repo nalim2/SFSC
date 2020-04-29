@@ -8,6 +8,8 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactorFactory;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import de.unistuttgart.isw.sfsc.core.CoreParameter;
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public class Data implements NotThrowingAutoCloseable {
@@ -45,22 +47,29 @@ public class Data implements NotThrowingAutoCloseable {
     frontendSubscriptionInbox.start();
   }
 
-  public static Data create(CoreParameter parameter) throws ExecutionException, InterruptedException {
+  public static Data create(CoreParameter parameter) throws ExecutionException, InterruptedException, IOException {
     Data data = new Data(parameter);
-    data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataPubPort()));
-    data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataSubPort()));
-    data.backend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataBackendPort()));
+    File pub = new File(parameter.getIpcFolderLocation(), parameter.getDataPubIpcFile());
+    File sub = new File(parameter.getIpcFolderLocation(), parameter.getDataSubIpcFile());
+    pub.createNewFile();
+    sub.createNewFile();
+    data.frontend.publisherSocketConnector().bind(TransportProtocol.IPC, pub.getAbsolutePath());
+    data.frontend.subscriberSocketConnector().bind(TransportProtocol.IPC, sub.getAbsolutePath());
+
+    data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataPubTcpPort()));
+    data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataSubTcpPort()));
+    data.backend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataBackendTcpPort()));
     return data;
   }
 
   public void connectBackend(String host, int port) {
-    if (!parameter.getBackendHost().equals(host) || parameter.getDataBackendPort() != port) {
+    if (!parameter.getBackendHost().equals(host) || parameter.getDataBackendTcpPort() != port) {
       backend.publisherSocketConnector().connect(TransportProtocol.TCP, Connector.createAddress(host, port));
     }
   }
 
   public void disconnectBackend(String host, int port) {
-    if (!parameter.getBackendHost().equals(host) || parameter.getDataBackendPort() != port) {
+    if (!parameter.getBackendHost().equals(host) || parameter.getDataBackendTcpPort() != port) {
       backend.publisherSocketConnector().disconnect(TransportProtocol.TCP, Connector.createAddress(host, port));
     }
   }

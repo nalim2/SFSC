@@ -18,3 +18,5 @@ services:
       - DATA_PUB_PORT=1253
       - DATA_SUB_PORT=1254
       - DATA_BACKEND_PORT=1250
+    volumes:
+      - "./tmp/sfsc/ipc/core1:/sfsc/tmp/sfsc/ipc"

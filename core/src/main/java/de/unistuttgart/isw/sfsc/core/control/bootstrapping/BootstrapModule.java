@@ -17,13 +17,20 @@ public final class BootstrapModule implements NotThrowingAutoCloseable {
   private final Publisher publisher;
   private final Handle handle;
 
-  BootstrapModule(PubSubConnection pubSubConnection, BootstrapperParameter params) {
+  BootstrapModule(PubSubConnection pubSubConnection, BootstrapperParameter parameter) {
     publisher = new Publisher(pubSubConnection);
 
-    ByteString topic = params.getTopic();
-    int port = params.getSubscriptionPort();
-    BootstrapMessage message = BootstrapMessage.newBuilder().setCoreSubscriptionPort(port).build();
-
+    ByteString topic = parameter.getTopic();
+    BootstrapMessage message = BootstrapMessage.newBuilder()
+        .setCoreControlPubTcpPort(parameter.getCoreControlPubTcpPort())
+        .setCoreControlSubTcpPort(parameter.getCoreControlSubTcpPort())
+        .setCoreDataPubTcpPort(parameter.getCoreDataPubTcpPort())
+        .setCoreDataSubTcpPort(parameter.getCoreDataSubTcpPort())
+        .setCoreControlPubIpcFile(parameter.getCoreControlPubIpcFile())
+        .setCoreControlSubIpcFile(parameter.getCoreControlSubIpcFile())
+        .setCoreDataPubIpcFile(parameter.getCoreDataPubIpcFile())
+        .setCoreDataSubIpcFile(parameter.getCoreDataSubIpcFile())
+        .build();
     handle = pubSubConnection.subscriptionTracker().addListener(storeEvent -> {
           if (topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE) {
             logger.info("received new subscription on bootstrap topic, sending bootstrapMessage");
