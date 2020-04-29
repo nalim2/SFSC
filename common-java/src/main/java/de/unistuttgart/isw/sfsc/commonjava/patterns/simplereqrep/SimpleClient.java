@@ -25,7 +25,7 @@ public final class SimpleClient implements NotThrowingAutoCloseable {
   public SimpleClient(PubSubConnection pubSubConnection, ByteString replyTopic, Executor executor) {
     this.publisher = pubSubConnection.publisher();
     this.replyTopic = replyTopic;
-    handle = SubscriptionAgent.create(pubSubConnection).addSubscriber(replyTopic, new SimpleClientConsumer(callbackRegistry), executor);
+    handle = SubscriptionAgent.create(pubSubConnection).addSubscriber(replyTopic, new SimpleClientConsumer(callbackRegistry), executor); //todo wait until subscription of target topic received?
   }
 
   public void send(ByteString targetTopic, ByteString payload, Consumer<ByteString> consumer, int timeoutMs, Runnable timeoutRunnable) {

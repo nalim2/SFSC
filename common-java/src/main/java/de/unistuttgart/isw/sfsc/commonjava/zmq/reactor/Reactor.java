@@ -3,36 +3,15 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import java.util.concurrent.ExecutionException;
-import org.zeromq.ZContext;
 
-public class Reactor implements NotThrowingAutoCloseable {
+public interface Reactor extends NotThrowingAutoCloseable {
 
-  private final ZmqExecutor executor;
+  ReactiveSocket createSubscriber() throws ExecutionException, InterruptedException;
 
-  Reactor(ZContext zContext) throws InterruptedException {
-    executor = ZmqExecutor.create(zContext);
-  }
+  ReactiveSocket createPublisher() throws ExecutionException, InterruptedException;
 
-  public static Reactor create(ContextConfiguration contextConfiguration) throws InterruptedException {
-    ZContext zContext = new ZContext();
-    contextConfiguration.configure(zContext);
-    return new Reactor(zContext);
-  }
-
-  public ReactiveSocket createSubscriber() throws ExecutionException, InterruptedException {
-    return executor.createSubscriber().get(); //todo wait
-  }
-
-  public ReactiveSocket createPublisher() throws ExecutionException, InterruptedException {
-    return executor.createPublisher().get(); //todo wait
-  }
-
-  public Handle addShutdownListener(Runnable runnable) {
-    return executor.addShutdownListener(runnable);
-  }
+  Handle addShutdownListener(Runnable runnable);
 
   @Override
-  public void close() {
-    executor.close();
-  }
+  void close();
 }

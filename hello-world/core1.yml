@@ -1,7 +1,7 @@
 version: "3"
 services:
   core1:
-    image: "docker-core:local"
+    image: "docker-core:dev"
     ports:
       - "1250:1250"
       - "1251:1251"
@@ -11,11 +11,12 @@ services:
       - "5701:5701"
     environment:
       - HOST=127.0.0.1
-      - BACKEND_PORT=1250
+      - BACKEND_HOST=core1
       - CONTROL_PUB_PORT=1251
       - CONTROL_SUB_PORT=1252
+      - CONTROL_BACKEND_PORT=5701
       - DATA_PUB_PORT=1253
       - DATA_SUB_PORT=1254
-
-      - BACKEND_HOST=core1
-      - HAZELCAST_PORT=5701
+      - DATA_BACKEND_PORT=1250
+    volumes:
+      - "./tmp/sfsc/ipc/core1:/sfsc/tmp/sfsc/ipc"

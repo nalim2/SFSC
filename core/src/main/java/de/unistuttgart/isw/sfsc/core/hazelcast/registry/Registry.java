@@ -58,6 +58,10 @@ public class Registry implements NotThrowingAutoCloseable {
     return registryEventLog.handleQueryRequest(queryRequest);
   }
 
+  public void deleteEntries(String adapterId) {
+    replicatedRegistry.removeAll(entry -> entry.getAdapterId().equals(adapterId));
+  }
+
   @Override
   public void close() {
     handle.close();

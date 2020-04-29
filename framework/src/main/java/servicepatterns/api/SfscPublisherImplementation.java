@@ -46,13 +46,23 @@ final class SfscPublisherImplementation implements SfscPublisher {
   }
 
   @Override
+  public Future<Void> unsubscriptionFuture() {
+    return subscriptionTracker.addOneShotUnsubscriptionListener(topic, () -> {});
+  }
+
+  @Override
+  public Handle onUnsubscription(Runnable runnable) {
+    Future<Void> future = subscriptionTracker.addOneShotUnsubscriptionListener(topic, () -> executor.execute(runnable));
+    return () -> future.cancel(true);
+  }
+
+  @Override
   public void publish(Message payload) {
     publisher.publish(topic, payload);
   }
 
   @Override
   public void close() {
-    publisher.close();
     onClose.run();
   }
 }

@@ -9,6 +9,10 @@ import java.util.concurrent.Future;
 
 public interface SfscPublisher extends NotThrowingAutoCloseable {
 
+  Future<Void> unsubscriptionFuture();
+
+  Handle onUnsubscription(Runnable runnable);
+
   void publish(Message payload);
 
   Map<String, ByteString> getTags();

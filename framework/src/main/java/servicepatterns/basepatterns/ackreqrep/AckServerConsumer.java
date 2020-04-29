@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
-import de.unistuttgart.isw.sfsc.commonjava.util.MaxTimesRepetition;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.MaxTimesRepetition;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement.OutputPublisher;
 import de.unistuttgart.isw.sfsc.framework.messagingpatterns.ackreqrep.Reply;
 import de.unistuttgart.isw.sfsc.framework.messagingpatterns.ackreqrep.RequestOrAcknowledge;

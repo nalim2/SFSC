@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor;
+package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Inbox;
 import java.util.ArrayList;
@@ -10,12 +10,12 @@ import org.zeromq.ZLoop.IZLoopHandler;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Socket;
 
-class QueuingHandler implements IZLoopHandler {
+class InboxQueue implements IZLoopHandler {
 
   private final BlockingQueue<List<byte[]>> queue = new LinkedBlockingQueue<>();
   private final int defaultFrameCount;
 
-  QueuingHandler(int defaultFrameCount) {
+  InboxQueue(int defaultFrameCount) {
     this.defaultFrameCount = defaultFrameCount;
   }
 

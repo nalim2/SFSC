@@ -2,7 +2,7 @@ package servicepatterns.api;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import de.unistuttgart.isw.sfsc.adapter.control.registry.RegistryApi;
+import de.unistuttgart.isw.sfsc.adapter.control.RegistryApi;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;

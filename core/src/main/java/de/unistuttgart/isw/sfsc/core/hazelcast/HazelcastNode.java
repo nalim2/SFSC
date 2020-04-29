@@ -7,14 +7,13 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.replicatedmap.ReplicatedMap;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
-import de.unistuttgart.isw.sfsc.core.configuration.Configuration;
-import de.unistuttgart.isw.sfsc.core.configuration.CoreOption;
+import de.unistuttgart.isw.sfsc.core.CoreParameter;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
 import java.util.function.BiConsumer;
 
 public class HazelcastNode implements NotThrowingAutoCloseable {
 
-  private static final String BACKEND_PORT_ATTRIBUTE_KEY = "backendPort";
+  private static final String BACKEND_PORT_ATTRIBUTE_KEY = "dataBackendPort";
   private static final String REGISTRY_MAP_NAME = "ServiceRegistry";
 
   private final HazelcastInstance hazelcastInstance;
@@ -26,13 +25,13 @@ public class HazelcastNode implements NotThrowingAutoCloseable {
   }
 
   public static HazelcastNode create(BiConsumer<String, Integer> memberAddedEventConsumer, BiConsumer<String, Integer> memberRemovedEventConsumer,
-      Configuration<CoreOption> configuration, String coreId) {
+      CoreParameter parameter) {
     Config config = new Config();
     config.addListenerConfig(new ListenerConfig(new BackendEventConsumer(memberAddedEventConsumer, memberRemovedEventConsumer)));
-    config.getMemberAttributeConfig().setAttribute(BACKEND_PORT_ATTRIBUTE_KEY, configuration.get(CoreOption.BACKEND_PORT));
+    config.getMemberAttributeConfig().setAttribute(BACKEND_PORT_ATTRIBUTE_KEY, Integer.toString(parameter.getDataBackendTcpPort()));
     config.getNetworkConfig()
-        .setPublicAddress(configuration.get(CoreOption.BACKEND_HOST))
-        .setPort(Integer.parseInt(configuration.get(CoreOption.HAZELCAST_PORT)));
+        .setPublicAddress(parameter.getBackendHost())
+        .setPort(parameter.getControlBackendTcpPort());
     HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
 
     return new HazelcastNode(hazelcastInstance);

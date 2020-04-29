@@ -1,5 +1,6 @@
-package de.unistuttgart.isw.sfsc.commonjava.util;
+package de.unistuttgart.isw.sfsc.commonjava.util.scheduling;
 
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;

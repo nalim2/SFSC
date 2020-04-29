@@ -9,7 +9,7 @@
   <version>${revision}</version>
   <packaging>pom</packaging>
 
-  <description>Shop Floor Service Combiner</description>
+  <description>Shop Floor Service Connector</description>
 
   <modules>
     <module>proto</module>
@@ -26,14 +26,14 @@
 
     <slf4j.version>1.7.30</slf4j.version>
     <protobuf.version>3.11.0</protobuf.version>
-    <jeromq.version>0.5.1</jeromq.version>
-    <hazelcast.version>4.0</hazelcast.version>
+    <jeromq.version>0.5.2</jeromq.version>
+    <hazelcast.version>4.0.1</hazelcast.version>
 
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
-    <dockerfile-maven.version>1.4.12</dockerfile-maven.version>
+    <dockerfile-maven-plugin.version>1.4.12</dockerfile-maven-plugin.version>
 
     <java.version>12</java.version>
     <encoding>UTF-8</encoding>
@@ -87,6 +87,11 @@
         <artifactId>adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.github.nalim2</groupId>
+        <artifactId>framework</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -135,6 +140,12 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+            <compilerArgs>
+              <arg>-h</arg>
+              <arg>target/headers</arg>
+            </compilerArgs>
+          </configuration>
         </plugin>
 
         <plugin>
@@ -157,12 +168,12 @@
         <plugin>
           <groupId>com.spotify</groupId>
           <artifactId>dockerfile-maven-plugin</artifactId>
-          <version>${dockerfile-maven.version}</version>
+          <version>${dockerfile-maven-plugin.version}</version>
           <configuration>
             <skipDockerInfo>true</skipDockerInfo>
             <contextDirectory>${project.basedir}</contextDirectory>
             <repository>${project.artifactId}</repository>
-            <tag>local</tag>
+            <tag>dev</tag>
           </configuration>
           <executions>
             <execution>
