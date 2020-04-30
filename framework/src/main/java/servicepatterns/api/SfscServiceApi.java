@@ -4,42 +4,37 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
+import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
 
 public interface SfscServiceApi {
 
-  Set<Map<String, ByteString>> getServices();
+  Set<SfscServiceDescriptor> getServices();
 
-  Set<Map<String, ByteString>> getServices(String name);
+  Set<SfscServiceDescriptor> getServices(String name);
 
-  Set<Map<String, ByteString>> getServices(String name, Message message, Collection<String> varPaths);
+  Set<SfscServiceDescriptor> getServices(String name, Message message, Collection<String> varPaths);
 
-  SfscServer server(String name, ByteString inputMessageType, ByteString serverTopic, ByteString outputMessageType, RegexDefinition regexDefinition,
-      Map<String, ByteString> customTags, Function<ByteString, AckServerResult> serverFunction, int timeoutMs, int sendRateMs, int sendMaxTries);
+  SfscServer server(SfscServerParameter parameter, Function<ByteString, AckServerResult> serverFunction);
 
   SfscClient client();
 
-  SfscPublisher publisher(String name, ByteString outputTopic, ByteString outputMessageType, Map<String, ByteString> customTags);
+  SfscPublisher publisher(SfscPublisherParameter sfscPublisherParameter);
 
-  SfscPublisher unregisteredPublisher(String name, ByteString outputTopic, ByteString outputMessageType, Map<String, ByteString> customTags);
+  SfscSubscriber subscriber(SfscServiceDescriptor publisherDescriptor, Consumer<ByteString> subscriberConsumer);
 
-  SfscSubscriber subscriber(Map<String, ByteString> publisherTags, Consumer<ByteString> consumer);
+  SfscServer channelFactory(SfscChannelFactoryParameter parameter, Function<ByteString, SfscPublisher> channelFactory);
 
-  SfscSubscriber subscriber(ByteString publisherTopic, Consumer<ByteString> consumer);
+  Handle addRegistryStoreEventListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener);
 
-  SfscServer channelGenerator(String name, Map<String, ByteString> customTags, ByteString serverTopic, ByteString inputMessageType,
-      Function<ByteString, SfscPublisher> channelFactory);
+  Handle addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate, Runnable runnable);
 
-  Handle addRegistryStoreEventListener(Consumer<StoreEvent<Map<String, ByteString>>> listener);
-
-//  <V> Future<V> registryStoreEventFuture(String name);
-//
-//  Handle onRegistryStoreEvent(String name, Runnable runnable);
+  Awaitable addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate);
 
 }

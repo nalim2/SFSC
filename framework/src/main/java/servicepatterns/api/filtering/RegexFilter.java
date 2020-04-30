@@ -1,23 +1,16 @@
 package servicepatterns.api.filtering;
 
-
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition.VarRegex.NumberRegex;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition.VarRegex.StringRegex;
-import de.unistuttgart.isw.sfsc.framework.descriptor.ServerTags;
-import java.util.Map;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.NumberRegex;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.StringRegex;
 import java.util.Objects;
 import java.util.function.Predicate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-final class RegexFilter implements Predicate<Map<String, ByteString>> {
+final class RegexFilter implements Predicate<SfscServiceDescriptor> {
 
-  private static final Logger logger = LoggerFactory.getLogger(RegexFilter.class);
   private final Message message;
   private final String varPath;
 
@@ -27,19 +20,9 @@ final class RegexFilter implements Predicate<Map<String, ByteString>> {
   }
 
   @Override
-  public boolean test(Map<String, ByteString> service) {
-    try {
-      ByteString regexDefinitionByteString = service.get(ServerTags.SFSC_SERVER_REGEX.name());
-      if (regexDefinitionByteString != null) {
-        RegexDefinition regexDefinition = RegexDefinition.parseFrom(regexDefinitionByteString);
-        return test(regexDefinition);
-      } else {
-        return false;
-      }
-    } catch (InvalidProtocolBufferException e) {
-      logger.warn("malformed regex", e);
-      return false;
-    }
+  public boolean test(SfscServiceDescriptor descriptor) {
+    RegexDefinition regexDefinition = descriptor.getServerTags().getRegex();
+    return test(regexDefinition);
   }
 
   public boolean test(RegexDefinition regexDefinition) {
