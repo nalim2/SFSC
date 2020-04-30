@@ -46,11 +46,13 @@ public final class ReplayingListener<T> implements Consumer<StoreEvent<T>> {
     processDeque();
   }
 
-  synchronized void processDeque() {
+  void processDeque() {
     if (ready.get()) {
-      StoreEvent<T> element;
-      while ((element = deque.poll()) != null) {
-        listener.accept(element);
+      synchronized (this) {
+        StoreEvent<T> element;
+        while ((element = deque.poll()) != null) {
+          listener.accept(element);
+        }
       }
     }
   }

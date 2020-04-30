@@ -1,6 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.jni;
 
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.LateComer;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
@@ -46,13 +47,15 @@ public class JniReactor implements Reactor {
     return new JniReactiveSocket(nativeSocketPointer, inboxQueue);
   }
 
-  @Override
   public Handle addShutdownListener(Runnable runnable) {
-    Runnable oneShotRunnable = new OneShotRunnable(runnable);
-    Handle handle = shutdownListeners.add(oneShotRunnable);
-    if (closed.get()) {
-      oneShotRunnable.run();
+    LateComer lateComer = new LateComer();
+    Handle handle = shutdownListeners.add(lateComer);
+    lateComer.set(new OneShotRunnable(() -> {
+      runnable.run();
       handle.close();
+    }));
+    if (closed.get()) {
+      lateComer.run();
     }
     return handle;
   }
