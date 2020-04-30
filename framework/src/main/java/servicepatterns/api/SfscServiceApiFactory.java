@@ -10,6 +10,11 @@ public final class SfscServiceApiFactory {
   private SfscServiceApiFactory() {
   }
 
+  public static SfscServiceApi getSfscServiceApi() throws InterruptedException, ExecutionException, TimeoutException {
+    Adapter adapter = Adapter.create(new AdapterConfiguration());
+    return new SfscServiceApiImplementation(adapter);
+  }
+
   public static SfscServiceApi getSfscServiceApi(AdapterConfiguration configuration)
       throws InterruptedException, ExecutionException, TimeoutException {
     Adapter adapter = Adapter.create(configuration);

@@ -2,9 +2,9 @@ package servicepatterns.services.channelfactory;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.protocol.channelfactory.ChannelFactoryReply;
 import de.unistuttgart.isw.sfsc.framework.protocol.channelfactory.ChannelFactoryRequest;
-import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import servicepatterns.api.SfscServiceApi;
@@ -27,9 +27,9 @@ public class ChannelFactoryClient {
   public SfscSubscriber process(ByteString byteString) {
     try {
       ChannelFactoryReply reply = ChannelFactoryReply.parseFrom(byteString);
-      Map<String, ByteString> tags = reply.getTagsMap();
-      if (tags != null) {
-        return sfscServiceApi.subscriber(tags, consumer);
+      SfscServiceDescriptor descriptor = reply.getServiceDescriptor();
+      if (descriptor != null) {
+        return sfscServiceApi.subscriber(descriptor, consumer);
       } else {
         throw new ChannelFactoryException("Response does not contain publisher information");
       }

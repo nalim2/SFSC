@@ -22,8 +22,8 @@ public final class Handshaker {
     );
 
     try (SimpleClient simpleClient = new SimpleClient(pubSubConnection, parameter.getSessionLocalTopic(), executor)) {
-      pubSubConnection.subscriptionTracker().addOneShotSubscriptionListener(parameter.getSessionRemoteTopic(), () -> {})
-          .get(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);
+      pubSubConnection.subscriptionTracker().addOneShotSubscriptionListener(parameter.getSessionRemoteTopic())
+          .await(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);
       simpleClient.send(parameter.getSessionRemoteTopic(), handshakeMessage.toByteString(), future::handleInput, parameter.getTimeoutMs(),
           future::handleError);
       return future.get(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);

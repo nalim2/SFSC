@@ -1,25 +1,25 @@
 package servicepatterns.api;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
-import java.util.Map;
-import java.util.concurrent.Future;
+import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
+
 
 public interface SfscPublisher extends NotThrowingAutoCloseable {
 
-  Future<Void> unsubscriptionFuture();
+  void publish(Message payload);
+
+  Handle onSubscription(Runnable runnable);
 
   Handle onUnsubscription(Runnable runnable);
 
-  void publish(Message payload);
+  Awaitable subscriptionAwaitable();
 
-  Map<String, ByteString> getTags();
+  Awaitable unsubscriptionAwaitable();
 
-  Future<Void> subscriptionFuture();
-
-  Handle onSubscription(Runnable runnable);
+  SfscServiceDescriptor getDescriptor();
 
   @Override
   void close();

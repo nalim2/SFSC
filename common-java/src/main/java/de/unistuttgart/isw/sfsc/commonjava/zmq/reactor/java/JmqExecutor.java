@@ -3,6 +3,7 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.LateComer;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
@@ -66,11 +67,14 @@ class JmqExecutor implements NotThrowingAutoCloseable {
   }
 
   public Handle addShutdownListener(Runnable runnable) {
-    Runnable oneShotRunnable = new OneShotRunnable(runnable);
-    Handle handle = shutdownListeners.add(oneShotRunnable);
-    if (closed.get()) {
-      oneShotRunnable.run();
+    LateComer lateComer = new LateComer();
+    Handle handle = shutdownListeners.add(lateComer);
+    lateComer.set(new OneShotRunnable(() -> {
+      runnable.run();
       handle.close();
+    }));
+    if (closed.get()) {
+      lateComer.run();
     }
     return handle;
   }
