@@ -4,7 +4,8 @@ jdk:
 
 install:
   - sudo rm -rf ./protoc
-  - unzip protoc-3.10.1-linux-x86_64.zip -d protoc
+  - wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+  - unzip protoc-3.11.4-linux-x86_64.zip -d protoc
   - chmod 755 -R protoc
   - BASE=/usr/local
   - sudo rm -rf $BASE/include/google/protobuf/
