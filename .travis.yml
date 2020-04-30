@@ -1,5 +1,3 @@
-if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
-
 language: java
 jdk:
 - openjdk12
