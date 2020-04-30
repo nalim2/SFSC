@@ -1,7 +1,20 @@
 language: java
 jdk:
 - openjdk12
+
 install:
   - wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protobuf-all-3.11.4.tar.gz
   - tar -xzvf protobuf-all-3.11.4.tar.gz
   - pushd protobuf-3.11.4 && ./configure --prefix=/usr && make && sudo make install && popd
+  
+jobs:
+  include:
+    - stage: test
+      script: mvn verify
+    - stage: deploy
+      if: branch = master
+      script:
+      - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+      - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+      - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+      - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
