@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.framework.protocol.channelfactory;
 
+import "framework/descriptor/service.proto";
+
 option java_multiple_files = true;
 
 message ChannelFactoryRequest {
@@ -9,7 +11,6 @@ message ChannelFactoryRequest {
 }
 
 message ChannelFactoryReply {
-  map<string, bytes> tags = 1;
+  de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor service_descriptor = 1;
 }
-
 

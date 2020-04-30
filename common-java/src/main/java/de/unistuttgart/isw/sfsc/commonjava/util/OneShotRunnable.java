@@ -15,4 +15,10 @@ public final class OneShotRunnable implements Runnable {
       runnable.run();
     }
   }
+
+  public boolean isDone() {
+    return done.get();
+  }
+
+
 }
