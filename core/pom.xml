@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.github.nalim2</groupId>
     <artifactId>sfsc</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>core</artifactId>
