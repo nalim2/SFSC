@@ -37,7 +37,7 @@ public class ServiceFactory {
   }
 
   public String coreId() {
-    return coreId();
+    return coreId;
   }
 
   public PubSubConnection pubSubConnection() {
