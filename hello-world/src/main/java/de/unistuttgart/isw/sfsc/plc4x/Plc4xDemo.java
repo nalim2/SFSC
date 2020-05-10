@@ -8,14 +8,13 @@ import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition.VarRegex;
-import de.unistuttgart.isw.sfsc.framework.descriptor.RegexDefinition.VarRegex.StringRegex;
-import java.util.Collections;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.StringRegex;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -23,14 +22,15 @@ import java.util.function.Function;
 import org.apache.plc4x.java.api.exceptions.PlcConnectionException;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionResponse;
+import servicepatterns.api.SfscChannelFactoryParameter;
 import servicepatterns.api.SfscClient;
 import servicepatterns.api.SfscPublisher;
+import servicepatterns.api.SfscPublisherParameter;
 import servicepatterns.api.SfscServer;
+import servicepatterns.api.SfscServerParameter;
 import servicepatterns.api.SfscServiceApi;
 import servicepatterns.api.SfscServiceApiFactory;
 import servicepatterns.api.SfscSubscriber;
-import servicepatterns.api.filtering.Filters;
-import servicepatterns.api.tagging.Tagger;
 import servicepatterns.basepatterns.ackreqrep.AckServerResult;
 
 public class Plc4xDemo {
@@ -77,8 +77,6 @@ public class Plc4xDemo {
   public static void main(String[] args) throws ExecutionException, InterruptedException, PlcConnectionException, TimeoutException {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
 
-    ByteString uuid = ByteString.copyFromUtf8(UUID.randomUUID().toString());
-
     SfscServiceApi serverSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(ADAPTER_CONFIGURATION_1);
     SfscServiceApi clientSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(ADAPTER_CONFIGURATION_2);
 
@@ -86,16 +84,11 @@ public class Plc4xDemo {
 
     /////////////////////////////////////
 
-    SfscPublisher boolPublisher = serverSfscServiceApi
-        .publisher("Bool", ByteString.copyFromUtf8(UUID.randomUUID().toString()), ByteString.copyFromUtf8("type"), Map.of("id", uuid));
-    SfscPublisher byteStringPublisher = serverSfscServiceApi
-        .publisher("ByteString", ByteString.copyFromUtf8(UUID.randomUUID().toString()), ByteString.copyFromUtf8("type"), Map.of("id", uuid));
-    SfscPublisher bytePublisher = serverSfscServiceApi
-        .publisher("Byte", ByteString.copyFromUtf8(UUID.randomUUID().toString()), ByteString.copyFromUtf8("type"), Map.of("id", uuid));
-    SfscPublisher int16Publisher = serverSfscServiceApi
-        .publisher("Int16", ByteString.copyFromUtf8(UUID.randomUUID().toString()), ByteString.copyFromUtf8("type"), Map.of("id", uuid));
-    SfscPublisher stringPublisher = serverSfscServiceApi
-        .publisher("String", ByteString.copyFromUtf8(UUID.randomUUID().toString()), ByteString.copyFromUtf8("type"), Map.of("id", uuid));
+    SfscPublisher boolPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("Bool"));
+    SfscPublisher byteStringPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("ByteString"));
+    SfscPublisher bytePublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("Byte"));
+    SfscPublisher int16Publisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("Int16"));
+    SfscPublisher stringPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("String"));
 
     PlcSubscriptionResponse boolSubscriptionResponse = plc4XServer.subscribe(topics.get("Bool"));
     PlcSubscriptionResponse byteStringSubscriptionResponse = plc4XServer.subscribe(topics.get("ByteString"));
@@ -104,38 +97,28 @@ public class Plc4xDemo {
     PlcSubscriptionResponse stringSubscriptionResponse = plc4XServer.subscribe(topics.get("String"));
 
     plc4XServer.register(event -> boolPublisher.publish(StringValue.of(event.toString())), boolSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> byteStringPublisher.publish(StringValue.of(event.toString())), byteStringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer
+        .register(event -> byteStringPublisher.publish(StringValue.of(event.toString())), byteStringSubscriptionResponse.getSubscriptionHandles());
     plc4XServer.register(event -> bytePublisher.publish(StringValue.of(event.toString())), byteSubscriptionResponse.getSubscriptionHandles());
     plc4XServer.register(event -> int16Publisher.publish(StringValue.of(event.toString())), int16SubscriptionResponse.getSubscriptionHandles());
     plc4XServer.register(event -> stringPublisher.publish(StringValue.of(event.toString())), stringSubscriptionResponse.getSubscriptionHandles());
 
-    CountDownLatch cdl = new CountDownLatch(1);
-    clientSfscServiceApi.addRegistryStoreEventListener(
-        event -> {
-          if (event.getStoreEventType() == StoreEventType.CREATE
-              && Tagger.getName(event.getData()).equals("Bool")
-              && Filters.byteStringEqualsFilter("id", uuid).test(event.getData())) { //todo not sure yet how is best
-            System.out.println("matching service found");
-            cdl.countDown();
-          }
-        }
+    clientSfscServiceApi.addOneShotRegistryStoreEventListener(
+        event -> event.getStoreEventType() == StoreEventType.CREATE
+            && Objects.equals(event.getData().getServiceName(), "Bool")
     );
+    System.out.println("matching service found");
+    SfscServiceDescriptor pubDescriptor = clientSfscServiceApi.getServices("Bool").stream().findAny().orElseThrow();
 
-    cdl.await();
-    Map<String, ByteString> pubTags = clientSfscServiceApi.getServices("Bool").stream()
-        .filter(Filters.byteStringEqualsFilter("id", uuid))
-        .findAny().orElseThrow();
-
-    SfscSubscriber subscriber = clientSfscServiceApi.subscriber(pubTags, bytestring -> System.out.println("Received message on subscriber"));
+    SfscSubscriber subscriber = clientSfscServiceApi.subscriber(pubDescriptor, bytestring -> System.out.println("Received message on subscriber"));
 
     ////////////////////////////////////////////////////////////
 
-    SfscServer server = serverSfscServiceApi.server("myServer",
-        ByteString.copyFromUtf8("plc4xtype"),
-        ByteString.copyFromUtf8(UUID.randomUUID().toString()),
-        ByteString.copyFromUtf8("plc4xtype"),
-
-        RegexDefinition.newBuilder()
+    SfscServerParameter serverParameter = new SfscServerParameter()
+        .setServiceName("myServer")
+        .setInputMessageType(ByteString.copyFromUtf8("plc4xtype"))
+        .setOutputMessageType(ByteString.copyFromUtf8("plc4xtype"))
+        .setRegexDefinition(RegexDefinition.newBuilder()
             .addRegexes(VarRegex.newBuilder()
                 .setVarName("name")
                 .setStringRegex(StringRegex.newBuilder().setRegex("w-String").build())
@@ -144,45 +127,31 @@ public class Plc4xDemo {
                 .setVarName("value")
                 .setStringRegex(StringRegex.newBuilder().setRegex(".*").build())
                 .build())
-            .build(),
-        Map.of("id", uuid),
-        plc4xServer(plc4XServer),
-        1000,
-        100,
-        3);
+            .build());
+    SfscServer server = serverSfscServiceApi.server(serverParameter, plc4xServer(plc4XServer));
 
     Thread.sleep(1000);
 
-    Map<String, ByteString> writeServerTags = clientSfscServiceApi.getServices("myServer", writeRequest(), List.of("name", "value"))
-        .stream()
-        .filter(Filters.byteStringEqualsFilter("id", uuid))
-        .findAny().orElseThrow();
-    Map<String, ByteString> readServerTags = clientSfscServiceApi.getServices("myServer")
-        .stream()
-        .filter(Filters.byteStringEqualsFilter("id", uuid))
-        .findAny().orElseThrow();
+    SfscServiceDescriptor writeServerTags = clientSfscServiceApi.getServices("myServer", writeRequest(), List.of("name", "value"))
+        .stream().findAny().orElseThrow();
+    SfscServiceDescriptor readServerTags = clientSfscServiceApi.getServices("myServer")
+        .stream().findAny().orElseThrow();
 
     SfscClient client = clientSfscServiceApi.client();
     client.request(writeServerTags, writeRequest(), writeConsumer(), 1000, () -> System.out.println("timeout"));
     client.request(readServerTags, readRequest(), readConsumer(), 1000, () -> System.out.println("timeout"));
 
     ////////////////////////////////
-    ChannelGenerator channelGenerator = new ChannelGenerator(clientSfscServiceApi);
-    SfscServer channelGeneratorServer = serverSfscServiceApi.channelGenerator(
-        "myGen",
-        Map.of("id", uuid),
-        ByteString.copyFromUtf8(UUID.randomUUID().toString()),
-        ByteString.copyFromUtf8("ignored"),
-        channelGenerator);
+    SfscChannelFactoryParameter factoryParameter = new SfscChannelFactoryParameter()
+        .setServiceName("myFactory");
+    SfscServer channelFactoryServer = serverSfscServiceApi.channelFactory(factoryParameter, new ChannelFactoryFunction(clientSfscServiceApi));
 
     Thread.sleep(1000);
-    Map<String, ByteString> genServerTags = clientSfscServiceApi.getServices("myGen").stream()
-        .filter(Filters.byteStringEqualsFilter("id", uuid))
-        .findAny().orElseThrow();
+    SfscServiceDescriptor descriptor = clientSfscServiceApi.getServices("myFactory").stream().findAny().orElseThrow();
     SfscClient client2 = clientSfscServiceApi.client();
     Thread.sleep(1000);
     SfscSubscriber sfscSubscriber = client2.requestChannel(
-        genServerTags,
+        descriptor,
         ByteString.EMPTY,
         500,
         message -> {
@@ -278,21 +247,21 @@ public class Plc4xDemo {
   }
 
 
-  static class ChannelGenerator implements Function<ByteString, SfscPublisher> {
+  static class ChannelFactoryFunction implements Function<ByteString, SfscPublisher> {
 
     private final SfscServiceApi sfscServiceApi;
 
-    ChannelGenerator(SfscServiceApi sfscServiceApi) {
+    ChannelFactoryFunction(SfscServiceApi sfscServiceApi) {
       this.sfscServiceApi = sfscServiceApi;
     }
 
     @Override
     public SfscPublisher apply(ByteString sfscMessage) {
-      SfscPublisher publisher = sfscServiceApi.unregisteredPublisher(
-          "channelName",
-          ByteString.copyFromUtf8(UUID.randomUUID().toString()),
-          ByteString.copyFromUtf8("String"),
-          Collections.emptyMap());
+      SfscPublisherParameter parameter = new SfscPublisherParameter()
+          .setServiceName("channelName")
+          .setOutputMessageType(ByteString.copyFromUtf8("String"))
+          .setUnregistered(true);
+      SfscPublisher publisher = sfscServiceApi.publisher(parameter);
       publisher.onSubscription(() -> publisher.publish(StringValue.of("myIndividualMessage")));
       return publisher;
     }

@@ -5,9 +5,10 @@ import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol.SubscriptionType;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.LateComer;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
-import de.unistuttgart.isw.sfsc.commonjava.util.OneShotListener;
+import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
 import de.unistuttgart.isw.sfsc.commonjava.util.QueueConnector;
 import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
@@ -17,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.slf4j.Logger;
@@ -59,24 +59,23 @@ public class SubscriptionTrackingInbox implements SubscriptionTracker, NotThrowi
   }
 
   @Override
-  public Future<Void> addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Runnable runnable) {
-    OneShotListener<StoreEvent<ByteString>> oneShotListener = new OneShotListener<>(predicate, runnable);
-    Handle handle = listeners.add(oneShotListener);
-    Future<Void> future = oneShotListener.initialize(handle);
+  public Handle addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Runnable runnable) {
+    LateComer lateComer = new LateComer();
+    Consumer<StoreEvent<ByteString>> consumer = event -> {
+      if (predicate.test(event)) {
+        lateComer.run();
+      }
+    };
+    Handle handle = listeners.add(consumer);
+    lateComer.set(new OneShotRunnable(() -> {
+      runnable.run();
+      handle.close();
+    }));
     Set<StoreEvent<ByteString>> prepopulation = StoreEvent.toStoreEventSet(getSubscriptions());
-    prepopulation.forEach(oneShotListener);
-    return future;
+    prepopulation.forEach(consumer);
+    return handle;
   }
 
-  @Override
-  public Future<Void> addOneShotSubscriptionListener(ByteString topic, Runnable runnable) {
-    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, runnable);
-  }
-
-  @Override
-  public Future<Void> addOneShotUnsubscriptionListener(ByteString topic, Runnable runnable) {
-    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.DELETE, runnable);
-  }
 
   void accept(List<byte[]> subscriptionMessage) {  //not thread safe, but we have just one so its okay
     if (!SubProtocol.isValid(subscriptionMessage)) {

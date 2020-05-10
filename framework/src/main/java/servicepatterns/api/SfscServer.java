@@ -1,12 +1,11 @@
 package servicepatterns.api;
 
-import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
-import java.util.Map;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 
 public interface SfscServer extends NotThrowingAutoCloseable {
 
-  Map<String, ByteString> getTags();
+  SfscServiceDescriptor getDescriptor();
 
   @Override
   void close();
