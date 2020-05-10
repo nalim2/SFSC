@@ -1,3 +1,5 @@
+if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
+
 language: java
 jdk:
 - openjdk12
@@ -12,7 +14,7 @@ jobs:
     - stage: test
       script: mvn verify
     - stage: deploy
-      if: (branch = master) AND (tag = ^release.*)
+      if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
       script:
       - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
       - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
