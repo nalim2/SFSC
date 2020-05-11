@@ -16,7 +16,6 @@ jobs:
   include:
     - stage: test
       script:
-        - echo $TRAVIS_TAG
         - mvn verify
     - stage: deploy
 #      if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
