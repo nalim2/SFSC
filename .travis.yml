@@ -17,9 +17,10 @@ jobs:
     - stage: test
       script: mvn verify
     - stage: deploy
-      if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
+#      if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
+      if: env(TRAVIS_TAG) IS NOT blank
       script:
       - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
       - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
       - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
-      - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
+      - mvn clean deploy --settings .maven.xml -DskipTests=true -Drevision=$TRAVIS_TAG -B -U -Prelease
