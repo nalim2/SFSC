@@ -8,10 +8,20 @@ import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
+import de.unistuttgart.isw.sfsc.framework.api.SfscChannelFactoryParameter;
+import de.unistuttgart.isw.sfsc.framework.api.SfscClient;
+import de.unistuttgart.isw.sfsc.framework.api.SfscPublisher;
+import de.unistuttgart.isw.sfsc.framework.api.SfscPublisherParameter;
+import de.unistuttgart.isw.sfsc.framework.api.SfscServer;
+import de.unistuttgart.isw.sfsc.framework.api.SfscServerParameter;
+import de.unistuttgart.isw.sfsc.framework.api.SfscServiceApi;
+import de.unistuttgart.isw.sfsc.framework.api.SfscServiceApiFactory;
+import de.unistuttgart.isw.sfsc.framework.api.SfscSubscriber;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.StringRegex;
+import de.unistuttgart.isw.sfsc.framework.patterns.ackreqrep.AckServerResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,16 +32,6 @@ import java.util.function.Function;
 import org.apache.plc4x.java.api.exceptions.PlcConnectionException;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
 import org.apache.plc4x.java.api.messages.PlcSubscriptionResponse;
-import servicepatterns.api.SfscChannelFactoryParameter;
-import servicepatterns.api.SfscClient;
-import servicepatterns.api.SfscPublisher;
-import servicepatterns.api.SfscPublisherParameter;
-import servicepatterns.api.SfscServer;
-import servicepatterns.api.SfscServerParameter;
-import servicepatterns.api.SfscServiceApi;
-import servicepatterns.api.SfscServiceApiFactory;
-import servicepatterns.api.SfscSubscriber;
-import servicepatterns.basepatterns.ackreqrep.AckServerResult;
 
 public class Plc4xDemo {
 
