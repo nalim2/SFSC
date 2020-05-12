@@ -1,4 +1,4 @@
-package servicepatterns.api.filtering;
+package servicepatterns.api.registry;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;

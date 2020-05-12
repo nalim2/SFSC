@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import servicepatterns.api.filtering.Filters;
 
 public final class ApiRegistryManager implements NotThrowingAutoCloseable {
 
@@ -46,8 +45,17 @@ public final class ApiRegistryManager implements NotThrowingAutoCloseable {
   public Set<SfscServiceDescriptor> getServices(String name, Message message, Collection<String> varPaths) {
     return getServices(name)
         .stream()
-        .filter(Filters.regexFilter(message, varPaths))
+        .filter(getVarPathPredicate(message, varPaths))
         .collect(Collectors.toUnmodifiableSet());
+  }
+
+  Predicate<SfscServiceDescriptor> getVarPathPredicate(Message message, Collection<String> varPaths) {
+    return varPaths
+        .stream()
+        .map(varPath -> new RegexFilter(message, varPath))
+        .map(filter -> (Predicate<SfscServiceDescriptor>) filter)
+        .reduce(Predicate::and)
+        .orElseThrow();
   }
 
   public Handle registerService(SfscServiceDescriptor descriptor) {
