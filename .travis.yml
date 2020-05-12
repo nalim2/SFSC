@@ -1,6 +1,6 @@
 language: java
 jdk:
-- openjdk12
+  - openjdk12
 
 install:
   - sudo rm -rf ./protoc
@@ -11,15 +11,17 @@ install:
   - sudo rm -rf $BASE/include/google/protobuf/
   - sudo cp protoc/bin/protoc $BASE/bin
   - sudo cp -R protoc/include/* $BASE/include
-  
+
 jobs:
   include:
     - stage: test
-      script: mvn verify
+      script:
+        - mvn -version
+        - mvn verify
     - stage: deploy
       if: (( branch = master ) AND (commit_message =~ /^deploy-release.*/ ))
       script:
-      - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-      - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
-      - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
-      - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
+        - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+        - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+        - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+        - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease

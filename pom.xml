@@ -20,7 +20,6 @@
   <scm>
     <connection>scm:git:https://github.com/nalim2/SFSC.git</connection>
     <url>https://github.com/nalim2/SFSC</url>
-    <tag>v0.1.3</tag>
   </scm>
 
   <distributionManagement>
@@ -64,7 +63,7 @@
   </modules>
 
   <properties>
-    <revision>0.1.1</revision>
+    <revision>0.1.3-SNAPSHOT</revision>
 
     <slf4j.version>1.7.30</slf4j.version>
     <protobuf.version>3.11.0</protobuf.version>
