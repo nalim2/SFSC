@@ -51,32 +51,36 @@ class JmqSocketImpl implements ReactiveSocket {
       @Override
       public void connect(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          socket.connect(Connector.createUri(protocol , address));
-          logger.debug("Connected socket {} to {}", socket, address);
+          String uri = Connector.createUri(protocol, address);
+          socket.connect(uri);
+          logger.debug("Connected socket {} to {}", socket, uri);
         });
       }
 
       @Override
       public void disconnect(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          socket.disconnect(Connector.createUri(protocol , address));
-          logger.debug("Disconnected socket {} from {}", socket, address);
+          String uri = Connector.createUri(protocol, address);
+          socket.disconnect(uri);
+          logger.debug("Disconnected socket {} from {}", socket, uri);
         });
       }
 
       @Override
       public void bind(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          socket.bind(Connector.createUri(protocol , address));
-          logger.debug("Bound socket {} to {}", socket, address);
+          String uri = Connector.createUri(protocol, address);
+          socket.bind(uri);
+          logger.debug("Bound socket {} to {}", socket, uri);
         });
       }
 
       @Override
       public void unbind(TransportProtocol protocol, String address) {
         executor.execute(() -> {
-          socket.disconnect(Connector.createUri(protocol , address));
-          logger.debug("Unbound socket {} from {}", socket, address);
+          String uri = Connector.createUri(protocol, address);
+          socket.disconnect(uri);
+          logger.debug("Unbound socket {} from {}", socket, uri);
         });
       }
     };

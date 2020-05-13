@@ -49,17 +49,23 @@ public class Data implements NotThrowingAutoCloseable {
 
   public static Data create(CoreParameter parameter) throws ExecutionException, InterruptedException, IOException {
     Data data = new Data(parameter);
+
     File pub = new File(parameter.getIpcFolderLocation(), parameter.getDataPubIpcFile());
     File sub = new File(parameter.getIpcFolderLocation(), parameter.getDataSubIpcFile());
     pub.createNewFile();
     sub.createNewFile();
-    data.frontend.publisherSocketConnector().bind(TransportProtocol.IPC, pub.getAbsolutePath());
-    data.frontend.subscriberSocketConnector().bind(TransportProtocol.IPC, sub.getAbsolutePath());
+    String frontendPubIpcPath = pub.getAbsolutePath();
+    String frontendSubIpcPath = sub.getAbsolutePath();
+    data.frontend.publisherSocketConnector().bind(TransportProtocol.IPC, frontendPubIpcPath);
+    data.frontend.subscriberSocketConnector().bind(TransportProtocol.IPC, frontendSubIpcPath);
 
-    data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataPubTcpPort()));
-    data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataSubTcpPort()));
+    String frontendPubTcpAddress = Connector.createWildcardAddress(parameter.getDataPubTcpPort());
+    String frontendSubTcpAddress = Connector.createWildcardAddress(parameter.getDataSubTcpPort());
+    data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, frontendPubTcpAddress);
+    data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, frontendSubTcpAddress);
 
-    data.backend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataBackendTcpPort()));
+    String backendTcpAddress = Connector.createWildcardAddress(parameter.getDataBackendTcpPort());
+    data.backend.subscriberSocketConnector().bind(TransportProtocol.TCP, backendTcpAddress);
     return data;
   }
 

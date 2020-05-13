@@ -63,12 +63,16 @@ public class Control implements NotThrowingAutoCloseable {
     File sub = new File(parameter.getIpcFolderLocation(), parameter.getControlSubIpcFile());
     pub.createNewFile();
     sub.createNewFile();
-    control.pubSubSocketPair.publisherSocketConnector().bind(TransportProtocol.IPC, pub.getAbsolutePath());
-    control.pubSubSocketPair.subscriberSocketConnector().bind(TransportProtocol.IPC, sub.getAbsolutePath());
-    control.pubSubSocketPair.publisherSocketConnector()
-        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getControlPubTcpPort()));
-    control.pubSubSocketPair.subscriberSocketConnector()
-        .bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getControlSubTcpPort()));
+    String pubIpcPath = pub.getAbsolutePath();
+    String subIpcPath = sub.getAbsolutePath();
+    control.pubSubSocketPair.publisherSocketConnector().bind(TransportProtocol.IPC, pubIpcPath);
+    control.pubSubSocketPair.subscriberSocketConnector().bind(TransportProtocol.IPC, subIpcPath);
+
+    String pubTcpAddress = Connector.createWildcardAddress(parameter.getControlPubTcpPort());
+    String subTcpAddress = Connector.createWildcardAddress(parameter.getControlSubTcpPort());
+    control.pubSubSocketPair.publisherSocketConnector().bind(TransportProtocol.TCP, pubTcpAddress);
+    control.pubSubSocketPair.subscriberSocketConnector().bind(TransportProtocol.TCP, subTcpAddress);
+
     return control;
   }
 
