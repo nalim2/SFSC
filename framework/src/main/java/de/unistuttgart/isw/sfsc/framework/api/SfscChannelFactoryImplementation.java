@@ -33,7 +33,7 @@ final class SfscChannelFactoryImplementation implements SfscServer {
         .build();
 
     ChannelFactoryServer channelFactoryServer = new ChannelFactoryServer(channelFactory);
-    SimpleServer server = new SimpleServer(pubSubConnection, channelFactoryServer, descriptor.getServerTags().getInputTopic(),
+    SimpleServer server = new SimpleServer(pubSubConnection, channelFactoryServer, descriptor.getChannelFactoryTags().getInputTopic(),
         serviceFactory.executorService());
     Handle handle = serviceFactory.registerService(descriptor);
     closeCallback = () -> {
