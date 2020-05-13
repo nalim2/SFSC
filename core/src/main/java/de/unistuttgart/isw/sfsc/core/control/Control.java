@@ -69,10 +69,6 @@ public class Control implements NotThrowingAutoCloseable {
         .bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getControlPubTcpPort()));
     control.pubSubSocketPair.subscriberSocketConnector()
         .bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getControlSubTcpPort()));
-    control.pubSubSocketPair.publisherSocketConnector()
-        .bind(TransportProtocol.IPC, Connector.createAddress(parameter.getHost(), parameter.getControlPubTcpPort()));
-    control.pubSubSocketPair.subscriberSocketConnector()
-        .bind(TransportProtocol.IPC, Connector.createAddress(parameter.getHost(), parameter.getControlSubTcpPort()));
     return control;
   }
 

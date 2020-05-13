@@ -58,6 +58,7 @@ public class Data implements NotThrowingAutoCloseable {
 
     data.frontend.publisherSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataPubTcpPort()));
     data.frontend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataSubTcpPort()));
+
     data.backend.subscriberSocketConnector().bind(TransportProtocol.TCP, Connector.createWildcardAddress(parameter.getDataBackendTcpPort()));
     return data;
   }
