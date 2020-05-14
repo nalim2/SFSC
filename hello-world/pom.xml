@@ -20,11 +20,11 @@
   <dependencies>
     <dependency>
       <groupId>com.github.nalim2</groupId>
-      <artifactId>adapter</artifactId>
+      <artifactId>framework</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.nalim2</groupId>
-      <artifactId>framework</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
