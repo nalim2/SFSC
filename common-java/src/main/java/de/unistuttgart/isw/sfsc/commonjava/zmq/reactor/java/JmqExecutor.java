@@ -1,6 +1,6 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.PubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.LateComer;
@@ -63,7 +63,7 @@ class JmqExecutor implements NotThrowingAutoCloseable {
   }
 
   public Future<ReactiveSocket> createSubscriber() {
-    return commandExecutor.createReactiveSocket(SocketType.XSUB, DataProtocol.frameCount());
+    return commandExecutor.createReactiveSocket(SocketType.XSUB, PubProtocol.frameCount());
   }
 
   public Handle addShutdownListener(Runnable runnable) {
