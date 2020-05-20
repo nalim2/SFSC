@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.framework.api;
+package de.unistuttgart.isw.sfsc.framework.api.services.pubsub;
 
 import com.google.protobuf.ByteString;
 import java.util.Map;

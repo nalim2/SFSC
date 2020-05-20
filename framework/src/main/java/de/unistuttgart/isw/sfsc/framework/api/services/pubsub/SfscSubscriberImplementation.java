@@ -1,12 +1,12 @@
-package de.unistuttgart.isw.sfsc.framework.api;
+package de.unistuttgart.isw.sfsc.framework.api.services.pubsub;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Subscriber;
-import de.unistuttgart.isw.sfsc.framework.api.tagging.ServiceFactory;
+import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import java.util.function.Consumer;
 
-final class SfscSubscriberImplementation implements SfscSubscriber {
+public final class SfscSubscriberImplementation implements SfscSubscriber {
 
   private final Runnable closeCallback;
 

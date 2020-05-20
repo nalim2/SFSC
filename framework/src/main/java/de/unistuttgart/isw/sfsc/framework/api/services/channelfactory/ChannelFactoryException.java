@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.framework.services.channelfactory;
+package de.unistuttgart.isw.sfsc.framework.api.services.channelfactory;
 
 public class ChannelFactoryException extends RuntimeException {
 

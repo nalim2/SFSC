@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.framework.api;
+package de.unistuttgart.isw.sfsc.framework.api.services.pubsub;
 
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;

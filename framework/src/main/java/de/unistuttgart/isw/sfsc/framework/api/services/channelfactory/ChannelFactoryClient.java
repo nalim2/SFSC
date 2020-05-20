@@ -1,9 +1,9 @@
-package de.unistuttgart.isw.sfsc.framework.services.channelfactory;
+package de.unistuttgart.isw.sfsc.framework.api.services.channelfactory;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.framework.api.SfscServiceApi;
-import de.unistuttgart.isw.sfsc.framework.api.SfscSubscriber;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscSubscriber;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.protocol.channelfactory.ChannelFactoryReply;
 import de.unistuttgart.isw.sfsc.framework.protocol.channelfactory.ChannelFactoryRequest;
