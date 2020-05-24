@@ -44,4 +44,6 @@ public interface SfscServiceApi {
 
   Awaitable addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate);
 
+  Handle addCoreLostEventListener(Runnable runnable);
+
 }
