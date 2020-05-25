@@ -116,5 +116,8 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     return adapter.addCoreLostEventListener(runnable);
   }
 
-  //todo close
+  @Override
+  public void close() {
+    //todo
+  }
 }
