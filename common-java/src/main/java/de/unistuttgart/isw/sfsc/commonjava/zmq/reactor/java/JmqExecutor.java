@@ -3,10 +3,8 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.java;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.PubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.SubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
-import de.unistuttgart.isw.sfsc.commonjava.util.LateComer;
-import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
+import de.unistuttgart.isw.sfsc.commonjava.util.ListenableEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
-import de.unistuttgart.isw.sfsc.commonjava.util.OneShotRunnable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Connector;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
@@ -20,7 +18,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZLoop;
@@ -36,8 +33,7 @@ class JmqExecutor implements NotThrowingAutoCloseable {
 
   private final Queue<Runnable> commandQueue = new ConcurrentLinkedQueue<>();
   private final BlockingQueue<Object> notificationQueue = new LinkedTransferQueue<>();
-  private final Listeners<Runnable> shutdownListeners = new Listeners<>();
-  private final AtomicBoolean closed = new AtomicBoolean();
+  private final ListenableEvent shutdownEvent = new ListenableEvent();
   private final String address = Connector.createUri(TransportProtocol.INPROC, UUID.randomUUID().toString());
 
   private final ZContext zContext;
@@ -48,6 +44,13 @@ class JmqExecutor implements NotThrowingAutoCloseable {
     this.zContext = zContext;
     this.commandExecutor = new CommandExecutor();
     this.notificationInjector = new NotificationInjector();
+
+    shutdownEvent.addListener(new Thread(() -> {
+      notificationInjector.close();
+      commandExecutor.close();
+      zContext.close();
+    })::start);
+
   }
 
   static JmqExecutor create(ZContext zContext) throws InterruptedException {
@@ -67,16 +70,7 @@ class JmqExecutor implements NotThrowingAutoCloseable {
   }
 
   public Handle addShutdownListener(Runnable runnable) {
-    LateComer lateComer = new LateComer();
-    Handle handle = shutdownListeners.add(lateComer);
-    lateComer.set(new OneShotRunnable(() -> {
-      runnable.run();
-      handle.close();
-    }));
-    if (closed.get()) {
-      lateComer.run();
-    }
-    return handle;
+    return shutdownEvent.addListener(runnable);
   }
 
   void execute(Runnable runnable) {
@@ -86,14 +80,7 @@ class JmqExecutor implements NotThrowingAutoCloseable {
 
   @Override
   public void close() {
-    if (closed.compareAndSet(false, true)) {
-      new Thread(() -> {
-        notificationInjector.close();
-        commandExecutor.close();
-        zContext.close();
-        shutdownListeners.forEach(Runnable::run);
-      }).start();
-    }
+    shutdownEvent.fire();
   }
 
   class CommandExecutor implements NotThrowingAutoCloseable {
@@ -111,25 +98,24 @@ class JmqExecutor implements NotThrowingAutoCloseable {
 
     void start() {
       executorService.execute(() -> {
-            final Socket receiver = commandExecutorZContext.createSocket(SocketType.PAIR);
-            receiver.bind(address);
-            bound.countDown();
-            final PollItem pollItem = new PollItem(receiver, ZMQ.ZMQ_POLLIN);
-            final IZLoopHandler handlerManager = (unused1, unused2, unused3) -> {
-              try {
-                receiver.recv();
-                commandQueue.remove().run();
-              } catch (ZMQException e) {
-                JmqExecutor.this.close();
-                Thread.currentThread().interrupt();
-              }
-              return 0;
-            };
-            zLoop.addPoller(pollItem, handlerManager, null);
-            zLoop.start();
-            commandExecutorZContext.close();
+        final Socket receiver = commandExecutorZContext.createSocket(SocketType.PAIR);
+        receiver.bind(address);
+        bound.countDown();
+        final PollItem pollItem = new PollItem(receiver, ZMQ.ZMQ_POLLIN);
+        final IZLoopHandler handlerManager = (unused1, unused2, unused3) -> {
+          try {
+            receiver.recv();
+            commandQueue.remove().run();
+          } catch (ZMQException e) {
+            JmqExecutor.this.close();
+            Thread.currentThread().interrupt();
           }
-      );
+          return 0;
+        };
+        zLoop.addPoller(pollItem, handlerManager, null);
+        zLoop.start();
+        commandExecutorZContext.close();
+      });
     }
 
     Future<ReactiveSocket> createReactiveSocket(SocketType type, int defaultFrameCount) {
@@ -165,23 +151,22 @@ class JmqExecutor implements NotThrowingAutoCloseable {
 
     void start() {
       executorService.execute(() -> {
-            ZContext notificationInjectorZContext = ZContext.shadow(zContext);
-            final Socket notificationSender = notificationInjectorZContext.createSocket(SocketType.PAIR);
-            notificationSender.connect(address);
-            while (!Thread.interrupted()) {
-              try {
-                notificationQueue.take();
-                notificationSender.send(NOTIFICATION);
-              } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-              } catch (ZMQException e) {
-                JmqExecutor.this.close();
-                Thread.currentThread().interrupt();
-              }
-            }
-            notificationInjectorZContext.close();
+        ZContext notificationInjectorZContext = ZContext.shadow(zContext);
+        final Socket notificationSender = notificationInjectorZContext.createSocket(SocketType.PAIR);
+        notificationSender.connect(address);
+        while (!Thread.interrupted()) {
+          try {
+            notificationQueue.take();
+            notificationSender.send(NOTIFICATION);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          } catch (ZMQException e) {
+            JmqExecutor.this.close();
+            Thread.currentThread().interrupt();
           }
-      );
+        }
+        notificationInjectorZContext.close();
+      });
     }
 
     @Override

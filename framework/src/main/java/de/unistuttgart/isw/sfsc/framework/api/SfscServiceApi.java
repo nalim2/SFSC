@@ -3,6 +3,7 @@ package de.unistuttgart.isw.sfsc.framework.api;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryParameter;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface SfscServiceApi {
+public interface SfscServiceApi extends NotThrowingAutoCloseable {
 
   Set<SfscServiceDescriptor> getServices();
 
@@ -43,5 +44,7 @@ public interface SfscServiceApi {
   Handle addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate, Runnable runnable);
 
   Awaitable addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate);
+
+  Handle addCoreLostEventListener(Runnable runnable);
 
 }

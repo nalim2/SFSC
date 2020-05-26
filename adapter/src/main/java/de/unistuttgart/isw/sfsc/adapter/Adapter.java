@@ -4,6 +4,7 @@ import de.unistuttgart.isw.sfsc.adapter.configuration.AdapterConfiguration;
 import de.unistuttgart.isw.sfsc.adapter.control.ControlPlane;
 import de.unistuttgart.isw.sfsc.adapter.control.RegistryApi;
 import de.unistuttgart.isw.sfsc.adapter.data.DataPlane;
+import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
@@ -27,7 +28,8 @@ public class Adapter implements NotThrowingAutoCloseable {
     return create(new AdapterConfiguration());
   }
 
-  public static Adapter create(AdapterConfiguration configuration) throws InterruptedException, ExecutionException, TimeoutException {
+  public static Adapter create(AdapterConfiguration configuration)
+      throws InterruptedException, ExecutionException, TimeoutException {
     return create(configuration.toAdapterParameter());
   }
 
@@ -48,6 +50,10 @@ public class Adapter implements NotThrowingAutoCloseable {
 
   public AdapterInformation adapterInformation() {
     return controlPlane.adapterInformation();
+  }
+
+  public Handle addCoreLostEventListener(Runnable runnable) {
+    return controlPlane.addCoreLostEventListener(runnable);
   }
 
   @Override

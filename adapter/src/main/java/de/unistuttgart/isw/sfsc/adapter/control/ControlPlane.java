@@ -17,6 +17,8 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Hello;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Welcome;
 import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatModule;
 import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatParameter;
+import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.ListenableEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnectionImplementation;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
@@ -31,6 +33,7 @@ import java.util.concurrent.TimeoutException;
 public class ControlPlane implements NotThrowingAutoCloseable {
 
   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+  private final ListenableEvent coreLostEvent = new ListenableEvent();
   private final PubSubSocketPair pubSubSocketPair;
   private final PubSubConnectionImplementation pubSubConnection;
 
@@ -39,16 +42,26 @@ public class ControlPlane implements NotThrowingAutoCloseable {
   private final AdapterInformation adapterInformation;
   private final DataParameter dataParameter;
 
-  public ControlPlane(Reactor reactor, AdapterParameter parameter) throws ExecutionException, InterruptedException, TimeoutException {
+  public ControlPlane(Reactor reactor, AdapterParameter parameter)
+      throws ExecutionException, InterruptedException, TimeoutException {
 
-    BootstrapperParameter bootstrapperParameter = new BootstrapperParameter(parameter.getBootstrapCoreTopic(), parameter.getControlTimeoutMs());
-    HandshakerParameter handshakerParameter = new HandshakerParameter(parameter.getHandshakeCoreTopic(), parameter.getHandshakeAdapterTopic(),
+    BootstrapperParameter bootstrapperParameter = new BootstrapperParameter(parameter.getBootstrapCoreTopic(),
         parameter.getControlTimeoutMs());
-    HeartbeatParameter heartbeatParameter = new HeartbeatParameter(parameter.getAdapterId(), parameter.getHeartbeatSendRateMs(),
-        parameter.getHeartbeatAdapterTopic(), parameter.getHeartbeatDeadlineIncomingMs());
-    RegistryParameter registryParameter = new RegistryParameter(parameter.getAdapterId(), parameter.getRegistryCoreQueryTopic(),
-        parameter.getRegistryCoreCommandTopic(), parameter.getRegistryCoreEventTopic(), parameter.getRegistryAdapterQueryTopic(),
-        parameter.getRegistryAdapterCommandTopic(), parameter.getControlTimeoutMs(), parameter.getRegistryPollingRateMs());
+    HandshakerParameter handshakerParameter = new HandshakerParameter(parameter.getHandshakeCoreTopic(),
+        parameter.getHandshakeAdapterTopic(),
+        parameter.getControlTimeoutMs());
+    HeartbeatParameter heartbeatParameter = new HeartbeatParameter(parameter.getAdapterId(),
+        parameter.getHeartbeatSendRateMs(),
+        parameter.getHeartbeatAdapterTopic(),
+        parameter.getHeartbeatDeadlineIncomingMs());
+    RegistryParameter registryParameter = new RegistryParameter(parameter.getAdapterId(),
+        parameter.getRegistryCoreQueryTopic(),
+        parameter.getRegistryCoreCommandTopic(),
+        parameter.getRegistryCoreEventTopic(),
+        parameter.getRegistryAdapterQueryTopic(),
+        parameter.getRegistryAdapterCommandTopic(),
+        parameter.getControlTimeoutMs(),
+        parameter.getRegistryPollingRateMs());
 
     pubSubSocketPair = PubSubSocketPair.create(reactor);
     pubSubConnection = PubSubConnectionImplementation.create(pubSubSocketPair);
@@ -64,34 +77,43 @@ public class ControlPlane implements NotThrowingAutoCloseable {
     }
     pubSubSocketPair.subscriberSocketConnector().connect(parameter.getTransportProtocol(), coreControlPubAddress);
 
-    BootstrapMessage bootstrapMessage = Bootstrapper.bootstrap(bootstrapperParameter, pubSubConnection, executorService);
+    BootstrapMessage bootstrapMessage = Bootstrapper.bootstrap(bootstrapperParameter,
+        pubSubConnection,
+        executorService);
 
     String coreControlSubAddress;
     if (parameter.getTransportProtocol() == TransportProtocol.TCP) {
       coreControlSubAddress = createAddress(parameter.getCoreHost(), bootstrapMessage.getCoreControlSubTcpPort());
     } else if (parameter.getTransportProtocol() == TransportProtocol.IPC) {
-      coreControlSubAddress = new File(parameter.getCoreIpcLocation(), bootstrapMessage.getCoreControlSubIpcFile()).getAbsolutePath();
+      coreControlSubAddress = new File(parameter.getCoreIpcLocation(),
+          bootstrapMessage.getCoreControlSubIpcFile()).getAbsolutePath();
     } else {
       throw new IllegalArgumentException();
     }
     pubSubSocketPair.publisherSocketConnector().connect(parameter.getTransportProtocol(), coreControlSubAddress);
 
-    Hello hello = Hello.newBuilder().setAdapterId(heartbeatParameter.getOutgoingId()).setHeartbeatTopic(heartbeatParameter.getExpectedIncomingTopic())
+    Hello hello = Hello
+        .newBuilder()
+        .setAdapterId(heartbeatParameter.getOutgoingId())
+        .setHeartbeatTopic(heartbeatParameter.getExpectedIncomingTopic())
         .build();
     Welcome welcome = Handshaker.handshake(handshakerParameter, pubSubConnection, executorService, hello);
 
     heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatParameter);
     ByteString heartbeatCoreTopic = ByteString.copyFromUtf8(parameter.getHeartbeatCoreTopic());
-    heartbeatModule.startSession(welcome.getCoreId(), heartbeatCoreTopic, core -> System.out.println("Core died")); //todo
+    heartbeatModule.startSession(welcome.getCoreId(), heartbeatCoreTopic, coreId -> coreLostEvent.fire());
     registryModule = RegistryModule.create(registryParameter, pubSubConnection, executorService);
 
-    adapterInformation = new AdapterInformation(welcome.getCoreId(), parameter.getAdapterId(), parameter.getTransportProtocol());
+    adapterInformation = new AdapterInformation(welcome.getCoreId(),
+        parameter.getAdapterId(),
+        parameter.getTransportProtocol());
 
     String coreDataPubAddress;
     if (parameter.getTransportProtocol() == TransportProtocol.TCP) {
       coreDataPubAddress = createAddress(parameter.getCoreHost(), bootstrapMessage.getCoreDataPubTcpPort());
     } else if (parameter.getTransportProtocol() == TransportProtocol.IPC) {
-      coreDataPubAddress = new File(parameter.getCoreIpcLocation(), bootstrapMessage.getCoreDataPubIpcFile()).getAbsolutePath();
+      coreDataPubAddress = new File(parameter.getCoreIpcLocation(),
+          bootstrapMessage.getCoreDataPubIpcFile()).getAbsolutePath();
     } else {
       throw new IllegalArgumentException();
     }
@@ -99,11 +121,16 @@ public class ControlPlane implements NotThrowingAutoCloseable {
     if (parameter.getTransportProtocol() == TransportProtocol.TCP) {
       coreDataSubAddress = createAddress(parameter.getCoreHost(), bootstrapMessage.getCoreDataSubTcpPort());
     } else if (parameter.getTransportProtocol() == TransportProtocol.IPC) {
-      coreDataSubAddress = new File(parameter.getCoreIpcLocation(), bootstrapMessage.getCoreDataSubIpcFile()).getAbsolutePath();
+      coreDataSubAddress = new File(parameter.getCoreIpcLocation(),
+          bootstrapMessage.getCoreDataSubIpcFile()).getAbsolutePath();
     } else {
       throw new IllegalArgumentException();
     }
     dataParameter = new DataParameter(parameter.getTransportProtocol(), coreDataPubAddress, coreDataSubAddress);
+  }
+
+  public Handle addCoreLostEventListener(Runnable runnable) {
+    return coreLostEvent.addListener(runnable);
   }
 
   public DataParameter dataParameter() {
