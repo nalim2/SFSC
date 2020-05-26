@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.framework.api;
+package de.unistuttgart.isw.sfsc.framework.api.services.clientserver;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;

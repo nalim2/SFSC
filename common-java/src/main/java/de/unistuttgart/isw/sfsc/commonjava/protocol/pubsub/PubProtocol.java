@@ -2,14 +2,14 @@ package de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub;
 
 import java.util.List;
 
-public enum DataProtocol {
+public enum PubProtocol {
   TOPIC_FRAME(0),
   DATA_FRAME(1);
 
   private static final int LENGTH = values().length; //cache
   private final int position;
 
-  DataProtocol(int position) {
+  PubProtocol(int position) {
     this.position = position;
     assert this.position == ordinal();
   }

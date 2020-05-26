@@ -1,7 +1,8 @@
-package de.unistuttgart.isw.sfsc.framework.api;
+package de.unistuttgart.isw.sfsc.framework.api.services.clientserver;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscSubscriber;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;

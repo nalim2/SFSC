@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.framework.api;
+package de.unistuttgart.isw.sfsc.framework.api.services.pubsub;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -7,13 +7,13 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
-import de.unistuttgart.isw.sfsc.framework.api.tagging.ServiceFactory;
+import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.PublisherTags;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-final class SfscPublisherImplementation implements SfscPublisher {
+public final class SfscPublisherImplementation implements SfscPublisher {
 
   private static final boolean defaultUnregistered = false;
 
@@ -25,7 +25,7 @@ final class SfscPublisherImplementation implements SfscPublisher {
   private final Executor executor;
   private final Runnable closeCallback;
 
-  SfscPublisherImplementation(SfscPublisherParameter parameter, ServiceFactory serviceFactory) {
+  public SfscPublisherImplementation(SfscPublisherParameter parameter, ServiceFactory serviceFactory) {
     PubSubConnection pubSubConnection = serviceFactory.pubSubConnection();
     String serviceId = serviceFactory.createServiceId();
     descriptor = SfscServiceDescriptor.newBuilder()

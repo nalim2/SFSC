@@ -8,7 +8,19 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.framework.api.registry.ApiRegistryManager;
-import de.unistuttgart.isw.sfsc.framework.api.tagging.ServiceFactory;
+import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
+import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryImplementation;
+import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryParameter;
+import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscClient;
+import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscClientImplementation;
+import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscServer;
+import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscServerImplementation;
+import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscServerParameter;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscPublisher;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscPublisherImplementation;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscPublisherParameter;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscSubscriber;
+import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscSubscriberImplementation;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.patterns.ackreqrep.AckServerResult;
 import java.util.Collection;
@@ -24,16 +36,21 @@ import org.slf4j.LoggerFactory;
 final class SfscServiceApiImplementation implements SfscServiceApi {
 
   private static final Logger logger = LoggerFactory.getLogger(SfscServiceApiImplementation.class);
-  private final ExecutorService executorService = Executors.unconfigurableExecutorService(
-      Executors.newCachedThreadPool(new ExceptionLoggingThreadFactory(getClass().getName(), logger))); //todo remove?
+  private final ExecutorService executorService = Executors.unconfigurableExecutorService(Executors.newCachedThreadPool(
+      new ExceptionLoggingThreadFactory(getClass().getName(), logger))); //todo remove?
 
   private final ApiRegistryManager apiRegistryManager;
   private final ServiceFactory serviceFactory;
+  private final Adapter adapter;
 
   SfscServiceApiImplementation(Adapter adapter) {
     apiRegistryManager = new ApiRegistryManager(adapter.registryClient());
-    serviceFactory = new ServiceFactory(adapter.dataConnection(), apiRegistryManager, adapter.adapterInformation().getCoreId(),
+    serviceFactory = new ServiceFactory(
+        adapter.dataConnection(),
+        apiRegistryManager,
+        adapter.adapterInformation().getCoreId(),
         adapter.adapterInformation().getAdapterId());
+    this.adapter = adapter;
   }
 
   @Override
@@ -72,17 +89,20 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
   }
 
   @Override
-  public SfscServer channelFactory(SfscChannelFactoryParameter parameter, Function<ByteString, SfscPublisher> channelFactory) {
+  public SfscServer channelFactory(SfscChannelFactoryParameter parameter,
+      Function<ByteString, SfscPublisher> channelFactory) {
     return new SfscChannelFactoryImplementation(parameter, serviceFactory, channelFactory);
   }
 
   @Override
   public Handle addRegistryStoreEventListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {
-    return apiRegistryManager.addStoreEventListener(storeEvent -> executorService.execute(() -> listener.accept(storeEvent)));
+    return apiRegistryManager.addStoreEventListener(storeEvent -> executorService.execute(() -> listener.accept(
+        storeEvent)));
   }
 
   @Override
-  public Handle addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate, Runnable runnable) {
+  public Handle addOneShotRegistryStoreEventListener(Predicate<StoreEvent<SfscServiceDescriptor>> predicate,
+      Runnable runnable) {
     return apiRegistryManager.addOneShotStoreEventListener(predicate, runnable);
   }
 
@@ -91,5 +111,13 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
     return apiRegistryManager.addOneShotStoreEventListener(predicate);
   }
 
-  //todo close
+  @Override
+  public Handle addCoreLostEventListener(Runnable runnable) {
+    return adapter.addCoreLostEventListener(runnable);
+  }
+
+  @Override
+  public void close() {
+    //todo
+  }
 }

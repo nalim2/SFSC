@@ -1,4 +1,4 @@
-package de.unistuttgart.isw.sfsc.framework.api.tagging;
+package de.unistuttgart.isw.sfsc.framework.api.services;
 
 import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;

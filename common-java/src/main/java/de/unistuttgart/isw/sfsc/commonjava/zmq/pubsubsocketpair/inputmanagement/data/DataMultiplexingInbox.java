@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.data;
 
 import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.PubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
@@ -35,11 +35,11 @@ public class DataMultiplexingInbox implements DataMultiplexer, NotThrowingAutoCl
   }
 
   void accept(List<byte[]> message) {
-    if (!DataProtocol.isValid(message)) {
+    if (!PubProtocol.isValid(message)) {
       logger.warn("Received invalid data message");
     } else {
-      ByteString topic = ByteString.copyFrom(DataProtocol.getTopic(message));
-      ByteString data = ByteString.copyFrom(DataProtocol.getData(message));
+      ByteString topic = ByteString.copyFrom(PubProtocol.getTopic(message));
+      ByteString data = ByteString.copyFrom(PubProtocol.getData(message));
       listeners.forEach(topicListener -> {
         if (topicListener.filter.test(topic)) {
           topicListener.messageHandler.accept(topic, data);

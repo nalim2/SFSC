@@ -7,7 +7,9 @@ public final class OneShotRunnable implements Runnable {
   private final AtomicBoolean done = new AtomicBoolean();
   private final Runnable runnable;
 
-  public OneShotRunnable(Runnable runnable) {this.runnable = runnable;}
+  public OneShotRunnable(Runnable runnable) {
+    this.runnable = runnable;
+  }
 
   @Override
   public void run() {
@@ -19,6 +21,5 @@ public final class OneShotRunnable implements Runnable {
   public boolean isDone() {
     return done.get();
   }
-
 
 }

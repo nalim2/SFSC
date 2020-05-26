@@ -2,7 +2,7 @@ package de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagemen
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.DataProtocol;
+import de.unistuttgart.isw.sfsc.commonjava.protocol.pubsub.PubProtocol;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.ReactiveSocket.Outbox;
 
 public class OutputPublisherImplementation implements OutputPublisher {
@@ -15,7 +15,7 @@ public class OutputPublisherImplementation implements OutputPublisher {
 
   @Override
   public void publish(byte[] topic, byte[] data) {
-    outbox.add(DataProtocol.newMessage(topic, data));
+    outbox.add(PubProtocol.newMessage(topic, data));
   }
 
   @Override
