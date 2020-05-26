@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Core" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="de.unistuttgart.isw.sfsc.dockercore.Main" />
+    <module name="docker-core" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="de.unistuttgart.isw.sfsc.dockercore.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
