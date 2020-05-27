@@ -2,6 +2,7 @@ package de.unistuttgart.isw.sfsc.framework.api.services.channelfactory;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.framework.api.SfscServiceApi;
 import de.unistuttgart.isw.sfsc.framework.api.services.pubsub.SfscSubscriber;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
@@ -20,8 +21,8 @@ public class ChannelFactoryClient {
     this.consumer = consumer;
   }
 
-  public ByteString getMessage(ByteString payload) {
-    return ChannelFactoryRequest.newBuilder().setPayload(payload).build().toByteString();
+  public Message getMessage(ByteString payload) {
+    return ChannelFactoryRequest.newBuilder().setPayload(payload).build();
   }
 
   public SfscSubscriber process(ByteString byteString) {
@@ -30,7 +31,8 @@ public class ChannelFactoryClient {
       SfscServiceDescriptor descriptor = reply.getServiceDescriptor();
       if (descriptor != null) {
         return sfscServiceApi.subscriber(descriptor, consumer);
-      } else {     throw new ChannelFactoryException("Response does not contain publisher information");
+      } else {
+        throw new ChannelFactoryException("Response does not contain publisher information");
       }
     } catch (InvalidProtocolBufferException e) {
       throw new ChannelFactoryException(e);

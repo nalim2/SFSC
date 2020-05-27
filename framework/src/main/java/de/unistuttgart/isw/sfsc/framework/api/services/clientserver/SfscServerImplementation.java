@@ -6,6 +6,7 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection
 import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.AckSettings;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;
 import de.unistuttgart.isw.sfsc.framework.patterns.ackreqrep.AckServer;
 import de.unistuttgart.isw.sfsc.framework.patterns.ackreqrep.AckServerResult;
@@ -14,7 +15,7 @@ import java.util.function.Function;
 
 public final class SfscServerImplementation implements SfscServer {
 
-  private static final int defaultSendMaxTries = 3;
+  private static final int defaultSendMaxTries = 1;
   private static final RegexDefinition defaultRegex = RegexDefinition.getDefaultInstance();
 
   private final SfscServiceDescriptor descriptor;
@@ -41,9 +42,11 @@ public final class SfscServerImplementation implements SfscServer {
                 .ofNullable(parameter.getOutputMessageType())
                 .orElseGet(serviceFactory::defaultType))
             .setRegex(Optional.ofNullable(parameter.getRegexDefinition()).orElse(defaultRegex))
-            .setTimeoutMs(Optional.ofNullable(parameter.getTimeoutMs()).orElseGet(serviceFactory::defaultTimeoutMs))
-            .setSendRateMs(Optional.ofNullable(parameter.getSendRateMs()).orElseGet(serviceFactory::defaultTimeoutMs))
-            .setSendMaxTries(Optional.ofNullable(parameter.getSendMaxTries()).orElse(defaultSendMaxTries))
+            .setAckSettings(AckSettings
+                .newBuilder()
+                .setTimeoutMs(Optional.ofNullable(parameter.getTimeoutMs()).orElseGet(serviceFactory::defaultTimeoutMs))
+                .setSendMaxTries(Optional.ofNullable(parameter.getSendMaxTries()).orElse(defaultSendMaxTries))
+                .build())
             .build())
         .build();
 
@@ -52,9 +55,9 @@ public final class SfscServerImplementation implements SfscServer {
         serviceFactory.executorService(),
         serverFunction,
         descriptor.getServerTags().getInputTopic(),
-        descriptor.getServerTags().getTimeoutMs(),
-        descriptor.getServerTags().getSendRateMs(),
-        descriptor.getServerTags().getSendMaxTries(),
+        descriptor.getServerTags().getAckSettings().getTimeoutMs(),
+        descriptor.getServerTags().getAckSettings().getTimeoutMs(),
+        descriptor.getServerTags().getAckSettings().getSendMaxTries(),
         serviceFactory.executorService());
 
     Handle handle = serviceFactory.registerService(descriptor);

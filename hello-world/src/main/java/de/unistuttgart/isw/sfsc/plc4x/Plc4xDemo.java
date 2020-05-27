@@ -10,6 +10,7 @@ import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage;
 import de.unistuttgart.isw.sfsc.example.plc4x.messages.Plc4xMessage.Type;
 import de.unistuttgart.isw.sfsc.framework.api.SfscServiceApi;
 import de.unistuttgart.isw.sfsc.framework.api.SfscServiceApiFactory;
+import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.ChannelFactoryResult;
 import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryParameter;
 import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscClient;
 import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscServer;
@@ -53,8 +54,7 @@ public class Plc4xDemo {
   private static final String UINT64_IDENTIFIER = "ns=2;i=10852";
   private static final String UINTEGER_IDENTIFIER = "ns=2;i=10870";
 
-  private static final Map<String, String> topics = Map.ofEntries(
-      Map.entry("Bool", BOOL_IDENTIFIER),
+  private static final Map<String, String> topics = Map.ofEntries(Map.entry("Bool", BOOL_IDENTIFIER),
       Map.entry("ByteString", BYTE_STRING_IDENTIFIER),
       Map.entry("Byte", BYTE_IDENTIFIER),
       Map.entry("Double", DOUBLE_IDENTIFIER),
@@ -68,13 +68,13 @@ public class Plc4xDemo {
       Map.entry("UInt16", UINT16_IDENTIFIER),
       Map.entry("UInt32", UINT32_IDENTIFIER),
       Map.entry("UInt64", UINT64_IDENTIFIER),
-      Map.entry("UInteger", UINTEGER_IDENTIFIER)
-  );
+      Map.entry("UInteger", UINTEGER_IDENTIFIER));
 
   private static final AdapterConfiguration ADAPTER_CONFIGURATION_1 = new AdapterConfiguration().setCorePubTcpPort(1251);
-  private static final AdapterConfiguration ADAPTER_CONFIGURATION_2 = new AdapterConfiguration().setCorePubTcpPort(1261);
+  private static final AdapterConfiguration ADAPTER_CONFIGURATION_2 = new AdapterConfiguration().setCorePubTcpPort(1251);
 
-  public static void main(String[] args) throws ExecutionException, InterruptedException, PlcConnectionException, TimeoutException {
+  public static void main(String[] args)
+      throws ExecutionException, InterruptedException, PlcConnectionException, TimeoutException {
     System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
 
     SfscServiceApi serverSfscServiceApi = SfscServiceApiFactory.getSfscServiceApi(ADAPTER_CONFIGURATION_1);
@@ -85,7 +85,8 @@ public class Plc4xDemo {
     /////////////////////////////////////
 
     SfscPublisher boolPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("Bool"));
-    SfscPublisher byteStringPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("ByteString"));
+    SfscPublisher byteStringPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName(
+        "ByteString"));
     SfscPublisher bytePublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("Byte"));
     SfscPublisher int16Publisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("Int16"));
     SfscPublisher stringPublisher = serverSfscServiceApi.publisher(new SfscPublisherParameter().setServiceName("String"));
@@ -96,21 +97,24 @@ public class Plc4xDemo {
     PlcSubscriptionResponse int16SubscriptionResponse = plc4XServer.subscribe(topics.get("Int16"));
     PlcSubscriptionResponse stringSubscriptionResponse = plc4XServer.subscribe(topics.get("String"));
 
-    plc4XServer.register(event -> boolPublisher.publish(StringValue.of(event.toString())), boolSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer
-        .register(event -> byteStringPublisher.publish(StringValue.of(event.toString())), byteStringSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> bytePublisher.publish(StringValue.of(event.toString())), byteSubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> int16Publisher.publish(StringValue.of(event.toString())), int16SubscriptionResponse.getSubscriptionHandles());
-    plc4XServer.register(event -> stringPublisher.publish(StringValue.of(event.toString())), stringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> boolPublisher.publish(StringValue.of(event.toString())),
+        boolSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> byteStringPublisher.publish(StringValue.of(event.toString())),
+        byteStringSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> bytePublisher.publish(StringValue.of(event.toString())),
+        byteSubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> int16Publisher.publish(StringValue.of(event.toString())),
+        int16SubscriptionResponse.getSubscriptionHandles());
+    plc4XServer.register(event -> stringPublisher.publish(StringValue.of(event.toString())),
+        stringSubscriptionResponse.getSubscriptionHandles());
 
-    clientSfscServiceApi.addOneShotRegistryStoreEventListener(
-        event -> event.getStoreEventType() == StoreEventType.CREATE
-            && Objects.equals(event.getData().getServiceName(), "Bool")
-    );
+    clientSfscServiceApi.addOneShotRegistryStoreEventListener(event ->
+        event.getStoreEventType() == StoreEventType.CREATE && Objects.equals(event.getData().getServiceName(), "Bool"));
     System.out.println("matching service found");
     SfscServiceDescriptor pubDescriptor = clientSfscServiceApi.getServices("Bool").stream().findAny().orElseThrow();
 
-    SfscSubscriber subscriber = clientSfscServiceApi.subscriber(pubDescriptor, bytestring -> System.out.println("Received message on subscriber"));
+    SfscSubscriber subscriber = clientSfscServiceApi.subscriber(pubDescriptor,
+        bytestring -> System.out.println("Received message on subscriber"));
 
     ////////////////////////////////////////////////////////////
 
@@ -118,12 +122,15 @@ public class Plc4xDemo {
         .setServiceName("myServer")
         .setInputMessageType(ByteString.copyFromUtf8("plc4xtype"))
         .setOutputMessageType(ByteString.copyFromUtf8("plc4xtype"))
-        .setRegexDefinition(RegexDefinition.newBuilder()
-            .addRegexes(VarRegex.newBuilder()
+        .setRegexDefinition(RegexDefinition
+            .newBuilder()
+            .addRegexes(VarRegex
+                .newBuilder()
                 .setVarName("name")
                 .setStringRegex(StringRegex.newBuilder().setRegex("w-String").build())
                 .build())
-            .addRegexes(VarRegex.newBuilder()
+            .addRegexes(VarRegex
+                .newBuilder()
                 .setVarName("value")
                 .setStringRegex(StringRegex.newBuilder().setRegex(".*").build())
                 .build())
@@ -132,41 +139,43 @@ public class Plc4xDemo {
 
     Thread.sleep(1000);
 
-    SfscServiceDescriptor writeServerTags = clientSfscServiceApi.getServices("myServer", writeRequest(), List.of("name", "value"))
-        .stream().findAny().orElseThrow();
-    SfscServiceDescriptor readServerTags = clientSfscServiceApi.getServices("myServer")
-        .stream().findAny().orElseThrow();
+    SfscServiceDescriptor writeServerTags = clientSfscServiceApi
+        .getServices("myServer", writeRequest(), List.of("name", "value"))
+        .stream()
+        .findAny()
+        .orElseThrow();
+    SfscServiceDescriptor readServerTags = clientSfscServiceApi
+        .getServices("myServer")
+        .stream()
+        .findAny()
+        .orElseThrow();
 
     SfscClient client = clientSfscServiceApi.client();
     client.request(writeServerTags, writeRequest(), writeConsumer(), 1000, () -> System.out.println("timeout"));
     client.request(readServerTags, readRequest(), readConsumer(), 1000, () -> System.out.println("timeout"));
 
     ////////////////////////////////
-    SfscChannelFactoryParameter factoryParameter = new SfscChannelFactoryParameter()
-        .setServiceName("myFactory");
-    SfscServer channelFactoryServer = serverSfscServiceApi.channelFactory(factoryParameter, new ChannelFactoryFunction(clientSfscServiceApi));
+    SfscChannelFactoryParameter factoryParameter = new SfscChannelFactoryParameter().setServiceName("myFactory");
+    SfscServer channelFactoryServer = serverSfscServiceApi.channelFactory(factoryParameter,
+        new ChannelFactoryFunction(clientSfscServiceApi));
 
     Thread.sleep(1000);
     SfscServiceDescriptor descriptor = clientSfscServiceApi.getServices("myFactory").stream().findAny().orElseThrow();
     SfscClient client2 = clientSfscServiceApi.client();
     Thread.sleep(1000);
-    SfscSubscriber sfscSubscriber = client2.requestChannel(
-        descriptor,
-        ByteString.EMPTY,
-        500,
-        message -> {
-          try {
-            System.out.println("generated subscriber received message: " + StringValue.parseFrom(message).toString());
-          } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-          }
-        }
-    ).get();
+    SfscSubscriber sfscSubscriber = client2.requestChannel(descriptor, ByteString.EMPTY, 500, message -> {
+      try {
+        System.out.println("generated subscriber received message: " + StringValue.parseFrom(message).toString());
+      } catch (InvalidProtocolBufferException e) {
+        e.printStackTrace();
+      }
+    }).get();
 
   }
 
   static Message readRequest() {
-    return Plc4xMessage.newBuilder()
+    return Plc4xMessage
+        .newBuilder()
         .setType(Plc4xMessage.Type.READ_REQUEST)
         .setName("r-String")
         .setQuery(topics.get("String"))
@@ -174,7 +183,8 @@ public class Plc4xDemo {
   }
 
   static Message writeRequest() {
-    return Plc4xMessage.newBuilder()
+    return Plc4xMessage
+        .newBuilder()
         .setType(Plc4xMessage.Type.WRITE_REQUEST)
         .setName("w-String")
         .setQuery(topics.get("String"))
@@ -211,21 +221,15 @@ public class Plc4xDemo {
         switch (request.getType()) {
           case READ_REQUEST: {
             PlcReadResponse readResponse = plc4XServer.read(request.getName(), request.getQuery());
-            return serverResult(
-                Plc4xMessage.newBuilder(request)
-                    .setType(Type.READ_RESPONSE)
-                    .setValue(readResponse.toString())
-                    .build()
-            );
+            return serverResult(Plc4xMessage
+                .newBuilder(request)
+                .setType(Type.READ_RESPONSE)
+                .setValue(readResponse.toString())
+                .build());
           }
           case WRITE_REQUEST: {
             plc4XServer.write(request.getName(), request.getQuery(), request.getValue());
-            return serverResult(
-                Plc4xMessage.newBuilder(request)
-                    .setType(Type.WRITE_RESPONSE)
-                    .clearValue()
-                    .build()
-            );
+            return serverResult(Plc4xMessage.newBuilder(request).setType(Type.WRITE_RESPONSE).clearValue().build());
           }
           default: {
             throw new UnsupportedOperationException();
@@ -239,15 +243,13 @@ public class Plc4xDemo {
   }
 
   static AckServerResult serverResult(Message response) {
-    return new AckServerResult(
-        response,
+    return new AckServerResult(response,
         () -> System.out.println("plc4x server acknowledge succeeded"),
-        () -> System.out.println("plc4x server acknowledge didnt succeed")
-    );
+        () -> System.out.println("plc4x server acknowledge didnt succeed"));
   }
 
 
-  static class ChannelFactoryFunction implements Function<ByteString, SfscPublisher> {
+  static class ChannelFactoryFunction implements Function<ByteString, ChannelFactoryResult> {
 
     private final SfscServiceApi sfscServiceApi;
 
@@ -256,14 +258,16 @@ public class Plc4xDemo {
     }
 
     @Override
-    public SfscPublisher apply(ByteString sfscMessage) {
+    public ChannelFactoryResult apply(ByteString sfscMessage) {
       SfscPublisherParameter parameter = new SfscPublisherParameter()
           .setServiceName("channelName")
           .setOutputMessageType(ByteString.copyFromUtf8("String"))
           .setUnregistered(true);
       SfscPublisher publisher = sfscServiceApi.publisher(parameter);
       publisher.onSubscription(() -> publisher.publish(StringValue.of("myIndividualMessage")));
-      return publisher;
+      return new ChannelFactoryResult(publisher,
+          () -> System.out.println("channel factory delivery success"),
+          () -> System.out.println("channel factory delivery fail"));
     }
   }
 
