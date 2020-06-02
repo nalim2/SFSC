@@ -13,7 +13,6 @@ message SfscServiceDescriptor {
   oneof serviceTags {
     PublisherTags publisher_tags = 6;
     ServerTags server_tags = 7;
-    ChannelFactoryTags channel_factory_tags = 8;
   }
 
   message PublisherTags {
@@ -27,9 +26,7 @@ message SfscServiceDescriptor {
     bytes input_message_type = 2;
     bytes output_message_type = 3;
     RegexDefinition regex = 4;
-    int32 timeout_ms = 5;
-    int32 send_rate_ms = 6;
-    int32 send_max_tries = 7;
+    AckSettings ack_settings = 5;
 
     message RegexDefinition {
       repeated VarRegex regexes = 1;
@@ -51,11 +48,11 @@ message SfscServiceDescriptor {
         }
       }
     }
-  }
 
-  message ChannelFactoryTags {
-    bytes input_topic = 1;
-    bytes input_message_type = 2;
+    message AckSettings {
+      int32 timeout_ms = 1;
+      int32 send_max_tries = 2;
+    }
   }
 
 }

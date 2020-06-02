@@ -15,7 +15,6 @@ public class SfscServerParameter {
   private ByteString outputMessageType;
   private RegexDefinition regexDefinition;
   private Integer timeoutMs;
-  private Integer sendRateMs;
   private Integer sendMaxTries;
 
   public SfscServerParameter setServiceName(String serviceName) {
@@ -59,14 +58,6 @@ public class SfscServerParameter {
     return this;
   }
 
-  public SfscServerParameter setSendRateMs(Integer sendRateMs) {
-    if (sendMaxTries != null && sendMaxTries < 0) {
-      throw new IllegalArgumentException();
-    }
-    this.sendRateMs = sendRateMs;
-    return this;
-  }
-
   public SfscServerParameter setSendMaxTries(Integer sendMaxTries) {
     if (sendMaxTries != null && sendMaxTries < 0) {
       throw new IllegalArgumentException();
@@ -101,10 +92,6 @@ public class SfscServerParameter {
 
   Integer getTimeoutMs() {
     return timeoutMs;
-  }
-
-  Integer getSendRateMs() {
-    return sendRateMs;
   }
 
   Integer getSendMaxTries() {

@@ -6,6 +6,7 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
+import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.ChannelFactoryResult;
 import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryParameter;
 import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscClient;
 import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscServer;
@@ -37,7 +38,7 @@ public interface SfscServiceApi extends NotThrowingAutoCloseable {
 
   SfscSubscriber subscriber(SfscServiceDescriptor publisherDescriptor, Consumer<ByteString> subscriberConsumer);
 
-  SfscServer channelFactory(SfscChannelFactoryParameter parameter, Function<ByteString, SfscPublisher> channelFactory);
+  SfscServer channelFactory(SfscChannelFactoryParameter parameter, Function<ByteString, ChannelFactoryResult> channelFactory);
 
   Handle addRegistryStoreEventListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener);
 
