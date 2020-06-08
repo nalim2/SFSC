@@ -9,7 +9,8 @@ import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.framework.api.registry.ApiRegistryManager;
 import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
-import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryImplementation;
+import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.ChannelFactoryResult;
+import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.ChannelFactoryServer;
 import de.unistuttgart.isw.sfsc.framework.api.services.channelfactory.SfscChannelFactoryParameter;
 import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscClient;
 import de.unistuttgart.isw.sfsc.framework.api.services.clientserver.SfscClientImplementation;
@@ -90,8 +91,10 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
 
   @Override
   public SfscServer channelFactory(SfscChannelFactoryParameter parameter,
-      Function<ByteString, SfscPublisher> channelFactory) {
-    return new SfscChannelFactoryImplementation(parameter, serviceFactory, channelFactory);
+      Function<ByteString, ChannelFactoryResult> channelFactory) {
+    ChannelFactoryServer channelFactoryServer = new ChannelFactoryServer(channelFactory);
+    SfscServerParameter sfscServerParameter = parameter.toSfscServerParameter();
+    return new SfscServerImplementation(sfscServerParameter, serviceFactory, channelFactoryServer);
   }
 
   @Override
