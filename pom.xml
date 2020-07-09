@@ -83,7 +83,8 @@
     <java.version>12</java.version>
     <encoding>UTF-8</encoding>
 
-    <maven.compiler.release>${java.version}</maven.compiler.release>
+
+    <maven.compiler.version>${java.version}</maven.compiler.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -194,6 +195,9 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
           <configuration>
+            <source>10</source>
+            <target>10</target>
+            <verbose>true</verbose>
             <compilerArgs>
               <arg>-h</arg>
               <arg>target/headers</arg>
@@ -270,7 +274,7 @@
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose >
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
           <!-- To generate javadoc -->
