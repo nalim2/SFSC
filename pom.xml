@@ -63,14 +63,19 @@
   </modules>
 
   <properties>
+
     <revision>0.1.9</revision>
 
     <slf4j.version>1.7.30</slf4j.version>
     <protobuf.version>3.11.0</protobuf.version>
     <jeromq.version>0.5.2</jeromq.version>
+
     <hazelcast.version>4.0.1</hazelcast.version>
 
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+    <protobuf.version>3.12.0</protobuf.version>
+    <protoc.version>3.12.0</protoc.version>
+
     <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
@@ -138,6 +143,13 @@
 
 
   <build>
+    <extensions>
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.6.2</version>
+      </extension>
+    </extensions>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -145,7 +157,8 @@
           <artifactId>protobuf-maven-plugin</artifactId>
           <version>${protobuf-maven-plugin.version}</version>
           <configuration>
-            <protocExecutable>protoc</protocExecutable>
+            <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
+            </protocArtifact>
           </configuration>
           <executions>
             <execution>
