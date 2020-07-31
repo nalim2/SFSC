@@ -247,6 +247,14 @@
         </property>
       </activation>
 
+      <modules>
+        <module>proto</module>
+        <module>common-java</module>
+        <module>core</module>
+        <module>adapter</module>
+        <module>framework</module>
+      </modules>
+
       <build>
         <plugins>
           <!-- To release to Maven central -->
