@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
 
 public final class SfscPublisherImplementation implements SfscPublisher {
 
-  private static final boolean defaultUnregistered = false;
+  private static final boolean defaultRegistrationFlag = false;
 
   private final SfscServiceDescriptor descriptor;
   private final Publisher publisher;
@@ -37,11 +37,11 @@ public final class SfscPublisherImplementation implements SfscPublisher {
         .setPublisherTags(PublisherTags.newBuilder()
             .setOutputTopic(Optional.ofNullable(parameter.getOutputTopic()).orElseGet(serviceFactory::createTopic))
             .setOutputMessageType(Optional.ofNullable(parameter.getOutputMessageType()).orElseGet(serviceFactory::defaultType))
-            .setUnregistered(Optional.ofNullable(parameter.isUnregistered()).orElse(defaultUnregistered))
+            .setUnregistered(Optional.ofNullable(parameter.isUnregistered()).orElse(defaultRegistrationFlag))
             .build())
         .build();
 
-    Handle handle = parameter.isUnregistered() != null && parameter.isUnregistered() ? null : serviceFactory.registerService(descriptor);
+    Handle handle = descriptor.getPublisherTags().getUnregistered() ? null : serviceFactory.registerService(descriptor);
     closeCallback = handle != null ? handle::close : null;
     topic = descriptor.getPublisherTags().getOutputTopic();
     topicCache = topic.toByteArray();

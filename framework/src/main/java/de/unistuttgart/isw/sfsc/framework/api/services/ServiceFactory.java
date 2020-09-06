@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,9 @@ public class ServiceFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(ServiceFactory.class);
 
+  private static final ByteString defaultType = ByteString.EMPTY;
+  private static final Supplier<String> defaultIdGenerator = () -> UUID.randomUUID().toString();
+  private static final Map<String, ByteString> defaultCustomTags = Map.of();
   private final ScheduledExecutorService executorService = Executors.unconfigurableScheduledExecutorService(
       Executors.newScheduledThreadPool(1, new ExceptionLoggingThreadFactory(getClass().getName(), logger)));
 
@@ -25,7 +29,8 @@ public class ServiceFactory {
   private final String coreId;
   private final String adapterId;
 
-  public ServiceFactory(PubSubConnection pubSubConnection, ApiRegistryManager apiRegistryManager, String coreId, String adapterId) {
+  public ServiceFactory(PubSubConnection pubSubConnection, ApiRegistryManager apiRegistryManager, String coreId,
+      String adapterId) {
     this.pubSubConnection = pubSubConnection;
     this.apiRegistryManager = apiRegistryManager;
     this.coreId = coreId;
@@ -45,23 +50,19 @@ public class ServiceFactory {
   }
 
   public String createServiceId() {
-    return UUID.randomUUID().toString();
+    return defaultIdGenerator.get();
   }
 
   public ByteString createTopic() {
-    return ByteString.copyFromUtf8(UUID.randomUUID().toString());
+    return ByteString.copyFromUtf8(defaultIdGenerator.get());
   }
 
   public ByteString defaultType() {
-    return ByteString.EMPTY;
+    return defaultType;
   }
 
   public Map<String, ByteString> defaultCustomTags() {
-    return Map.of();
-  }
-
-  public int defaultTimeoutMs() {
-    return 1000;
+    return defaultCustomTags;
   }
 
   public Handle registerService(SfscServiceDescriptor descriptor) {
