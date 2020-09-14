@@ -5,19 +5,17 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryReply;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryReply.Expired;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryReply.Future;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryRequest;
-import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.SchedulerService;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -32,8 +30,7 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
   private final AtomicLong logCounter = new AtomicLong();
   private final Map<Long, QueryReply> eventLog = new ConcurrentHashMap<>();
   private final NavigableMap<Long, QueryReply> staging = new ConcurrentSkipListMap<>();
-  private final ScheduledExecutorService executorService = Executors
-      .newSingleThreadScheduledExecutor(new ExceptionLoggingThreadFactory(getClass().getName(), logger));
+  private final SchedulerService schedulerService = new SchedulerService(1);
   private final Listeners<Consumer<QueryReply>> listeners = new Listeners<>();
 
   private final int removalRetentionTimeSec;
@@ -48,7 +45,7 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
 
   public void onStoreEvent(StoreEvent<ByteString> storeEvent) {
     long id = idCounter.get();
-    executorService.execute(() -> {
+    schedulerService.execute(() -> {
           switch (storeEvent.getStoreEventType()) {
             case CREATE: {
               onAdd(id, storeEvent.getData());
@@ -77,7 +74,7 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
       staging.put(id, queryReply);
       processStaging();
       discardCreateEvent(byteString);
-      executorService.schedule(() -> eventLog.remove(id), removalRetentionTimeSec, TimeUnit.SECONDS);
+      schedulerService.schedule(() -> eventLog.remove(id), removalRetentionTimeSec, TimeUnit.SECONDS);
   }
 
   void processStaging() {
@@ -116,6 +113,6 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
 
   @Override
   public void close() {
-    executorService.shutdownNow();
+    schedulerService.close();
   }
 }

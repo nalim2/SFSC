@@ -7,8 +7,8 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Welcome;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleServer;
 import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -20,9 +20,9 @@ class SessionServer implements NotThrowingAutoCloseable {
 
   private final SimpleServer simpleServer;
 
-  SessionServer(SessionParameter parameter, PubSubConnection pubSubConnection, Executor executor,
+  SessionServer(SessionParameter parameter, PubSubConnection pubSubConnection, Scheduler scheduler,
       Listeners<Consumer<NewSessionEvent>> sessionListeners) {
-    simpleServer = new SimpleServer(pubSubConnection, new SessionConsumer(sessionListeners, parameter), parameter.getSessionTopic(), executor);
+    simpleServer = new SimpleServer(pubSubConnection, new SessionConsumer(sessionListeners, parameter), parameter.getSessionTopic(), scheduler);
   }
 
   @Override

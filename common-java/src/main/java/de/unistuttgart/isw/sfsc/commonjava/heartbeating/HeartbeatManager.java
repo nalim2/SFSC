@@ -7,12 +7,12 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.session.heartbeat.Heartbea
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Publisher;
 import de.unistuttgart.isw.sfsc.commonjava.util.DeadMansSwitch;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -22,19 +22,19 @@ public final class HeartbeatManager {
 
   private static final Logger logger = LoggerFactory.getLogger(HeartbeatManager.class);
   private final PubSubConnection pubSubConnection;
-  private final ScheduledExecutorService scheduledExecutorService;
+  private final Scheduler scheduler;
   private final Map<String, DeadMansSwitch> sessionMap = new ConcurrentHashMap<>();
   private final HeartbeatParameter params;
 
-  HeartbeatManager(PubSubConnection pubSubConnection, ScheduledExecutorService scheduledExecutorService, HeartbeatParameter params) {
+  HeartbeatManager(PubSubConnection pubSubConnection, Scheduler scheduler, HeartbeatParameter params) {
     this.pubSubConnection = pubSubConnection;
-    this.scheduledExecutorService = scheduledExecutorService;
+    this.scheduler = scheduler;
     this.params = params;
   }
 
   void startSession(String remoteId, ByteString remoteTopic, Consumer<String> onDeceive) {
     final int expectedHeartbeatRate = params.getHeartbeatDeadlineIncomingMs();
-    DeadMansSwitch deadMansSwitch = DeadMansSwitch.create(scheduledExecutorService, expectedHeartbeatRate);
+    DeadMansSwitch deadMansSwitch = DeadMansSwitch.create(scheduler, expectedHeartbeatRate);
     Handle heartbeat = startHeartbeat(remoteTopic);
     sessionMap.put(remoteId, deadMansSwitch);
     deadMansSwitch.addOnDeceaseListener(() -> {
@@ -65,7 +65,7 @@ public final class HeartbeatManager {
     final String heartbeatId = params.getOutgoingId();
     Publisher publisher = new Publisher(pubSubConnection);
     Message message = HeartbeatMessage.newBuilder().setId(heartbeatId).build();
-    Future<?> future = scheduledExecutorService.scheduleAtFixedRate(() ->
+    Future<?> future = scheduler.scheduleAtFixedRate(() ->
         publisher.publish(remoteTopic, message), 0, params.getSendRateMs(), TimeUnit.MILLISECONDS);
     return () -> future.cancel(true);
   }

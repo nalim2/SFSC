@@ -4,8 +4,8 @@ import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command.CommandRequest;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleClient;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 final class CommandClient implements NotThrowingAutoCloseable {
@@ -14,8 +14,8 @@ final class CommandClient implements NotThrowingAutoCloseable {
   private final SimpleClient simpleClient;
   private final int timeoutMs;
 
-  CommandClient(PubSubConnection pubSubConnection, ByteString serverTopic, ByteString clientTopic, int timeoutMs, Executor executor) {
-    simpleClient = new SimpleClient(pubSubConnection, clientTopic, executor);
+  CommandClient(PubSubConnection pubSubConnection, ByteString serverTopic, ByteString clientTopic, int timeoutMs, Scheduler scheduler) {
+    simpleClient = new SimpleClient(pubSubConnection, clientTopic, scheduler);
     this.serverTopic = serverTopic;
     this.timeoutMs = timeoutMs;
   }

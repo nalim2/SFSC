@@ -8,10 +8,10 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Listeners;
 import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -27,9 +27,9 @@ final class Registry {
   private final AtomicLong idCounter = new AtomicLong();
   private final Set<ByteString> registry = ConcurrentHashMap.newKeySet();
 
-  private final Executor executor;
+  private final Scheduler scheduler;
 
-  Registry(Executor executor) {this.executor = executor;}
+  Registry(Scheduler scheduler) {this.scheduler = scheduler;}
 
   void handleQueryReply(ByteString byteString) {
     try {
@@ -43,7 +43,7 @@ final class Registry {
           case EXPIRED: {
             idCounter.compareAndSet(queryId, queryId + 1);
             modifyRegistry(queryReply);
-            executor.execute(() -> notificationListeners.forEach(Runnable::run));
+            scheduler.execute(() -> notificationListeners.forEach(Runnable::run));
             break;
           }
           case FUTURE: {
@@ -82,7 +82,7 @@ final class Registry {
 
   void onStoreEvent(StoreEventType type, ByteString data) {
     StoreEvent<ByteString> storeEvent = new StoreEvent<>(type, data);
-    executor.execute(() -> entryListeners.forEach(consumer -> consumer.accept(storeEvent)));
+    scheduler.execute(() -> entryListeners.forEach(consumer -> consumer.accept(storeEvent)));
   }
 
   Handle addEntryListener(Consumer<StoreEvent<ByteString>> listener) {

@@ -3,9 +3,9 @@ package de.unistuttgart.isw.sfsc.framework.api;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.adapter.Adapter;
-import de.unistuttgart.isw.sfsc.commonjava.util.ExceptionLoggingThreadFactory;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.SchedulerService;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.framework.api.registry.ApiRegistryManager;
 import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
@@ -26,19 +26,13 @@ import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.patterns.ackreqrep.AckServerResult;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class SfscServiceApiImplementation implements SfscServiceApi {
 
-  private static final Logger logger = LoggerFactory.getLogger(SfscServiceApiImplementation.class);
-  private final ExecutorService executorService = Executors.unconfigurableExecutorService(Executors.newCachedThreadPool(
-      new ExceptionLoggingThreadFactory(getClass().getName(), logger))); //todo remove?
+  private final SchedulerService schedulerService = new SchedulerService(4);
 
   private final ApiRegistryManager apiRegistryManager;
   private final ServiceFactory serviceFactory;
@@ -50,7 +44,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
         adapter.dataConnection(),
         apiRegistryManager,
         adapter.adapterInformation().getCoreId(),
-        adapter.adapterInformation().getAdapterId());
+        adapter.adapterInformation().getAdapterId(), schedulerService);
     this.adapter = adapter;
   }
 
@@ -99,7 +93,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
 
   @Override
   public Handle addRegistryStoreEventListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {
-    return apiRegistryManager.addStoreEventListener(storeEvent -> executorService.execute(() -> listener.accept(
+    return apiRegistryManager.addStoreEventListener(storeEvent -> schedulerService.execute(() -> listener.accept(
         storeEvent)));
   }
 
@@ -121,6 +115,7 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
 
   @Override
   public void close() {
-    //todo
+    schedulerService.close();
+    //todo close other stuff?
   }
 }
