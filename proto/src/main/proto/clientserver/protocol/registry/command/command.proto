@@ -1,14 +1,15 @@
 syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command;
-
+import "framework/types/types.proto";
+import "framework/descriptor/service.proto";
 option java_multiple_files = true;
 
 message CommandRequest {
-  string adapterId = 1;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId adapterId = 1;
   oneof create_or_delete{
-    bytes create = 2;
-    bytes delete = 3;
+    de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor create_request = 2;
+    de.unistuttgart.isw.sfsc.framework.types.SfscId delete_request = 3;
   }
 }
 

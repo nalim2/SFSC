@@ -1,11 +1,12 @@
 syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.serverserver.registry;
-
+import "framework/types/types.proto";
+import "framework/descriptor/service.proto";
 option java_multiple_files = true;
 
 message RegistryEntry {
-  string adapterId = 1;
-  string coreId = 2;
-  bytes data = 3;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId adapterId = 1;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId coreId = 2;
+  de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor data = 3;
 }

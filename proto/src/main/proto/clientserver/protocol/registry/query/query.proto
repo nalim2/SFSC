@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query;
-
+import "framework/types/types.proto";
+import "framework/descriptor/service.proto";
 option java_multiple_files = true;
 
 message QueryRequest {
@@ -11,8 +12,8 @@ message QueryRequest {
 message QueryReply {
   int64 event_id = 1;
   oneof created_or_deleted_or_expired_or_future {
-    bytes created = 2;
-    bytes deleted = 3;
+    de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor created = 2;
+    de.unistuttgart.isw.sfsc.framework.types.SfscId deleted = 3;
     Expired expired = 4;
     Future future = 5;
   }

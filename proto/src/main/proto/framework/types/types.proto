@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package de.unistuttgart.isw.sfsc.framework.types;
+
+option java_multiple_files = true;
+
+message SfscId {
+	string id = 1;
+}
+
+message Topic {
+	bytes topic = 1;
+}
+
+message MessageType {
+	bytes type = 1;
+}

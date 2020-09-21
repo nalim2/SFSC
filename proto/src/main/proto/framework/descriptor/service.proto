@@ -1,13 +1,13 @@
 syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.framework.descriptor;
-
+import "framework/types/types.proto";
 option java_multiple_files = true;
 
 message SfscServiceDescriptor {
-  string service_id = 1;
-  string adapter_id = 2;
-  string core_id = 3;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId service_id = 1;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId adapter_id = 2;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId core_id = 3;
   string service_name = 4;
   map<string, bytes> custom_tags = 5;
   oneof serviceTags {
@@ -16,15 +16,15 @@ message SfscServiceDescriptor {
   }
 
   message PublisherTags {
-    bytes output_topic = 1;
-    bytes output_message_type = 2;
+    de.unistuttgart.isw.sfsc.framework.types.Topic output_topic = 1;
+    de.unistuttgart.isw.sfsc.framework.types.MessageType output_message_type = 2;
     bool unregistered = 3;
   }
 
   message ServerTags {
-    bytes input_topic = 1;
-    bytes input_message_type = 2;
-    bytes output_message_type = 3;
+    de.unistuttgart.isw.sfsc.framework.types.Topic input_topic = 1;
+    de.unistuttgart.isw.sfsc.framework.types.MessageType input_message_type = 2;
+    de.unistuttgart.isw.sfsc.framework.types.MessageType output_message_type = 3;
     RegexDefinition regex = 4;
     AckSettings ack_settings = 5;
 
