@@ -10,8 +10,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TimeoutRegistry<K, V> implements NotThrowingAutoCloseable {
 
+
+  private static final int THREAD_NUMBER = 1;
+
   private final ConcurrentHashMap<K, TimeoutContainer<V>> map = new ConcurrentHashMap<>();
-  private final SchedulerService schedulerService = new SchedulerService(1);
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
 
   public void put(K key, V value, int timeoutMs, Runnable timeoutRunnable) {
     AtomicReference<ScheduledFuture<?>> scheduledFuture = new AtomicReference<>();

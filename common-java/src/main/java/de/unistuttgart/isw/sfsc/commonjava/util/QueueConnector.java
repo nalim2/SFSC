@@ -6,9 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QueueConnector<T> implements NotThrowingAutoCloseable {
+  private static final int THREAD_NUMBER = 1;
 
   private static final Logger logger = LoggerFactory.getLogger(QueueConnector.class);
-  private final SchedulerService schedulerService = new SchedulerService(1);
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
   private final BlockingSupplier<T> source;
 
   public QueueConnector(BlockingSupplier<T> source) {

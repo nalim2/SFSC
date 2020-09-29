@@ -24,13 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class RegistryEventLog implements NotThrowingAutoCloseable {
-
   private static final Logger logger = LoggerFactory.getLogger(RegistryEventLog.class);
+  private static final int THREAD_NUMBER = 1;
+
   private final Supplier<Long> idCounter = new AtomicLong()::getAndIncrement;
   private final AtomicLong logCounter = new AtomicLong();
   private final Map<Long, QueryReply> eventLog = new ConcurrentHashMap<>();
   private final NavigableMap<Long, QueryReply> staging = new ConcurrentSkipListMap<>();
-  private final SchedulerService schedulerService = new SchedulerService(1);
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
   private final Listeners<Consumer<QueryReply>> listeners = new Listeners<>();
 
   private final int removalRetentionTimeSec;

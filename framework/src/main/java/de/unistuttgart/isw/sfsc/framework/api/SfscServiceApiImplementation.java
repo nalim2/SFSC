@@ -32,7 +32,9 @@ import java.util.function.Predicate;
 
 final class SfscServiceApiImplementation implements SfscServiceApi {
 
-  private final SchedulerService schedulerService = new SchedulerService(4);
+  private static final int THREAD_NUMBER = 4;
+
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
 
   private final ApiRegistryManager apiRegistryManager;
   private final ServiceFactory serviceFactory;
@@ -44,7 +46,8 @@ final class SfscServiceApiImplementation implements SfscServiceApi {
         adapter.dataConnection(),
         apiRegistryManager,
         adapter.adapterInformation().getCoreId(),
-        adapter.adapterInformation().getAdapterId(), schedulerService);
+        adapter.adapterInformation().getAdapterId(),
+        schedulerService);
     this.adapter = adapter;
   }
 

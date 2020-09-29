@@ -7,9 +7,9 @@ import de.unistuttgart.isw.sfsc.core.hazelcast.registry.Registry;
 
 public class RegistryModule implements NotThrowingAutoCloseable {
 
-  private static final int REGISTRY_THREAD_NUMBER = 1;
+  private static final int THREAD_NUMBER = 1;
 
-  private final SchedulerService schedulerService = new SchedulerService(REGISTRY_THREAD_NUMBER);
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
 
   private final Registry registry;
   private final QueryServer queryServer;

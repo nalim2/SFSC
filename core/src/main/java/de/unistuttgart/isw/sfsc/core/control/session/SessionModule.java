@@ -8,6 +8,7 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection
 import java.util.function.Consumer;
 
 public class SessionModule implements NotThrowingAutoCloseable {
+  private static final int THREAD_NUMBER = 1;
 
   private final SessionServer sessionServer;
   private final SchedulerService schedulerService;
@@ -19,7 +20,7 @@ public class SessionModule implements NotThrowingAutoCloseable {
   }
 
   public static SessionModule create(PubSubConnection pubSubConnection, SessionParameter parameter, Consumer<String> onDead) {
-    SchedulerService schedulerService = new SchedulerService(1);
+    SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
     HeartbeatModule heartbeatModule = HeartbeatModule.create(pubSubConnection, schedulerService, parameter.getHeartbeatParameter());
     Listeners<Consumer<NewSessionEvent>> sessionListeners = new Listeners<>();
     sessionListeners.add(

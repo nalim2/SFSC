@@ -31,7 +31,9 @@ import java.util.concurrent.TimeoutException;
 
 public class ControlPlane implements NotThrowingAutoCloseable {
 
-  private final SchedulerService schedulerService = new SchedulerService(1);
+  private static final int THREAD_NUMBER = 1;
+
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
   private final ListenableEvent coreLostEvent = new ListenableEvent();
   private final PubSubSocketPair pubSubSocketPair;
   private final PubSubConnectionImplementation pubSubConnection;
