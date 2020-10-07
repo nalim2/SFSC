@@ -18,8 +18,10 @@ message QueryReply {
     Future future = 5;
   }
   message Expired {
+	int64 oldest_valid_event_id = 1;
   }
   message Future {
+	int64 newest_valid_event_id = 1;
   }
 }
 

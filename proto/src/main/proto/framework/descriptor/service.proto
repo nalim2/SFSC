@@ -10,49 +10,53 @@ message SfscServiceDescriptor {
   de.unistuttgart.isw.sfsc.framework.types.SfscId core_id = 3;
   string service_name = 4;
   map<string, bytes> custom_tags = 5;
-  oneof serviceTags {
-    PublisherTags publisher_tags = 6;
-    ServerTags server_tags = 7;
-  }
+  ServiceTags service_tags = 6;
+  
+  message ServiceTags {
+  
+	oneof serviceTags {
+		PublisherTags publisher_tags = 1;
+		ServerTags server_tags = 2;
+	  }
 
-  message PublisherTags {
-    de.unistuttgart.isw.sfsc.framework.types.Topic output_topic = 1;
-    de.unistuttgart.isw.sfsc.framework.types.MessageType output_message_type = 2;
-    bool unregistered = 3;
-  }
+	  message PublisherTags {
+		de.unistuttgart.isw.sfsc.framework.types.Topic output_topic = 1;
+		de.unistuttgart.isw.sfsc.framework.types.MessageType output_message_type = 2;
+		bool unregistered = 3;
+	  }
 
-  message ServerTags {
-    de.unistuttgart.isw.sfsc.framework.types.Topic input_topic = 1;
-    de.unistuttgart.isw.sfsc.framework.types.MessageType input_message_type = 2;
-    de.unistuttgart.isw.sfsc.framework.types.MessageType output_message_type = 3;
-    RegexDefinition regex = 4;
-    AckSettings ack_settings = 5;
+	  message ServerTags {
+		de.unistuttgart.isw.sfsc.framework.types.Topic input_topic = 1;
+		de.unistuttgart.isw.sfsc.framework.types.MessageType input_message_type = 2;
+		de.unistuttgart.isw.sfsc.framework.types.MessageType output_message_type = 3;
+		RegexDefinition regex = 4;
+		AckSettings ack_settings = 5;
 
-    message RegexDefinition {
-      repeated VarRegex regexes = 1;
+		message RegexDefinition {
+		  repeated VarRegex regexes = 1;
 
-      message VarRegex {
-        string varName = 1;
-        oneof regex {
-          StringRegex string_regex = 2;
-          NumberRegex number_regex = 3;
-        }
+		  message VarRegex {
+			string varName = 1;
+			oneof regex {
+			  StringRegex string_regex = 2;
+			  NumberRegex number_regex = 3;
+			}
 
-        message StringRegex {
-          string regex = 1;
-        }
+			message StringRegex {
+			  string regex = 1;
+			}
 
-        message NumberRegex {
-          sint64 lowerBound = 1;
-          sint64 upperBound = 2;
-        }
-      }
-    }
+			message NumberRegex {
+			  sint64 lowerBound = 1;
+			  sint64 upperBound = 2;
+			}
+		  }
+		}
 
-    message AckSettings {
-      int32 timeout_ms = 1;
-      int32 send_max_tries = 2;
-    }
-  }
-
+		message AckSettings {
+		  int32 timeout_ms = 1;
+		  int32 send_max_tries = 2;
+		}
+	  }
+	}
 }
