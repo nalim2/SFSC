@@ -7,10 +7,10 @@ import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Subscriber;
 import de.unistuttgart.isw.sfsc.commonjava.util.FutureAdapter;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -28,24 +28,24 @@ public class RegistryModule implements RegistryApi {
   private final Subscriber subscriber;
   private final RegistryParameter params;
 
-  RegistryModule(RegistryParameter parameter, PubSubConnection pubSubConnection, ScheduledExecutorService executor) {
+  RegistryModule(RegistryParameter parameter, PubSubConnection pubSubConnection, Scheduler scheduler) {
     this.params = parameter;
-    registry = new Registry(executor);
+    registry = new Registry(scheduler);
     queryClient = new QueryClient(pubSubConnection, parameter.getCoreQueryTopic(), parameter.getAdapterQueryTopic(), parameter.getTimeoutMs(),
-        executor);
+        scheduler);
     commandClient = new CommandClient(pubSubConnection, parameter.getCoreCommandTopic(), parameter.getAdapterCommandTopic(),
-        parameter.getTimeoutMs(), executor);
+        parameter.getTimeoutMs(), scheduler);
     registry.addNotificationListener(
         () -> queryClient.query(registry::getId, registry::handleQueryReply, () -> logger.warn("registry query timeout"))
     );
-    subscriber = new Subscriber(pubSubConnection, registry::handleQueryReply, parameter.getCoreEventTopic(), executor);
-    executor.scheduleAtFixedRate(
+    subscriber = new Subscriber(pubSubConnection, registry::handleQueryReply, parameter.getCoreEventTopic(), scheduler);
+    scheduler.scheduleAtFixedRate(
         () -> queryClient.query(registry::getId, registry::handleQueryReply, () -> logger.warn("registry query timeout")),
         0, parameter.getPollingRateMs(), TimeUnit.MILLISECONDS);
   }
 
-  public static RegistryModule create(RegistryParameter parameter, PubSubConnection pubSubConnection, ScheduledExecutorService executor) {
-    return new RegistryModule(parameter, pubSubConnection, executor);
+  public static RegistryModule create(RegistryParameter parameter, PubSubConnection pubSubConnection, Scheduler scheduler) {
+    return new RegistryModule(parameter, pubSubConnection, scheduler);
   }
 
   @Override

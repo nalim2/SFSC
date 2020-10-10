@@ -4,8 +4,8 @@ import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryRequest;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleClient;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -15,8 +15,8 @@ final class QueryClient implements NotThrowingAutoCloseable {
   private final SimpleClient simpleClient;
   private final int timeoutMs;
 
-  QueryClient(PubSubConnection pubSubConnection, ByteString serverTopic, ByteString clientTopic, int timeoutMs, Executor executor) {
-    simpleClient = new SimpleClient(pubSubConnection, clientTopic, executor);
+  QueryClient(PubSubConnection pubSubConnection, ByteString serverTopic, ByteString clientTopic, int timeoutMs, Scheduler scheduler) {
+    simpleClient = new SimpleClient(pubSubConnection, clientTopic, scheduler);
     this.serverTopic = serverTopic;
     this.timeoutMs = timeoutMs;
   }

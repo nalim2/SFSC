@@ -20,19 +20,20 @@ import de.unistuttgart.isw.sfsc.commonjava.heartbeating.HeartbeatParameter;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.ListenableEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.SchedulerService;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnectionImplementation;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 
 public class ControlPlane implements NotThrowingAutoCloseable {
 
-  private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+  private static final int THREAD_NUMBER = 1;
+
+  private final SchedulerService schedulerService = new SchedulerService(THREAD_NUMBER);
   private final ListenableEvent coreLostEvent = new ListenableEvent();
   private final PubSubSocketPair pubSubSocketPair;
   private final PubSubConnectionImplementation pubSubConnection;
@@ -79,7 +80,7 @@ public class ControlPlane implements NotThrowingAutoCloseable {
 
     BootstrapMessage bootstrapMessage = Bootstrapper.bootstrap(bootstrapperParameter,
         pubSubConnection,
-        executorService);
+        schedulerService);
 
     String coreControlSubAddress;
     if (parameter.getTransportProtocol() == TransportProtocol.TCP) {
@@ -97,12 +98,12 @@ public class ControlPlane implements NotThrowingAutoCloseable {
         .setAdapterId(heartbeatParameter.getOutgoingId())
         .setHeartbeatTopic(heartbeatParameter.getExpectedIncomingTopic())
         .build();
-    Welcome welcome = Handshaker.handshake(handshakerParameter, pubSubConnection, executorService, hello);
+    Welcome welcome = Handshaker.handshake(handshakerParameter, pubSubConnection, schedulerService, hello);
 
-    heartbeatModule = HeartbeatModule.create(pubSubConnection, executorService, heartbeatParameter);
+    heartbeatModule = HeartbeatModule.create(pubSubConnection, schedulerService, heartbeatParameter);
     ByteString heartbeatCoreTopic = ByteString.copyFromUtf8(parameter.getHeartbeatCoreTopic());
     heartbeatModule.startSession(welcome.getCoreId(), heartbeatCoreTopic, coreId -> coreLostEvent.fire());
-    registryModule = RegistryModule.create(registryParameter, pubSubConnection, executorService);
+    registryModule = RegistryModule.create(registryParameter, pubSubConnection, schedulerService);
 
     adapterInformation = new AdapterInformation(welcome.getCoreId(),
         parameter.getAdapterId(),
@@ -151,7 +152,7 @@ public class ControlPlane implements NotThrowingAutoCloseable {
     pubSubConnection.close();
     registryModule.close();
     heartbeatModule.close();
-    executorService.shutdownNow();
+    schedulerService.close();
   }
 
 }

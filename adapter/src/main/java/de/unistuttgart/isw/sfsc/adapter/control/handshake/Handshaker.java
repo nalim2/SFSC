@@ -5,15 +5,15 @@ import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Hello;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake.Welcome;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleClient;
 import de.unistuttgart.isw.sfsc.commonjava.util.FutureAdapter;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public final class Handshaker {
 
-  public static Welcome handshake(HandshakerParameter parameter, PubSubConnection pubSubConnection, Executor executor, Hello handshakeMessage)
+  public static Welcome handshake(HandshakerParameter parameter, PubSubConnection pubSubConnection, Scheduler scheduler, Hello handshakeMessage)
       throws InterruptedException, ExecutionException, TimeoutException {
 
     FutureAdapter<ByteString, Welcome> future = new FutureAdapter<>(
@@ -21,7 +21,7 @@ public final class Handshaker {
         () -> {throw new TimeoutException();}
     );
 
-    try (SimpleClient simpleClient = new SimpleClient(pubSubConnection, parameter.getSessionLocalTopic(), executor)) {
+    try (SimpleClient simpleClient = new SimpleClient(pubSubConnection, parameter.getSessionLocalTopic(), scheduler)) {
       pubSubConnection.subscriptionTracker().addOneShotSubscriptionListener(parameter.getSessionRemoteTopic())
           .await(parameter.getTimeoutMs(), TimeUnit.MILLISECONDS);
       simpleClient.send(parameter.getSessionRemoteTopic(), handshakeMessage.toByteString(), future::handleInput, parameter.getTimeoutMs(),

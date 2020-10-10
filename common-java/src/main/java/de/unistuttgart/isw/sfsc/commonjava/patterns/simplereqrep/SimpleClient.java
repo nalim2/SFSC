@@ -4,11 +4,11 @@ import com.google.protobuf.ByteString;
 import de.unistuttgart.isw.sfsc.commonjava.registry.CallbackRegistry;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement.OutputPublisher;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.util.SubscriptionAgent;
 import de.unistuttgart.isw.sfsc.messagingpatterns.reqrep.Request;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,10 +22,10 @@ public final class SimpleClient implements NotThrowingAutoCloseable {
   private final OutputPublisher publisher;
   private final Handle handle;
 
-  public SimpleClient(PubSubConnection pubSubConnection, ByteString replyTopic, Executor executor) {
+  public SimpleClient(PubSubConnection pubSubConnection, ByteString replyTopic, Scheduler scheduler) {
     this.publisher = pubSubConnection.publisher();
     this.replyTopic = replyTopic;
-    handle = SubscriptionAgent.create(pubSubConnection).addSubscriber(replyTopic, new SimpleClientConsumer(callbackRegistry), executor); //todo wait until subscription of target topic received?
+    handle = SubscriptionAgent.create(pubSubConnection).addSubscriber(replyTopic, new SimpleClientConsumer(callbackRegistry), scheduler); //todo wait until subscription of target topic received?
   }
 
   public void send(ByteString targetTopic, ByteString payload, Consumer<ByteString> consumer, int timeoutMs, Runnable timeoutRunnable) {

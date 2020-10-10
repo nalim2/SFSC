@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Publisher;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
@@ -11,18 +12,17 @@ import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.PublisherTags;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 public final class SfscPublisherImplementation implements SfscPublisher {
 
-  private static final boolean defaultUnregistered = false;
+  private static final boolean defaultRegistrationFlag = false;
 
   private final SfscServiceDescriptor descriptor;
   private final Publisher publisher;
   private final SubscriptionTracker subscriptionTracker;
   private final ByteString topic;
   private final byte[] topicCache;
-  private final Executor executor;
+  private final Scheduler scheduler;
   private final Runnable closeCallback;
 
   public SfscPublisherImplementation(SfscPublisherParameter parameter, ServiceFactory serviceFactory) {
@@ -37,17 +37,17 @@ public final class SfscPublisherImplementation implements SfscPublisher {
         .setPublisherTags(PublisherTags.newBuilder()
             .setOutputTopic(Optional.ofNullable(parameter.getOutputTopic()).orElseGet(serviceFactory::createTopic))
             .setOutputMessageType(Optional.ofNullable(parameter.getOutputMessageType()).orElseGet(serviceFactory::defaultType))
-            .setUnregistered(Optional.ofNullable(parameter.isUnregistered()).orElse(defaultUnregistered))
+            .setUnregistered(Optional.ofNullable(parameter.isUnregistered()).orElse(defaultRegistrationFlag))
             .build())
         .build();
 
-    Handle handle = parameter.isUnregistered() != null && parameter.isUnregistered() ? null : serviceFactory.registerService(descriptor);
+    Handle handle = descriptor.getPublisherTags().getUnregistered() ? null : serviceFactory.registerService(descriptor);
     closeCallback = handle != null ? handle::close : null;
     topic = descriptor.getPublisherTags().getOutputTopic();
     topicCache = topic.toByteArray();
     publisher = new Publisher(pubSubConnection);
     subscriptionTracker = pubSubConnection.subscriptionTracker();
-    this.executor = serviceFactory.executorService();
+    this.scheduler = serviceFactory.scheduler();
   }
 
   @Override
@@ -57,12 +57,12 @@ public final class SfscPublisherImplementation implements SfscPublisher {
 
   @Override
   public Handle onSubscription(Runnable runnable) {
-    return subscriptionTracker.addOneShotSubscriptionListener(topic, () -> executor.execute(runnable));
+    return subscriptionTracker.addOneShotSubscriptionListener(topic, () -> scheduler.execute(runnable));
   }
 
   @Override
   public Handle onUnsubscription(Runnable runnable) {
-    return subscriptionTracker.addOneShotUnsubscriptionListener(topic, () -> executor.execute(runnable));
+    return subscriptionTracker.addOneShotUnsubscriptionListener(topic, () -> scheduler.execute(runnable));
   }
 
   @Override

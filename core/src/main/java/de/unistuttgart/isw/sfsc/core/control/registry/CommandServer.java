@@ -5,9 +5,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.command.CommandRequest;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleServer;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.core.hazelcast.registry.Registry;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,8 @@ class CommandServer implements NotThrowingAutoCloseable {
 
   private final SimpleServer simpleServer;
 
-  CommandServer(PubSubConnection pubSubConnection, ByteString topic, Executor executor, Registry registry) {
-    simpleServer = new SimpleServer(pubSubConnection, new RegistryConsumer(registry), topic, executor);
+  CommandServer(PubSubConnection pubSubConnection, ByteString topic, Scheduler scheduler, Registry registry) {
+    simpleServer = new SimpleServer(pubSubConnection, new RegistryConsumer(registry), topic, scheduler);
   }
 
   @Override

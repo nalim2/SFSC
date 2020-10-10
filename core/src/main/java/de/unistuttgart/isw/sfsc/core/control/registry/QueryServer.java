@@ -5,9 +5,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import de.unistuttgart.isw.sfsc.clientserver.protocol.registry.query.QueryRequest;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.simplereqrep.SimpleServer;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.core.hazelcast.registry.Registry;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +17,8 @@ class QueryServer implements NotThrowingAutoCloseable {
   private static final Logger logger = LoggerFactory.getLogger(QueryServer.class);
   private final SimpleServer simpleServer;
 
-  QueryServer(PubSubConnection pubSubConnection,ByteString topic, Executor executor, Registry registry) {
-    simpleServer = new SimpleServer(pubSubConnection, new QueryConsumer(registry), topic, executor);
+  QueryServer(PubSubConnection pubSubConnection,ByteString topic, Scheduler scheduler, Registry registry) {
+    simpleServer = new SimpleServer(pubSubConnection, new QueryConsumer(registry), topic, scheduler);
   }
 
   @Override
