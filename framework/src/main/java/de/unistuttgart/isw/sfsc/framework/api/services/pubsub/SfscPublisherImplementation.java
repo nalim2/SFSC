@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.commonjava.patterns.pubsub.Publisher;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.util.synchronizing.Awaitable;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
@@ -11,7 +12,6 @@ import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.PublisherTags;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 public final class SfscPublisherImplementation implements SfscPublisher {
 
@@ -22,7 +22,7 @@ public final class SfscPublisherImplementation implements SfscPublisher {
   private final SubscriptionTracker subscriptionTracker;
   private final ByteString topic;
   private final byte[] topicCache;
-  private final Executor executor;
+  private final Scheduler scheduler;
   private final Runnable closeCallback;
 
   public SfscPublisherImplementation(SfscPublisherParameter parameter, ServiceFactory serviceFactory) {
@@ -47,7 +47,7 @@ public final class SfscPublisherImplementation implements SfscPublisher {
     topicCache = topic.toByteArray();
     publisher = new Publisher(pubSubConnection);
     subscriptionTracker = pubSubConnection.subscriptionTracker();
-    this.executor = serviceFactory.executorService();
+    this.scheduler = serviceFactory.scheduler();
   }
 
   @Override
@@ -57,12 +57,12 @@ public final class SfscPublisherImplementation implements SfscPublisher {
 
   @Override
   public Handle onSubscription(Runnable runnable) {
-    return subscriptionTracker.addOneShotSubscriptionListener(topic, () -> executor.execute(runnable));
+    return subscriptionTracker.addOneShotSubscriptionListener(topic, () -> scheduler.execute(runnable));
   }
 
   @Override
   public Handle onUnsubscription(Runnable runnable) {
-    return subscriptionTracker.addOneShotUnsubscriptionListener(topic, () -> executor.execute(runnable));
+    return subscriptionTracker.addOneShotUnsubscriptionListener(topic, () -> scheduler.execute(runnable));
   }
 
   @Override

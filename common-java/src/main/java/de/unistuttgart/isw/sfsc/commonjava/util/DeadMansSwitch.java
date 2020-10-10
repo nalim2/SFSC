@@ -1,7 +1,7 @@
 package de.unistuttgart.isw.sfsc.commonjava.util;
 
+import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,16 +11,16 @@ public final class DeadMansSwitch implements NotThrowingAutoCloseable {
   private final AtomicBoolean closed = new AtomicBoolean();
   private final AtomicReference<Future<?>> runnableFuture = new AtomicReference<>();
   private final Listeners<Runnable> runnables = new Listeners<>();
-  private final ScheduledExecutorService scheduledExecutorService;
+  private final Scheduler scheduler;
   private final int rateMs;
 
-  DeadMansSwitch(ScheduledExecutorService scheduledExecutorService, int rateMs) {
-    this.scheduledExecutorService = scheduledExecutorService;
+  DeadMansSwitch(Scheduler scheduler, int rateMs) {
+    this.scheduler = scheduler;
     this.rateMs = rateMs;
   }
 
-  public static DeadMansSwitch create(ScheduledExecutorService scheduledExecutorService, int rateMs) {
-    DeadMansSwitch deadMansSwitch = new DeadMansSwitch(scheduledExecutorService, rateMs);
+  public static DeadMansSwitch create(Scheduler scheduler, int rateMs) {
+    DeadMansSwitch deadMansSwitch = new DeadMansSwitch(scheduler, rateMs);
     deadMansSwitch.restart();
     return deadMansSwitch;
   }
@@ -35,7 +35,7 @@ public final class DeadMansSwitch implements NotThrowingAutoCloseable {
   }
 
   void restart() {
-    runnableFuture.set(scheduledExecutorService.schedule(() ->
+    runnableFuture.set(scheduler.schedule(() ->
         {
           close();
           runnables.forEach(Runnable::run);

@@ -22,7 +22,7 @@ public final class SfscClientImplementation implements SfscClient {
     this.client = new AckClient(
         serviceFactory.pubSubConnection(),
         serviceFactory.createTopic(),
-        serviceFactory.executorService());
+        serviceFactory.scheduler());
   }
 
   @Override

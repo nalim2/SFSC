@@ -53,13 +53,13 @@ public final class SfscServerImplementation implements SfscServer {
 
     AckServer server = new AckServer(
         pubSubConnection,
-        serviceFactory.executorService(),
+        serviceFactory.scheduler(),
         serverFunction,
         descriptor.getServerTags().getInputTopic(),
         descriptor.getServerTags().getAckSettings().getTimeoutMs(),
         descriptor.getServerTags().getAckSettings().getTimeoutMs(),
-        descriptor.getServerTags().getAckSettings().getSendMaxTries(),
-        serviceFactory.executorService());
+        descriptor.getServerTags().getAckSettings().getSendMaxTries()
+    );
 
     Handle handle = serviceFactory.registerService(descriptor);
     closeCallback = () -> {
