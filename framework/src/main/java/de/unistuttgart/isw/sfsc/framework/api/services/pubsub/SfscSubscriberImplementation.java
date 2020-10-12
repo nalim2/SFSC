@@ -15,7 +15,7 @@ public final class SfscSubscriberImplementation implements SfscSubscriber {
     Subscriber subscriber = new Subscriber(
         serviceFactory.pubSubConnection(),
         subscriberConsumer,
-        publisherDescriptor.getPublisherTags().getOutputTopic(),
+        publisherDescriptor.getServiceTags().getPublisherTags().getOutputTopic().getTopic(),
         serviceFactory.scheduler());
     closeCallback = subscriber::close;
   }

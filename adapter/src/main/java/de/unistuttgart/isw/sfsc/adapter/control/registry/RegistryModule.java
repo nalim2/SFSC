@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,26 +50,26 @@ public class RegistryModule implements RegistryApi {
   }
 
   @Override
-  public Future<CommandReply> create(ByteString entry) {
+  public Future<CommandReply> create(SfscServiceDescriptor entry) {
     FutureAdapter<ByteString, CommandReply> future = new FutureAdapter<>(CommandReply::parseFrom, () -> {throw new TimeoutException();});
     commandClient.create(entry, params.getAdapterId(), future::handleInput, future::handleError);
     return future;
   }
 
   @Override
-  public Future<CommandReply> remove(ByteString entry) {
+  public Future<CommandReply> remove(SfscServiceDescriptor entry) {
     FutureAdapter<ByteString, CommandReply> future = new FutureAdapter<>(CommandReply::parseFrom, () -> {throw new TimeoutException();});
     commandClient.remove(entry, params.getAdapterId(), future::handleInput, future::handleError);
     return future;
   }
 
   @Override
-  public Set<ByteString> getEntries() {
+  public Set<SfscServiceDescriptor> getEntries() {
     return registry.getRegistry();
   }
 
   @Override
-  public Handle addListener(Consumer<StoreEvent<ByteString>> listener) {
+  public Handle addListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {
     return registry.addEntryListener(listener);
   }
 

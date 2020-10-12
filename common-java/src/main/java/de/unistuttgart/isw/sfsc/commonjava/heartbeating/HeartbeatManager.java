@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import de.unistuttgart.isw.sfsc.framework.types.SfscId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public final class HeartbeatManager {
   void accept(ByteString byteString) {
     try {
       HeartbeatMessage heartbeat = HeartbeatMessage.parseFrom(byteString);
-      keepAlive(heartbeat.getId());
+      keepAlive(heartbeat.getAdapterId().getId());
     } catch (InvalidProtocolBufferException e) {
       logger.warn("received malformed message", e);
     }
@@ -64,7 +65,7 @@ public final class HeartbeatManager {
   Handle startHeartbeat(ByteString remoteTopic) {
     final String heartbeatId = params.getOutgoingId();
     Publisher publisher = new Publisher(pubSubConnection);
-    Message message = HeartbeatMessage.newBuilder().setId(heartbeatId).build();
+    Message message = HeartbeatMessage.newBuilder().setAdapterId(SfscId.newBuilder().setId(heartbeatId).build()).build();
     Future<?> future = scheduler.scheduleAtFixedRate(() ->
         publisher.publish(remoteTopic, message), 0, params.getSendRateMs(), TimeUnit.MILLISECONDS);
     return () -> future.cancel(true);

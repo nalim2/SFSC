@@ -19,11 +19,13 @@ public interface SubscriptionTracker {
   Handle addOneShotListener(Predicate<StoreEvent<ByteString>> predicate, Runnable runnable);
 
   default Handle addOneShotSubscriptionListener(ByteString topic, Runnable runnable) {
-    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, runnable);
+    return addOneShotListener(storeEvent ->
+        topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.CREATE, runnable);
   }
 
   default Handle addOneShotUnsubscriptionListener(ByteString topic, Runnable runnable) {
-    return addOneShotListener(storeEvent -> topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.DELETE, runnable);
+    return addOneShotListener(storeEvent ->
+        topic.equals(storeEvent.getData()) && storeEvent.getStoreEventType() == StoreEventType.DELETE, runnable);
   }
 
   default Awaitable addOneShotSubscriptionListener(ByteString topic) {

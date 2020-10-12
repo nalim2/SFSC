@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +22,11 @@ final class Registry {
 
   private static final Logger logger = LoggerFactory.getLogger(Registry.class);
 
-  private final Listeners<Consumer<StoreEvent<ByteString>>> entryListeners = new Listeners<>();
+  private final Listeners<Consumer<StoreEvent<SfscServiceDescriptor>>> entryListeners = new Listeners<>();
   private final Listeners<Runnable> notificationListeners = new Listeners<>();
 
   private final AtomicLong idCounter = new AtomicLong();
-  private final Set<ByteString> registry = ConcurrentHashMap.newKeySet();
+  private final Set<SfscServiceDescriptor> registry = ConcurrentHashMap.newKeySet();
 
   private final Scheduler scheduler;
 
@@ -64,13 +65,13 @@ final class Registry {
   void modifyRegistry(QueryReply queryReply) {
     switch (queryReply.getCreatedOrDeletedOrExpiredOrFutureCase()) {
       case CREATED: {
-        ByteString data = queryReply.getCreated();
+        SfscServiceDescriptor data = queryReply.getCreated();
         registry.add(data);
         onStoreEvent(StoreEventType.CREATE, data);
         break;
       }
       case DELETED: {
-        ByteString data = queryReply.getDeleted();
+        SfscServiceDescriptor data = queryReply.getDeleted();
         registry.remove(data);
         onStoreEvent(StoreEventType.DELETE, data);
         break;
@@ -80,13 +81,13 @@ final class Registry {
 
   }
 
-  void onStoreEvent(StoreEventType type, ByteString data) {
-    StoreEvent<ByteString> storeEvent = new StoreEvent<>(type, data);
+  void onStoreEvent(StoreEventType type, SfscServiceDescriptor data) {
+    StoreEvent<SfscServiceDescriptor> storeEvent = new StoreEvent<>(type, data);
     scheduler.execute(() -> entryListeners.forEach(consumer -> consumer.accept(storeEvent)));
   }
 
-  Handle addEntryListener(Consumer<StoreEvent<ByteString>> listener) {
-    ReplayingListener<ByteString> replayingListener = new ReplayingListener<>(listener);
+  Handle addEntryListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {
+    ReplayingListener<SfscServiceDescriptor> replayingListener = new ReplayingListener<>(listener);
     Handle handle = entryListeners.add(replayingListener);
 
     replayingListener.prepend(getRegistry());
@@ -99,7 +100,7 @@ final class Registry {
     return notificationListeners.add(listener);
   }
 
-  Set<ByteString> getRegistry() {
+  Set<SfscServiceDescriptor> getRegistry() {
     return Collections.unmodifiableSet(registry);
   }
 

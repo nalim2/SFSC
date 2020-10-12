@@ -13,7 +13,7 @@ message QueryReply {
   int64 event_id = 1;
   oneof created_or_deleted_or_expired_or_future {
     de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor created = 2;
-    de.unistuttgart.isw.sfsc.framework.types.SfscId deleted = 3;
+    de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor deleted = 3;
     Expired expired = 4;
     Future future = 5;
   }

@@ -25,6 +25,8 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubSocketPair;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.Reactor;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.reactor.TransportProtocol;
+import de.unistuttgart.isw.sfsc.framework.types.SfscId;
+import de.unistuttgart.isw.sfsc.framework.types.Topic;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -95,17 +97,17 @@ public class ControlPlane implements NotThrowingAutoCloseable {
 
     Hello hello = Hello
         .newBuilder()
-        .setAdapterId(heartbeatParameter.getOutgoingId())
-        .setHeartbeatTopic(heartbeatParameter.getExpectedIncomingTopic())
+        .setAdapterId(SfscId.newBuilder().setId(heartbeatParameter.getOutgoingId()).build())
+        .setHeartbeatTopic(Topic.newBuilder().setTopic(heartbeatParameter.getExpectedIncomingTopic()).build())
         .build();
     Welcome welcome = Handshaker.handshake(handshakerParameter, pubSubConnection, schedulerService, hello);
 
     heartbeatModule = HeartbeatModule.create(pubSubConnection, schedulerService, heartbeatParameter);
     ByteString heartbeatCoreTopic = ByteString.copyFromUtf8(parameter.getHeartbeatCoreTopic());
-    heartbeatModule.startSession(welcome.getCoreId(), heartbeatCoreTopic, coreId -> coreLostEvent.fire());
+    heartbeatModule.startSession(welcome.getCoreId().getId(), heartbeatCoreTopic, coreId -> coreLostEvent.fire());
     registryModule = RegistryModule.create(registryParameter, pubSubConnection, schedulerService);
 
-    adapterInformation = new AdapterInformation(welcome.getCoreId(),
+    adapterInformation = new AdapterInformation(welcome.getCoreId().getId(),
         parameter.getAdapterId(),
         parameter.getTransportProtocol());
 

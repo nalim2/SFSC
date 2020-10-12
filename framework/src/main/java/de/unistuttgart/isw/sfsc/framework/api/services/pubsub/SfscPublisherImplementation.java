@@ -10,7 +10,11 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.inputmanagement.subscription.SubscriptionTracker;
 import de.unistuttgart.isw.sfsc.framework.api.services.ServiceFactory;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
-import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.PublisherTags;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags.PublisherTags;
+import de.unistuttgart.isw.sfsc.framework.types.MessageType;
+import de.unistuttgart.isw.sfsc.framework.types.SfscId;
+import de.unistuttgart.isw.sfsc.framework.types.Topic;
 import java.util.Optional;
 
 public final class SfscPublisherImplementation implements SfscPublisher {
@@ -28,22 +32,25 @@ public final class SfscPublisherImplementation implements SfscPublisher {
   public SfscPublisherImplementation(SfscPublisherParameter parameter, ServiceFactory serviceFactory) {
     PubSubConnection pubSubConnection = serviceFactory.pubSubConnection();
     String serviceId = serviceFactory.createServiceId();
+    Topic outputTopic = parameter.getOutputTopic() == null ? serviceFactory.createTopic() : Topic.newBuilder().setTopic(parameter.getOutputTopic()).build();
+    MessageType outputMessageType = parameter.getOutputMessageType() == null ? serviceFactory.defaultType() : MessageType.newBuilder().setType(parameter.getOutputMessageType()).build();
     descriptor = SfscServiceDescriptor.newBuilder()
-        .setServiceId(serviceId)
-        .setAdapterId(serviceFactory.adapterId())
-        .setCoreId(serviceFactory.coreId())
+        .setServiceId(SfscId.newBuilder().setId(serviceId).build())
+        .setAdapterId(SfscId.newBuilder().setId(serviceFactory.adapterId()).build())
+        .setCoreId(SfscId.newBuilder().setId(serviceFactory.coreId()).build())
         .setServiceName(Optional.ofNullable(parameter.getServiceName()).orElse(serviceId))
         .putAllCustomTags(Optional.ofNullable(parameter.getCustomTags()).orElseGet(serviceFactory::defaultCustomTags))
-        .setPublisherTags(PublisherTags.newBuilder()
-            .setOutputTopic(Optional.ofNullable(parameter.getOutputTopic()).orElseGet(serviceFactory::createTopic))
-            .setOutputMessageType(Optional.ofNullable(parameter.getOutputMessageType()).orElseGet(serviceFactory::defaultType))
+        .setServiceTags(ServiceTags.newBuilder().setPublisherTags(PublisherTags.newBuilder()
+            .setOutputTopic(outputTopic)
+            .setOutputMessageType(outputMessageType)
             .setUnregistered(Optional.ofNullable(parameter.isUnregistered()).orElse(defaultRegistrationFlag))
-            .build())
+            .build()).build()
+    )
         .build();
 
-    Handle handle = descriptor.getPublisherTags().getUnregistered() ? null : serviceFactory.registerService(descriptor);
+    Handle handle = descriptor.getServiceTags().getPublisherTags().getUnregistered() ? null : serviceFactory.registerService(descriptor);
     closeCallback = handle != null ? handle::close : null;
-    topic = descriptor.getPublisherTags().getOutputTopic();
+    topic = descriptor.getServiceTags().getPublisherTags().getOutputTopic().getTopic();
     topicCache = topic.toByteArray();
     publisher = new Publisher(pubSubConnection);
     subscriptionTracker = pubSubConnection.subscriptionTracker();

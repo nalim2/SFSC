@@ -9,7 +9,7 @@ message CommandRequest {
   de.unistuttgart.isw.sfsc.framework.types.SfscId adapterId = 1;
   oneof create_or_delete{
     de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor create_request = 2;
-    de.unistuttgart.isw.sfsc.framework.types.SfscId delete_request = 3;
+    de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor delete_request = 3;
   }
 }
 

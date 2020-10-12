@@ -3,9 +3,9 @@ package de.unistuttgart.isw.sfsc.framework.api.registry;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
-import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;
-import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.NumberRegex;
-import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.StringRegex;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags.ServerTags.RegexDefinition;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags.ServerTags.RegexDefinition.VarRegex.NumberRegex;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags.ServerTags.RegexDefinition.VarRegex.StringRegex;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -21,7 +21,7 @@ final class RegexFilter implements Predicate<SfscServiceDescriptor> {
 
   @Override
   public boolean test(SfscServiceDescriptor descriptor) {
-    RegexDefinition regexDefinition = descriptor.getServerTags().getRegex();
+    RegexDefinition regexDefinition = descriptor.getServiceTags().getServerTags().getRegex();
     return test(regexDefinition);
   }
 

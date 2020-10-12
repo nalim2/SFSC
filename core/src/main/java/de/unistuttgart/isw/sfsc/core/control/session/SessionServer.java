@@ -11,6 +11,7 @@ import de.unistuttgart.isw.sfsc.commonjava.util.scheduling.Scheduler;
 import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.PubSubConnection;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import de.unistuttgart.isw.sfsc.framework.types.SfscId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,11 +45,11 @@ class SessionServer implements NotThrowingAutoCloseable {
     public ByteString apply(ByteString byteString) {
       try {
         Hello hello = Hello.parseFrom(byteString);
-        String adapterId = hello.getAdapterId();
-        ByteString adapterHeartbeatTopic = hello.getHeartbeatTopic();
+        String adapterId = hello.getAdapterId().getId();
+        ByteString adapterHeartbeatTopic = hello.getHeartbeatTopic().getTopic();
         logger.info("new session request from {}", hello.getAdapterId());
         sessionListeners.forEach(consumer -> consumer.accept(new NewSessionEvent(adapterId, adapterHeartbeatTopic)));
-        return Welcome.newBuilder().setCoreId(parameter.getCoreId()).build().toByteString();
+        return Welcome.newBuilder().setCoreId(SfscId.newBuilder().setId(parameter.getCoreId()).build()).build().toByteString();
       } catch (InvalidProtocolBufferException e) {
         logger.warn("received malformed message", e);
         return ByteString.EMPTY;

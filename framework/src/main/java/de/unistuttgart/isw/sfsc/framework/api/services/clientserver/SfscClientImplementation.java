@@ -21,21 +21,21 @@ public final class SfscClientImplementation implements SfscClient {
     this.sfscServiceApi = sfscServiceApi;
     this.client = new AckClient(
         serviceFactory.pubSubConnection(),
-        serviceFactory.createTopic(),
+        serviceFactory.createTopic().getTopic(),
         serviceFactory.scheduler());
   }
 
   @Override
   public void request(SfscServiceDescriptor serverDescriptor, Message payload, Consumer<ByteString> consumer,
       int timeoutMs, Runnable timeoutRunnable) {
-    ByteString serverTopic = serverDescriptor.getServerTags().getInputTopic();
+    ByteString serverTopic = serverDescriptor.getServiceTags().getServerTags().getInputTopic().getTopic();
     client.send(serverTopic, payload, consumer, timeoutMs, timeoutRunnable);
   }
 
   @Override
   public Future<SfscSubscriber> requestChannel(SfscServiceDescriptor channelFactoryDescriptor, ByteString payload,
       int timeoutMs, Consumer<ByteString> consumer) {
-    ByteString channelFactoryTopic = channelFactoryDescriptor.getServerTags().getInputTopic();
+    ByteString channelFactoryTopic = channelFactoryDescriptor.getServiceTags().getServerTags().getInputTopic().getTopic();
     ChannelFactoryClient channelFactoryClient = new ChannelFactoryClient(sfscServiceApi, consumer);
     FutureAdapter<ByteString, SfscSubscriber> futureAdapter = new FutureAdapter<>(
         channelFactoryClient::process,
