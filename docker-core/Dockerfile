@@ -1,4 +1,6 @@
-FROM nalim2/sfsc-core-build-base:latest
+FROM  adoptopenjdk/openjdk12
+# --platform=linux/arm/v7
+WORKDIR /app
 
 COPY target/docker-core.jar .
 
