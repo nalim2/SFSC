@@ -1,8 +1,8 @@
 package de.unistuttgart.isw.sfsc.framework.api.services.clientserver;
 
 import com.google.protobuf.ByteString;
-import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition;
-import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServerTags.RegexDefinition.VarRegex.RegexCase;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags.ServerTags.RegexDefinition;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor.ServiceTags.ServerTags.RegexDefinition.VarRegex.RegexCase;
 import java.util.Map;
 import java.util.Objects;
 

@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
     return listeners.add(listener);
   }
 
-  public void onStoreEvent(StoreEvent<ByteString> storeEvent) {
+  public void onStoreEvent(StoreEvent<SfscServiceDescriptor> storeEvent) {
     long id = idCounter.get();
     schedulerService.execute(() -> {
           switch (storeEvent.getStoreEventType()) {
@@ -64,13 +65,13 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
     );
   }
 
-  void onAdd(long id, ByteString byteString) {
+  void onAdd(long id, SfscServiceDescriptor byteString) {
       QueryReply queryReply = QueryReply.newBuilder().setCreated(byteString).setEventId(id).build();
       staging.put(id, queryReply);
       processStaging();
   }
 
-  void onRemove(long id, ByteString byteString) {
+  void onRemove(long id, SfscServiceDescriptor byteString) {
       QueryReply queryReply = QueryReply.newBuilder().setDeleted(byteString).setEventId(id).build();
       staging.put(id, queryReply);
       processStaging();
@@ -94,9 +95,9 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
     }
   }
 
-  void discardCreateEvent(ByteString byteString) {
+  void discardCreateEvent(SfscServiceDescriptor byteString) {
     eventLog.entrySet().stream()
-        .filter(entry -> byteString.equals(entry.getValue().getCreated()))
+        .filter(entry -> byteString.toByteString().equals(entry.getValue().getCreated().toByteString()))
         .map(Entry::getKey)
         .findAny()
         .ifPresentOrElse(eventLog::remove, () -> logger.warn("Could not discard, add event not found"));
@@ -104,8 +105,9 @@ public final class RegistryEventLog implements NotThrowingAutoCloseable {
 
   public QueryReply handleQueryRequest(QueryRequest queryRequest) {
     long id = queryRequest.getEventId();
-    if (logCounter.get() <= id) {
-      return QueryReply.newBuilder().setEventId(id).setFuture(Future.getDefaultInstance()).build();
+    long currentLogCount = logCounter.get();
+    if (currentLogCount <= id) {
+      return QueryReply.newBuilder().setEventId(id).setFuture(Future.newBuilder().setNewestValidEventId(currentLogCount)).build();
     } else {
       return Optional.ofNullable(eventLog.get(id))
           .orElseGet(() -> QueryReply.newBuilder().setEventId(id).setExpired(Expired.getDefaultInstance()).build());

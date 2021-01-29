@@ -6,6 +6,7 @@ import com.hazelcast.core.EntryListener;
 import com.hazelcast.map.MapEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent.StoreEventType;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -13,9 +14,9 @@ import java.util.function.Consumer;
 class EntryListenerAdapter implements EntryListener<RegistryEntry, Boolean> {
 
   private final ReentrantLock lock = new ReentrantLock(true);
-  private final Consumer<StoreEvent<ByteString>> registryEventHandler;
+  private final Consumer<StoreEvent<SfscServiceDescriptor>> registryEventHandler;
 
-  EntryListenerAdapter(Consumer<StoreEvent<ByteString>> registryEventHandler) {
+  EntryListenerAdapter(Consumer<StoreEvent<SfscServiceDescriptor>> registryEventHandler) {
     this.registryEventHandler = registryEventHandler;
   }
 

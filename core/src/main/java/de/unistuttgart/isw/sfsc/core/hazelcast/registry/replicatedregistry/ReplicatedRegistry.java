@@ -5,6 +5,7 @@ import com.hazelcast.replicatedmap.ReplicatedMap;
 import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.ReplayingListener;
 import de.unistuttgart.isw.sfsc.commonjava.util.StoreEvent;
+import de.unistuttgart.isw.sfsc.framework.descriptor.SfscServiceDescriptor;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,8 +25,8 @@ public class ReplicatedRegistry {
     this.replicatedMap = replicatedMap;
   }
 
-  public Handle addListener(Consumer<StoreEvent<ByteString>> listener) {
-    ReplayingListener<ByteString> replayingListener = new ReplayingListener<>(listener);
+  public Handle addListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {
+    ReplayingListener<SfscServiceDescriptor> replayingListener = new ReplayingListener<>(listener);
     UUID handle = replicatedMap.addEntryListener(new EntryListenerAdapter(replayingListener));
 
     replayingListener.prepend(createStoreEventSnapshot());
@@ -50,7 +51,7 @@ public class ReplicatedRegistry {
     copy.forEach(replicatedMap::remove);
   }
 
-  Set<ByteString> createStoreEventSnapshot() {
+  Set<SfscServiceDescriptor> createStoreEventSnapshot() {
     return Set.copyOf(replicatedMap.keySet()).stream()
         .map(RegistryEntry::getData)
         .collect(Collectors.toUnmodifiableSet());

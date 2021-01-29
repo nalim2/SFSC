@@ -1,0 +1,23 @@
+version: "3"
+services:
+  core1:
+    container_name: core1
+    image: "nalim2/sfsc-core:linux-x86-experimental"
+    build: .
+    ports:
+      - "1250:1250"
+      - "1251:1251"
+      - "1252:1252"
+      - "1253:1253"
+      - "1254:1254"
+      - "5701:5701"
+    environment:
+      - HOST=127.0.0.1
+      - BACKEND_PORT=1250
+      - CONTROL_PUB_PORT=1251
+      - CONTROL_SUB_PORT=1252
+      - DATA_PUB_PORT=1253
+      - DATA_SUB_PORT=1254
+
+      - BACKEND_HOST=core1
+      - HAZELCAST_PORT=5701

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.framework.messagingpatterns.ackreqrep;
-
+import "framework/types/types.proto";
 option java_multiple_files = true;
 
 message RequestOrAcknowledge {
@@ -11,7 +11,7 @@ message RequestOrAcknowledge {
   }
 
   message Request {
-    bytes reply_topic = 1;
+    de.unistuttgart.isw.sfsc.framework.types.Topic reply_topic = 1;
     int32 expected_reply_id = 2;
     bytes request_payload = 3;
   }
@@ -22,7 +22,7 @@ message RequestOrAcknowledge {
 }
 
 message Reply {
-  bytes acknowledge_topic = 1;
+  de.unistuttgart.isw.sfsc.framework.types.Topic acknowledge_topic = 1;
   int32 expected_acknowledge_id = 2;
   int32 reply_id = 3;
   bytes reply_payload = 4;

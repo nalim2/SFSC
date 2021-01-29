@@ -1,14 +1,14 @@
 syntax = "proto3";
 
 package de.unistuttgart.isw.sfsc.clientserver.protocol.session.handshake;
-
+import "framework/types/types.proto";
 option java_multiple_files = true;
 
 message Hello {
-  string adapter_id = 1;
-  bytes heartbeat_topic = 2;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId adapter_id = 1;
+  de.unistuttgart.isw.sfsc.framework.types.Topic heartbeat_topic = 2;
 }
 
 message Welcome {
-  string core_id = 1;
+  de.unistuttgart.isw.sfsc.framework.types.SfscId core_id = 1;
 }

@@ -30,7 +30,7 @@ final class AckClientConsumer implements BiConsumer<ByteString, ByteString> {
       int replyId = reply.getReplyId();
       ByteString replyPayload = reply.getReplyPayload();
       callbackRegistry.performCallback(replyId, replyPayload);
-      ByteString acknowledgeTopic = reply.getAcknowledgeTopic();
+      ByteString acknowledgeTopic = reply.getAcknowledgeTopic().getTopic();
       int acknowledgeId = reply.getExpectedAcknowledgeId();
       RequestOrAcknowledge acknowledge = wrapAcknowledge(acknowledgeId);
       publisher.publish(acknowledgeTopic, acknowledge);

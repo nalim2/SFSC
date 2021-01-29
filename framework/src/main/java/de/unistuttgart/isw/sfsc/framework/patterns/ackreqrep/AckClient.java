@@ -11,6 +11,7 @@ import de.unistuttgart.isw.sfsc.commonjava.zmq.pubsubsocketpair.outputmanagement
 import de.unistuttgart.isw.sfsc.commonjava.zmq.util.SubscriptionAgent;
 import de.unistuttgart.isw.sfsc.framework.messagingpatterns.ackreqrep.RequestOrAcknowledge;
 import de.unistuttgart.isw.sfsc.framework.messagingpatterns.ackreqrep.RequestOrAcknowledge.Request;
+import de.unistuttgart.isw.sfsc.framework.types.Topic;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,7 +41,7 @@ public final class AckClient implements NotThrowingAutoCloseable {
   RequestOrAcknowledge wrapRequest(int id, Message payload) {
     Request request = Request.newBuilder()
         .setRequestPayload(payload.toByteString())
-        .setReplyTopic(replyTopic)
+        .setReplyTopic(Topic.newBuilder().setTopic(replyTopic).build())
         .setExpectedReplyId(id)
         .build();
 

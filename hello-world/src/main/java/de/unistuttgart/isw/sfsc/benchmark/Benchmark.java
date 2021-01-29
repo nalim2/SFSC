@@ -7,7 +7,7 @@ import de.unistuttgart.isw.sfsc.benchmark.io.SfscBenchmark;
 public class Benchmark {
 
   private static final AdapterConfiguration clientConfiguration = new AdapterConfiguration().setCorePubTcpPort(1251);
-  private static final AdapterConfiguration serverConfiguration = new AdapterConfiguration().setCorePubTcpPort(1261);
+  private static final AdapterConfiguration serverConfiguration = new AdapterConfiguration().setCorePubTcpPort(1251);
 
   public static void main(String[] args) throws Exception {
 

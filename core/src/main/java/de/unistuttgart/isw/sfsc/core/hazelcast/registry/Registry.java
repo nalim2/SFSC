@@ -9,6 +9,7 @@ import de.unistuttgart.isw.sfsc.commonjava.util.Handle;
 import de.unistuttgart.isw.sfsc.commonjava.util.NotThrowingAutoCloseable;
 import de.unistuttgart.isw.sfsc.core.hazelcast.registry.log.RegistryEventLog;
 import de.unistuttgart.isw.sfsc.core.hazelcast.registry.replicatedregistry.ReplicatedRegistry;
+import de.unistuttgart.isw.sfsc.framework.types.SfscId;
 import de.unistuttgart.isw.sfsc.serverserver.registry.RegistryEntry;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -36,14 +37,14 @@ public class Registry implements NotThrowingAutoCloseable {
   }
 
   public CommandReply handleCommand(CommandRequest commandRequest) {
-    String adapterId = commandRequest.getAdapterId();
+    String adapterId = commandRequest.getAdapterId().getId();
     switch (commandRequest.getCreateOrDeleteCase()) {
-      case CREATE: {
-        replicatedRegistry.add(RegistryEntry.newBuilder().setAdapterId(adapterId).setCoreId(coreId).setData(commandRequest.getCreate()).build());
+      case CREATE_REQUEST: {
+        replicatedRegistry.add(RegistryEntry.newBuilder().setAdapterId(SfscId.newBuilder().setId(adapterId).build()).setCoreId(SfscId.newBuilder().setId(coreId).build()).setData(commandRequest.getCreateRequest()).build());
         break;
       }
-      case DELETE: {
-        replicatedRegistry.remove(RegistryEntry.newBuilder().setAdapterId(adapterId).setCoreId(coreId).setData(commandRequest.getDelete()).build());
+      case DELETE_REQUEST: {
+        replicatedRegistry.remove(RegistryEntry.newBuilder().setAdapterId(SfscId.newBuilder().setId(adapterId).build()).setCoreId(SfscId.newBuilder().setId(coreId).build()).setData(commandRequest.getDeleteRequest()).build());
         break;
       }
       default: {
@@ -59,7 +60,7 @@ public class Registry implements NotThrowingAutoCloseable {
   }
 
   public void deleteEntries(String adapterId) {
-    replicatedRegistry.removeAll(entry -> entry.getAdapterId().equals(adapterId));
+    replicatedRegistry.removeAll(entry -> entry.getAdapterId().getId().equals(adapterId));
   }
 
   @Override

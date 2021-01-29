@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import de.unistuttgart.isw.sfsc.framework.types.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ final class AckServerConsumer implements BiConsumer<ByteString, ByteString> {
         case REQUEST: {
           Request request = requestOrAcknowledge.getRequest();
           int replyId = request.getExpectedReplyId();
-          ByteString replyTopic = request.getReplyTopic();
+          ByteString replyTopic = request.getReplyTopic().getTopic();
           ByteString requestPayload = request.getRequestPayload();
           AckServerResult ackServerResult = serverFunction.apply(requestPayload);
           int acknowledgeId = idGenerator.get();
@@ -97,7 +98,7 @@ final class AckServerConsumer implements BiConsumer<ByteString, ByteString> {
   Reply wrapReply(int acknowledgeId, ByteString acknowledgeTopic, int replyId, Message payload) {
     return Reply
         .newBuilder()
-        .setAcknowledgeTopic(acknowledgeTopic)
+        .setAcknowledgeTopic(Topic.newBuilder().setTopic(acknowledgeTopic).build())
         .setExpectedAcknowledgeId(acknowledgeId)
         .setReplyId(replyId)
         .setReplyPayload(payload.toByteString())

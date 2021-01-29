@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class StoreEventStreamConverter implements Consumer<StoreEvent<ByteString>> {
+class StoreEventStreamConverter implements Consumer<StoreEvent<SfscServiceDescriptor>> {
 
   private static final Logger logger = LoggerFactory.getLogger(StoreEventStreamConverter.class);
 
@@ -28,9 +28,9 @@ class StoreEventStreamConverter implements Consumer<StoreEvent<ByteString>> {
   StoreEventStreamConverter(Set<SfscServiceDescriptor> services) {this.services = services;}
 
   @Override
-  public void accept(StoreEvent<ByteString> storeEvent) {
-    try {
-      SfscServiceDescriptor descriptor = SfscServiceDescriptor.parseFrom(storeEvent.getData());
+  public void accept(StoreEvent<SfscServiceDescriptor> storeEvent) {
+
+      SfscServiceDescriptor descriptor = storeEvent.getData();
       switch (storeEvent.getStoreEventType()) {
         case CREATE: {
           services.add(descriptor);
@@ -49,9 +49,7 @@ class StoreEventStreamConverter implements Consumer<StoreEvent<ByteString>> {
           break;
         }
       }
-    } catch (InvalidProtocolBufferException e) {
-      logger.warn("Registry contains malformed entries", e);
-    }
+
   }
 
   Handle addListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {

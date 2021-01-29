@@ -59,9 +59,8 @@ public final class ApiRegistryManager implements NotThrowingAutoCloseable {
   }
 
   public Handle registerService(SfscServiceDescriptor descriptor) {
-    ByteString descriptorBytes = descriptor.toByteString();
-    registryApi.create(descriptor.toByteString()); //todo why returns future?
-    return () -> registryApi.remove(descriptorBytes);
+    registryApi.create(descriptor); //todo why returns future?
+    return () -> registryApi.remove(descriptor);
   }
 
   public Handle addStoreEventListener(Consumer<StoreEvent<SfscServiceDescriptor>> listener) {
